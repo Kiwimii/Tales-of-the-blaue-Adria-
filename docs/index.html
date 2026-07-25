@@ -7,6 +7,7 @@
   <meta name="color-scheme" content="dark" />
   <title>Tales of the Blaue Adria</title>
   <link rel="stylesheet" href="./styles.css?v=3" />
+  <link rel="stylesheet" href="./compat.css?v=3" />
 </head>
 <body>
   <main id="creator" class="creator-page">
@@ -66,6 +67,26 @@
   </main>
 
   <noscript>Dieses Spiel benötigt JavaScript.</noscript>
+  <script>
+    window.addEventListener('error', function (event) {
+      document.body.innerHTML = '<main class="creator-page"><section class="creator-card"><div><p class="eyebrow">Technischer Startfehler</p><h1>Das Spiel konnte nicht starten.</h1><p>' + String(event.message || 'Unbekannter Fehler') + '</p><button class="primary" onclick="location.reload()">Neu laden</button></div></section></main>';
+    });
+    if (window.CanvasRenderingContext2D && !CanvasRenderingContext2D.prototype.roundRect) {
+      CanvasRenderingContext2D.prototype.roundRect = function (x, y, width, height, radius) {
+        var r = Math.max(0, Math.min(Number(radius) || 0, Math.abs(width) / 2, Math.abs(height) / 2));
+        this.moveTo(x + r, y);
+        this.lineTo(x + width - r, y);
+        this.quadraticCurveTo(x + width, y, x + width, y + r);
+        this.lineTo(x + width, y + height - r);
+        this.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+        this.lineTo(x + r, y + height);
+        this.quadraticCurveTo(x, y + height, x, y + height - r);
+        this.lineTo(x, y + r);
+        this.quadraticCurveTo(x, y, x + r, y);
+        return this;
+      };
+    }
+  </script>
   <script src="./game.js?v=3"></script>
 </body>
 </html>
