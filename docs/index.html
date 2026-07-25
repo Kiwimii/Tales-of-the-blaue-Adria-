@@ -6,10 +6,12 @@
   <meta name="theme-color" content="#101814" />
   <meta name="color-scheme" content="dark" />
   <meta name="description" content="Tales of the Blaue Adria – ein schwarzhumoriges Camping-RPG für Browser und Smartphone." />
-  <link rel="manifest" href="./manifest.webmanifest?v=15" />
-  <link rel="stylesheet" href="./styles.css?v=15" />
-  <link rel="stylesheet" href="./styles-v13.css?v=15" />
-  <link rel="stylesheet" href="./ux-v15.css?v=15" />
+  <link rel="manifest" href="./manifest.webmanifest?v=23" />
+  <link rel="stylesheet" href="./styles.css?v=23" />
+  <link rel="stylesheet" href="./styles-v13.css?v=23" />
+  <link rel="stylesheet" href="./ux-v15.css?v=23" />
+  <link rel="stylesheet" href="./design-v23.css?v=23" />
+  <link rel="stylesheet" href="./design-faces-v23.css?v=23" />
   <title>Tales of the Blaue Adria</title>
 </head>
 <body>
@@ -87,15 +89,22 @@
     window.addEventListener('unhandledrejection',function(event){var box=document.getElementById('fatal-error');if(!box)return;box.classList.remove('hidden');document.getElementById('fatal-message').textContent=String(event.reason||'Unbekannter Promise-Fehler')});
     if(window.CanvasRenderingContext2D&&!CanvasRenderingContext2D.prototype.roundRect){CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){r=Math.max(0,Math.min(Number(r)||0,Math.abs(w)/2,Math.abs(h)/2));this.moveTo(x+r,y);this.lineTo(x+w-r,y);this.quadraticCurveTo(x+w,y,x+w,y+r);this.lineTo(x+w,y+h-r);this.quadraticCurveTo(x+w,y+h,x+w-r,y+h);this.lineTo(x+r,y+h);this.quadraticCurveTo(x,y+h,x,y+h-r);this.lineTo(x,y+r);this.quadraticCurveTo(x,y,x+r,y);return this};}
   </script>
-  <script src="./content-v13.js?v=15"></script>
-  <script src="./map-v13.js?v=15"></script>
-  <script src="./prelude-v13.js?v=15"></script>
-  <script src="./engine-v13.js?v=15"></script>
-  <script src="./bridge-v13.js?v=15"></script>
-  <script src="./world-v13.js?v=15"></script>
-  <script src="./activities-v13.js?v=15"></script>
-  <script src="./hotfix-v13.js?v=15"></script>
-  <script src="./ux-v15.js?v=15"></script>
-  <script src="./ux-runtime-v15.js?v=15"></script>
+  <script src="./content-v13.js?v=23"></script>
+  <script src="./map-v13.js?v=23"></script>
+  <script src="./prelude-v13.js?v=23"></script>
+  <script src="./engine-v13.js?v=23"></script>
+  <script src="./bridge-v13.js?v=23"></script>
+  <script src="./world-v13.js?v=23"></script>
+  <script src="./activities-v13.js?v=23"></script>
+  <script src="./hotfix-v13.js?v=23"></script>
+  <script src="./ux-v15.js?v=23"></script>
+  <script src="./ux-runtime-v15.js?v=23"></script>
+  <script src="./design-core-v23.js?v=23"></script>
+  <script src="./design-world-v23.js?v=23"></script>
+  <script src="./design-characters-v23.js?v=23"></script>
+  <script src="./design-battle-v23.js?v=23"></script>
+  <script src="./design-minigames-v23.js?v=23"></script>
+  <script src="./design-atmosphere-v23.js?v=23"></script>
+  <script src="./design-runtime-v23.js?v=23"></script>
 </body>
 </html>
