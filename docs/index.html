@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#102b24" />
+  <title>Tales of the Blaue Adria</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main id="creator" class="creator-page">
+    <section class="creator-card">
+      <div>
+        <p class="eyebrow">Freitag · 07:00 Uhr</p>
+        <h1>Tales of the Blaue Adria</h1>
+        <p>Erstelle deine Figur. Danach startet der erste spielbare Technik-Prototyp mit Oberwelt, Kampf, Flip Cup, Bedürfnissen und Teamrekrutierung.</p>
+        <label>Name<input id="name" value="André" maxlength="18" /></label>
+        <div class="colors">
+          <label>Haut<input id="skin" type="color" value="#efc09b" /></label>
+          <label>Haare<input id="hair" type="color" value="#49301f" /></label>
+          <label>Oberteil<input id="shirt" type="color" value="#e3b74f" /></label>
+        </div>
+        <label>Startmerkmal
+          <select id="trait">
+            <option value="charmant">Charmant</option>
+            <option value="direkt">Direkt</option>
+            <option value="chaotisch">Chaotisch</option>
+            <option value="hilfsbereit">Hilfsbereit</option>
+            <option value="beobachtend">Beobachtend</option>
+          </select>
+        </label>
+        <button id="start" class="primary">Wochenende starten</button>
+      </div>
+      <div class="preview">
+        <div id="avatar" class="avatar"><i></i><b></b><span></span><em></em></div>
+        <strong id="preview-name">André</strong>
+        <small id="preview-trait">Bessere Chancen in freundlichen Dialogen.</small>
+      </div>
+    </section>
+  </main>
+
+  <main id="game-shell" class="game-shell hidden">
+    <header class="topbar">
+      <div><p class="eyebrow" id="day-phase">Tag 1 · Morgen</p><strong id="clock">07:00</strong></div>
+      <span class="mode" id="mode">Top-down</span>
+      <button id="reset" class="quiet">Neustart</button>
+    </header>
+    <section id="needs" class="needs"></section>
+    <section class="frame">
+      <div id="game"></div>
+      <div id="world-controls" class="controls">
+        <div class="dpad">
+          <button data-dir="up" class="up">▲</button>
+          <button data-dir="left" class="left">◀</button>
+          <button data-dir="right" class="right">▶</button>
+          <button data-dir="down" class="down">▼</button>
+        </div>
+        <button id="action" class="action">AKTION</button>
+      </div>
+    </section>
+    <footer class="bottom">
+      <div><p class="eyebrow">Inventar</p><div id="inventory" class="chips"></div></div>
+      <div class="team"><p class="eyebrow">Team</p><strong id="team-name">André</strong><span id="team-list">· noch keine Begleiter</span></div>
+    </footer>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.min.js"></script>
+  <script src="./game.js"></script>
+</body>
+</html>
