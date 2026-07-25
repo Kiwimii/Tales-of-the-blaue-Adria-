@@ -1,0 +1,1 @@
+(()=>{'use strict';if(!window.TBA13)throw new Error('Engine wurde nicht geladen.');window.TBA13.world=window.TBA13.world||{};window.TBA13.activities=window.TBA13.activities||{};})();
