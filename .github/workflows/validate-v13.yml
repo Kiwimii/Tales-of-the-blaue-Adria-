@@ -22,43 +22,45 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - name: Syntax · content
-        run: node --check docs/content-v13.js
-      - name: Syntax · map
-        run: node --check docs/map-v13.js
-      - name: Syntax · prelude
-        run: node --check docs/prelude-v13.js
-      - name: Syntax · engine
-        run: node --check docs/engine-v13.js
-      - name: Syntax · bridge
-        run: node --check docs/bridge-v13.js
-      - name: Syntax · world
-        run: node --check docs/world-v13.js
-      - name: Syntax · activities
-        run: node --check docs/activities-v13.js
-      - name: Syntax · hotfix
-        run: node --check docs/hotfix-v13.js
-      - name: Syntax · UX layer
+      - name: Syntax · legacy game modules
         run: |
+          node --check docs/content-v13.js
+          node --check docs/map-v13.js
+          node --check docs/prelude-v13.js
+          node --check docs/engine-v13.js
+          node --check docs/bridge-v13.js
+          node --check docs/world-v13.js
+          node --check docs/activities-v13.js
+          node --check docs/hotfix-v13.js
           node --check docs/ux-v15.js
           node --check docs/ux-runtime-v15.js
+      - name: Syntax · professional design modules
+        run: |
+          node --check docs/design-core-v23.js
+          node --check docs/design-world-v23.js
+          node --check docs/design-characters-v23.js
+          node --check docs/design-battle-v23.js
+          node --check docs/design-minigames-v23.js
+          node --check docs/design-atmosphere-v23.js
+          node --check docs/design-runtime-v23.js
       - name: Check required page elements
         run: |
           for id in boot-screen boot-status boot-progress app game-canvas game-stage needs-strip touch-controls virtual-stick stick-knob action-button scene-actions toast-stack objective-banner creator-screen shop-screen dialogue-layer drawer-layer fatal-error; do
             grep -q "id=\"$id\"" docs/index.html || { echo "Missing #$id"; exit 1; }
           done
-      - name: Check module order and build marker
+      - name: Check design assets and module order
         run: |
-          grep -q 'content-v13.js?v=15' docs/index.html
-          grep -q 'map-v13.js?v=15' docs/index.html
-          grep -q 'engine-v13.js?v=15' docs/index.html
-          grep -q 'world-v13.js?v=15' docs/index.html
-          grep -q 'activities-v13.js?v=15' docs/index.html
-          grep -q 'hotfix-v13.js?v=15' docs/index.html
-          grep -q 'ux-v15.js?v=15' docs/index.html
-          grep -q 'ux-runtime-v15.js?v=15' docs/index.html
-          grep -q 'ux-v15.css?v=15' docs/index.html
-          grep -q "Sprint 16 · v1.5.0" docs/ux-runtime-v15.js
+          grep -q 'design-v23.css?v=23' docs/index.html
+          grep -q 'design-faces-v23.css?v=23' docs/index.html
+          grep -q 'design-core-v23.js?v=23' docs/index.html
+          grep -q 'design-world-v23.js?v=23' docs/index.html
+          grep -q 'design-characters-v23.js?v=23' docs/index.html
+          grep -q 'design-battle-v23.js?v=23' docs/index.html
+          grep -q 'design-minigames-v23.js?v=23' docs/index.html
+          grep -q 'design-atmosphere-v23.js?v=23' docs/index.html
+          grep -q 'design-runtime-v23.js?v=23' docs/index.html
+          grep -q "Sprint 24 · v2.3.0" docs/design-runtime-v23.js
+          grep -q '"start_url": "./?v=23"' docs/manifest.webmanifest
       - name: Check forbidden stale runtime
         run: |
           ! grep -q 'game.js?v=8' docs/index.html
