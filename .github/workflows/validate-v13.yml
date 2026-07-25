@@ -22,16 +22,22 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - name: Check JavaScript syntax
-        run: |
-          node --check docs/content-v13.js
-          node --check docs/map-v13.js
-          node --check docs/prelude-v13.js
-          node --check docs/engine-v13.js
-          node --check docs/bridge-v13.js
-          node --check docs/world-v13.js
-          node --check docs/activities-v13.js
-          node --check docs/hotfix-v13.js
+      - name: Syntax · content
+        run: node --check docs/content-v13.js
+      - name: Syntax · map
+        run: node --check docs/map-v13.js
+      - name: Syntax · prelude
+        run: node --check docs/prelude-v13.js
+      - name: Syntax · engine
+        run: node --check docs/engine-v13.js
+      - name: Syntax · bridge
+        run: node --check docs/bridge-v13.js
+      - name: Syntax · world
+        run: node --check docs/world-v13.js
+      - name: Syntax · activities
+        run: node --check docs/activities-v13.js
+      - name: Syntax · hotfix
+        run: node --check docs/hotfix-v13.js
       - name: Check required page elements
         run: |
           for id in boot-screen boot-status boot-progress app game-canvas game-stage needs-strip touch-controls virtual-stick stick-knob action-button scene-actions toast-stack objective-banner creator-screen shop-screen dialogue-layer drawer-layer fatal-error; do
