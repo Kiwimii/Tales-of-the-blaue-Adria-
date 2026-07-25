@@ -1,0 +1,30 @@
+name: Bootstrap game project
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/bootstrap.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Expand prepared project
+        run: |
+          cat .bootstrap/part-* | base64 --decode > /tmp/tales-of-the-blaue-adria.tar.xz
+          tar -xJf /tmp/tales-of-the-blaue-adria.tar.xz -C .
+          rm -rf .bootstrap .github/workflows/bootstrap.yml
+      - name: Commit project structure
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "feat: initialize playable game architecture"
+          git push origin main
