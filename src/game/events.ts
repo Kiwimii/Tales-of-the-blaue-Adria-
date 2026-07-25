@@ -1,0 +1,17 @@
+import type { Direction } from './types';
+
+export const INPUT_EVENT = 'tales:input';
+export const ACTION_EVENT = 'tales:action';
+
+export interface InputEventDetail {
+  direction: Direction;
+  active: boolean;
+}
+
+export function sendDirection(direction: Direction, active: boolean): void {
+  window.dispatchEvent(new CustomEvent<InputEventDetail>(INPUT_EVENT, { detail: { direction, active } }));
+}
+
+export function sendAction(): void {
+  window.dispatchEvent(new CustomEvent(ACTION_EVENT));
+}
