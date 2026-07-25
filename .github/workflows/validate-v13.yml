@@ -38,6 +38,10 @@ jobs:
         run: node --check docs/activities-v13.js
       - name: Syntax · hotfix
         run: node --check docs/hotfix-v13.js
+      - name: Syntax · UX layer
+        run: |
+          node --check docs/ux-v15.js
+          node --check docs/ux-runtime-v15.js
       - name: Check required page elements
         run: |
           for id in boot-screen boot-status boot-progress app game-canvas game-stage needs-strip touch-controls virtual-stick stick-knob action-button scene-actions toast-stack objective-banner creator-screen shop-screen dialogue-layer drawer-layer fatal-error; do
@@ -45,14 +49,18 @@ jobs:
           done
       - name: Check module order and build marker
         run: |
-          grep -q 'content-v13.js' docs/index.html
-          grep -q 'map-v13.js' docs/index.html
-          grep -q 'engine-v13.js' docs/index.html
-          grep -q 'world-v13.js' docs/index.html
-          grep -q 'activities-v13.js' docs/index.html
-          grep -q 'hotfix-v13.js' docs/index.html
-          grep -q "Sprint 10 · v1.3.0" docs/content-v13.js
+          grep -q 'content-v13.js?v=15' docs/index.html
+          grep -q 'map-v13.js?v=15' docs/index.html
+          grep -q 'engine-v13.js?v=15' docs/index.html
+          grep -q 'world-v13.js?v=15' docs/index.html
+          grep -q 'activities-v13.js?v=15' docs/index.html
+          grep -q 'hotfix-v13.js?v=15' docs/index.html
+          grep -q 'ux-v15.js?v=15' docs/index.html
+          grep -q 'ux-runtime-v15.js?v=15' docs/index.html
+          grep -q 'ux-v15.css?v=15' docs/index.html
+          grep -q "Sprint 16 · v1.5.0" docs/ux-runtime-v15.js
       - name: Check forbidden stale runtime
         run: |
           ! grep -q 'game.js?v=8' docs/index.html
           ! grep -q 'content.js?v=8' docs/index.html
+          ! grep -q '?v=14' docs/index.html
