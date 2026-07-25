@@ -86,3 +86,5 @@ jobs:
           git add docs .github/workflows/validate-v13.yml
           git commit -m "sprint 16: integrate close camera, natural collisions and compact dialogue UX"
           git push origin main
+
+# trigger integration
