@@ -1,0 +1,1 @@
+(()=>{'use strict';if(!window.TBA13_CONTENT||!window.TBA13_MAP)throw new Error('Karten- oder Inhaltsdaten fehlen.');window.TBA13_CONTENT.zones=window.TBA13_MAP.zones;})();
