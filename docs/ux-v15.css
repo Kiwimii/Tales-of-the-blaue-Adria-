@@ -1,0 +1,41 @@
+:root{--world-zoom:1.24}
+.game-stage.world-view-v15{background:#1d382c;overflow:hidden}
+.game-stage.world-view-v15 #game-canvas{object-fit:cover;transform:scale(var(--world-zoom));transform-origin:50% 50%;transition:transform .28s cubic-bezier(.2,.8,.2,1);will-change:transform}
+.game-stage.collision-bump #game-canvas{animation:collisionBump .18s ease-out}
+@keyframes collisionBump{0%{filter:brightness(1)}45%{filter:brightness(1.12) saturate(1.18)}100%{filter:brightness(1)}}
+
+.world-ux-layer{position:absolute;inset:0;z-index:17;pointer-events:none}
+.world-area-chip{position:absolute;left:12px;top:12px;display:grid;gap:1px;min-width:150px;max-width:48%;padding:9px 12px;border:1px solid #fff3;border-radius:13px;background:#08130fd9;box-shadow:0 8px 22px #0005;backdrop-filter:blur(10px)}
+.world-area-chip small{font-size:.58rem;font-weight:900;letter-spacing:.13em;color:#f2c55e}.world-area-chip strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.78rem}
+.world-zoom-controls{position:absolute;right:12px;top:12px;display:flex;align-items:center;gap:5px;padding:5px;border:1px solid #fff3;border-radius:13px;background:#08130fd9;backdrop-filter:blur(10px);pointer-events:auto}
+.world-zoom-controls button{width:36px;height:34px;border:0;border-radius:9px;background:#ffffff12;font-size:1.25rem;font-weight:900}.world-zoom-controls span{min-width:45px;text-align:center;font-size:.66rem;font-weight:900;color:#f5d675}
+.context-action-v15{position:absolute;left:50%;bottom:16px;display:flex;align-items:center;gap:10px;min-width:min(340px,70vw);max-width:calc(100% - 150px);min-height:58px;padding:8px 16px 8px 9px;border:2px solid #ffe27a88;border-radius:18px;background:#13251ff2;color:#fff9de;box-shadow:0 16px 38px #0009;transform:translateX(-50%);pointer-events:auto;animation:contextIn .18s ease-out}
+.context-action-v15>span{display:grid;place-items:center;width:40px;height:40px;flex:0 0 auto;border-radius:50%;background:#e75f49;color:#fff;font-size:1.2rem;font-weight:1000}.context-action-v15 div{display:grid;text-align:left;min-width:0}.context-action-v15 small{font-size:.55rem;letter-spacing:.12em;color:#efc85c}.context-action-v15 strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.86rem}
+@keyframes contextIn{from{opacity:0;transform:translate(-50%,8px) scale(.96)}to{opacity:1;transform:translate(-50%,0) scale(1)}}
+
+#dialogue-layer{place-items:end center;padding:0 8px calc(8px + env(safe-area-inset-bottom,0px));background:linear-gradient(180deg,transparent 0 43%,rgba(4,10,8,.36) 57%,rgba(4,10,8,.9) 100%);backdrop-filter:none}
+#dialogue-layer .dialogue-card{align-self:end;display:grid;grid-template-columns:64px minmax(0,1fr);gap:12px;width:min(920px,100%);max-height:min(46dvh,390px);margin:0;padding:12px;border:1px solid #f2cf7059;border-radius:20px;background:linear-gradient(150deg,#14261ff8,#0a1512fb);box-shadow:0 -12px 42px #0009;overflow:hidden;animation:dialogueUp .22s cubic-bezier(.2,.8,.2,1)}
+#dialogue-layer .portrait{width:60px;height:60px;border-width:3px;font-size:1.55rem;align-self:start}
+#dialogue-layer .dialogue-main{display:grid;grid-template-rows:auto minmax(0,auto) minmax(0,1fr);min-width:0;min-height:0}
+#dialogue-layer .dialogue-main header{position:sticky;top:0;z-index:2;background:#102019}
+#dialogue-layer .dialogue-main p{min-height:0;max-height:92px;margin:7px 0 9px;padding-right:6px;overflow:auto;font-size:.87rem;line-height:1.35;color:#f5f1df}
+#dialogue-layer .choice-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;max-height:154px;padding-right:4px;overflow:auto;overscroll-behavior:contain}
+#dialogue-layer .choice-button{min-height:46px;padding:8px 10px;border-color:#ffffff25;background:#ffffff0a;font-size:.76rem;line-height:1.2}
+#dialogue-layer .choice-button:active{transform:scale(.985);background:#f2c55e1f}
+#dialogue-layer .tiny-button{min-height:34px;padding:5px 8px;border-radius:9px;background:#ffffff0b}
+@keyframes dialogueUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+
+.map-v15-wrap{display:grid;gap:12px}.map-v15-wrap canvas{display:block;width:100%;height:auto;aspect-ratio:760/500;border:1px solid #ffffff28;border-radius:16px;background:#789d5d;box-shadow:inset 0 0 0 1px #0003}.map-v15-legend{display:flex;flex-wrap:wrap;gap:8px 14px;font-size:.72rem;color:#dce5df}.map-v15-legend span{display:flex;align-items:center;gap:6px}.map-v15-legend i{width:13px;height:13px;border-radius:4px;background:#6f9959}.map-v15-legend .blocked{background:#263c2e;border:1px dashed #f0cd6b}.map-v15-legend .water{background:#3d8da8}.map-v15-legend .player{border-radius:50%;background:#ffe56e;border:2px solid #18231f}.map-boundary-toggle{display:flex;align-items:center;gap:10px;padding:12px;border:1px solid #ffffff1d;border-radius:12px;background:#ffffff07;font-weight:800}.map-boundary-toggle input{width:20px;height:20px}.map-v15-wrap p{margin:0;color:#b9c7bf;font-size:.78rem;line-height:1.45}
+
+@media(max-width:700px){
+ :root{--world-zoom:1.36}
+ .world-area-chip{top:8px;left:8px;min-width:125px;padding:7px 9px}.world-zoom-controls{right:8px;top:8px}.world-zoom-controls button{width:32px;height:31px}
+ .context-action-v15{left:auto;right:12px;bottom:116px;min-width:0;max-width:52%;padding:7px 11px 7px 7px;transform:none}.context-action-v15>span{width:35px;height:35px}.context-action-v15 strong{font-size:.75rem}@keyframes contextIn{from{opacity:0;transform:translateY(8px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+ #dialogue-layer .dialogue-card{grid-template-columns:48px minmax(0,1fr);gap:9px;max-height:43dvh;padding:9px;border-radius:17px}
+ #dialogue-layer .portrait{width:46px;height:46px;font-size:1.25rem}
+ #dialogue-layer .dialogue-main p{max-height:72px;font-size:.8rem}
+ #dialogue-layer .choice-list{grid-template-columns:1fr;max-height:135px}
+ #dialogue-layer .choice-button{min-height:44px;font-size:.73rem}
+}
+@media(min-width:701px){.game-stage.world-view-v15 #game-canvas{--world-zoom:1.24}}
+@media(prefers-reduced-motion:reduce){.game-stage.world-view-v15 #game-canvas,.dialogue-card,.context-action-v15{transition:none!important;animation:none!important}}
