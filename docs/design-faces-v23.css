@@ -1,0 +1,11 @@
+#dialogue-layer .portrait{display:grid;place-items:center;overflow:hidden;color:transparent}
+.portrait-face{position:relative;width:54px;height:54px;border-radius:48% 48% 44% 44%;background:#efbd96;border:2px solid #1b2420;box-shadow:inset 0 -5px 0 #dba77e}
+.portrait-face:before{content:'';position:absolute;left:2px;right:2px;top:-4px;height:24px;border-radius:50% 50% 35% 35%;background:#352921;border-bottom:2px solid #1b211f}
+.portrait-face i,.portrait-face b{position:absolute;top:23px;width:10px;height:8px;border-radius:50%;background:#fff;border:1px solid #222}.portrait-face i{left:10px}.portrait-face b{right:10px}.portrait-face i:after,.portrait-face b:after{content:'';position:absolute;width:4px;height:4px;left:3px;top:2px;border-radius:50%;background:#17211d}
+.portrait-face em{position:absolute;left:50%;bottom:8px;width:17px;height:7px;transform:translateX(-50%);border-bottom:2px solid #7c3f37;border-radius:50%}
+#dialogue-portrait>small{position:absolute;right:3px;bottom:1px;z-index:2;display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#17231e;color:#ffe384;font-size:.65rem;font-weight:900;border:1px solid #f2d578}
+#dialogue-portrait[data-person="gundula"] .portrait-face:before{background:#8b3f58}#dialogue-portrait[data-person="gundula"] .portrait-face em{border-bottom:0;border-top:2px solid #7c3f37;bottom:5px}
+#dialogue-portrait[data-person="uli"] .portrait-face:before{background:#72706a}#dialogue-portrait[data-person="schubert"] .portrait-face:before,#dialogue-portrait[data-person="schima"] .portrait-face:before{background:#514437}
+#dialogue-portrait[data-person="nina"] .portrait-face:before,#dialogue-portrait[data-person="jule"] .portrait-face:before{background:#8c4d38}
+.game-stage.battle-v23 #game-canvas,.game-stage.minigame-v23 #game-canvas{transform:none!important;object-fit:contain!important}.game-stage.battle-v23 .world-ux-layer,.game-stage.minigame-v23 .world-ux-layer{display:none}
+@media(max-width:700px){.portrait-face{width:39px;height:39px}.portrait-face:before{height:18px}.portrait-face i,.portrait-face b{top:17px;width:8px;height:6px}.portrait-face i{left:7px}.portrait-face b{right:7px}.portrait-face em{bottom:5px;width:13px}.game-stage.battle-v23 .scene-actions,.game-stage.minigame-v23 .scene-actions{bottom:5px}}
