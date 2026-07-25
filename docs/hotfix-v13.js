@@ -6,6 +6,58 @@ const S=()=>E.getState(),R=E.R,ctx=E.ctx,canvas=E.el.canvas;
 let worldReady=false;
 const originalUpdate=E.updateScene;
 E.updateScene=function(dt,t){if(S().scene==='world'&&!worldReady){E.world.init();worldReady=true;}originalUpdate?.(dt,t);};
+
+function shopFeedback(message,tone='bad'){
+ const text=document.getElementById('shop-summary-text');
+ const button=document.getElementById('shop-finish');
+ if(text){
+  text.textContent=message;
+  text.style.color=tone==='good'?'#78d09c':tone==='warn'?'#f2c55e':'#ff8a78';
+  text.style.fontWeight='900';
+  text.setAttribute('role','alert');
+  text.scrollIntoView({block:'nearest',behavior:'smooth'});
+ }
+ if(button){button.disabled=false;button.textContent='Bezahlen und losfahren';}
+}
+function finishShopSafely(){
+ const s=S(),button=document.getElementById('shop-finish');
+ if(button){button.disabled=true;button.textContent='Kasse prüft …';}
+ s.cart=s.cart&&typeof s.cart==='object'?s.cart:{};
+ const entries=Object.entries(s.cart)
+  .filter(([id,q])=>C.items[id]&&Number.isFinite(Number(q))&&Number(q)>0)
+  .map(([id,q])=>[id,Math.max(0,Math.floor(Number(q)))]);
+ const total=entries.reduce((sum,[id,q])=>sum+C.items[id].price*q,0);
+ if(total>s.money){shopFeedback(`Zu teuer: Dir fehlen ${E.money(total-s.money)}. Nimm etwas aus dem Wagen.`);return;}
+ try{
+  for(const [id,q] of entries)s.inventory[id]=(s.inventory[id]||0)+q;
+  s.money=Math.max(0,s.money-total);
+  s.cart={};
+  s.quests.shop=99;
+  s.quests.entry=0;
+  s.activeQuest='entry';
+  s.scene='world';
+  E.log(entries.length?`Einkauf beendet. ${E.money(s.money)} übrig.`:'Ohne Einkauf losgefahren. Planung wurde erfolgreich verweigert.');
+  E.save();
+  E.showOnly(E.el.app);
+  E.setScene('world',false);
+  E.world.init();
+  worldReady=true;
+  E.banner('NEUE QUEST · REIN IN DEN WAHNSINN');
+  E.toast('Kasse überlebt',entries.length?'Einkauf verstaut. Abfahrt.':'Du fährst ohne Vorräte los. Mutig ist ein Wort dafür.','good');
+ }catch(error){
+  console.error(error);
+  shopFeedback(`Kassenfehler: ${error.message||error}`);
+ }
+}
+document.addEventListener('click',event=>{
+ const button=event.target.closest?.('#shop-finish');
+ if(!button)return;
+ event.preventDefault();
+ event.stopPropagation();
+ event.stopImmediatePropagation();
+ finishShopSafely();
+},true);
+
 const originalInteract=E.world.interact;
 E.world.interact=function(){
  const s=S(),h=E.hour(),nearRonny=Math.hypot(s.world.x-1580,s.world.y-500)<105;
@@ -26,25 +78,25 @@ function openGateLobby(){const s=S();E.openDialogue('gundula','Vor dem Tor stehe
  {label:`Gundula ansprechen ${s.flags.gundula?'✓':''}`,hint:'Hecke, Platzordnung und Menschenverachtung',action:talkGateGundula},
  {label:`Uli ansprechen ${s.flags.uli?'✓':''}`,hint:'Parkplatz vier. Nicht drei. Nicht fünf.',action:talkGateUli},
  {label:'Tor prüfen',hint:s.flags.gundula&&s.flags.uli?'Einlass möglich':'Noch nicht beide überzeugt',action:()=>{if(s.flags.gundula&&s.flags.uli)originalInteract();else E.toast('Tor bleibt zu','Zwei Wachleute, zwei Gespräche. Rechnen hilft.','warn')}}
- ]);}
+]);}
 function talkGateGundula(){const s=S();if(s.flags.gundula)return E.openDialogue('gundula','Du darfst vielleicht rein. Die Hecke ist trotzdem tabu. Besonders für Körperflüssigkeiten.');E.openDialogue('gundula',C.dialogues.gundula.intro,[
  {label:'Höflich anmelden',hint:'Langweilig, aber überraschend wirksam',action:()=>gateCheck('gundula',48+C.traits[s.profile.trait].dialogue)},
  {label:'Batida de Coco erwähnen',hint:s.inventory.batida?'Flüssiges Verwaltungsschmiermittel':'Nicht eingekauft',action:()=>gateCheck('gundula',s.inventory.batida?82:18)},
  {label:'„Ich bruns garantiert nicht in die Hecke.“',hint:'Extrem verdächtig formuliert',action:()=>gateCheck('gundula',38)},
  {label:'Zurückpöbeln',hint:'Respekt oder sofortige Feindschaft',action:()=>gateCheck('gundula',24+C.traits[s.profile.trait].battle)}
- ]);}
+]);}
 function talkGateUli(){const s=S();if(s.flags.uli)return E.openDialogue('uli','Parkplatz vier. Du hast genickt. Ich habe Zeugen.');E.openDialogue('uli',C.dialogues.uli.intro,[
  {label:'Parkplatz 4 bestätigen',hint:'Die Zahl zwischen drei und fünf',action:()=>gateCheck('uli',68)},
  {label:'Ordentlich neu einparken',hint:'Zehn Minuten und etwas Restwürde',action:()=>{E.advance(10,'Unter Ulis Blick neu einparken');gateCheck('uli',86)}},
  {label:'„Passt doch so.“',hint:'Uli empfindet körperlichen Schmerz',action:()=>gateCheck('uli',14)},
  {label:'Wasser anbieten',hint:s.inventory.water?'Praktisch':'Du hast keins',action:()=>gateCheck('uli',s.inventory.water?76:22)}
- ]);}
+]);}
 function gateCheck(id,chance){const s=S(),roll=E.rand(1,100);if(roll<=chance){s.flags[id]=true;s.relations[id]+=10;E.toast(`${id==='gundula'?'Gundula':'Uli'} überzeugt`,`Wurf ${roll}/${chance}. Ein bürokratisches Wunder.`,'good');if(s.flags.gundula&&s.flags.uli)E.banner('BEIDE ÜBERZEUGT · TOR ERNEUT ANSPRECHEN');}else{s.relations[id]-=5;E.toast('Abgelehnt',`Wurf ${roll}/${chance}. Deine Erklärung hatte die Statik eines nassen Zelts.`,'bad');}E.save();}
 function openSleep(){const s=S(),where=s.world.y<700?'Nordlager':'Südlager';E.openDialogue('andre',`Das Zelt in ${where} sieht aus wie eine feuchte Plastiktüte mit Reißverschluss. Trotzdem wäre Schlaf vermutlich klüger als die nächste Idee.`,[
  {label:'Bis 08:00 Uhr schlafen',hint:'Energie hoch, Kater eventuell auch',action:sleepMorning},
  {label:'Powernap · 90 Minuten',hint:'Etwas Energie, viel Zeitverlust',action:()=>{s.needs.energy=E.clamp(s.needs.energy+32);s.needs.alcohol=E.clamp(s.needs.alcohol-8);E.advance(90,'Im Zelt wegtreten');}},
  {label:'Weiter eskalieren',hint:'Vernunft erfolgreich abgewehrt',action:()=>E.toast('Natürlich','Schlaf ist offenbar ein Problem für Zukunfts-Dich.','warn')}
- ]);}
+]);}
 function sleepMorning(){const s=S(),m=E.minuteOfDay();let delta=m<480?480-m:1440-m+480;const oldAlcohol=s.needs.alcohol;s.needs.energy=100;s.needs.alcohol=E.clamp(s.needs.alcohol-45);s.needs.highness=E.clamp(s.needs.highness-35);s.needs.hangover=E.clamp(s.needs.hangover+oldAlcohol*.28+12);s.needs.hunger=E.clamp(s.needs.hunger+12);s.needs.thirst=E.clamp(s.needs.thirst+16);s.world.noise=0;E.advance(delta,'Bis morgens im Zelt schlafen');if(s.day===3)E.addQuest('cleanup');E.toast(`${E.dayName(s.day)}morgen`,'Du wachst auf. Dein Mund fühlt sich an wie ein Aschenbecher mit Sandfüllung.','warn');}
 const originalDraw=E.drawScene;
 E.drawScene=function(t){originalDraw?.(t);if(S().scene==='world'){ctx.restore();drawExtraHotspots(t);}};
