@@ -28,3 +28,5 @@ jobs:
           git add -A
           git commit -m "feat: initialize playable game architecture"
           git push origin main
+
+# bootstrap trigger 2
