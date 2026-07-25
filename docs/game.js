@@ -1,273 +1,32 @@
-(() => {
-  'use strict';
-
-  const STORAGE = 'tales-blaue-adria-preview-v1';
-  const Phaser = window.Phaser;
-  const directions = new Set();
-  let actionRequested = false;
-  let game = null;
-
-  const initial = {
-    profile: null,
-    mode: 'creator',
-    day: 1,
-    minutes: 420,
-    money: 25,
-    needs: { energy: 100, hunger: 8, thirst: 10, bladder: 4, alcohol: 0, highness: 0 },
-    inventory: { wasser: 2, wuerste: 1, bier: 2, batida: 1 },
-    team: [],
-    flags: {},
-    position: { x: 165, y: 360 },
-  };
-
-  const state = load();
-  const creator = document.querySelector('#creator');
-  const shell = document.querySelector('#game-shell');
-  const traitTexts = {
-    charmant: 'Bessere Chancen in freundlichen Dialogen.',
-    direkt: 'Klare Antworten wirken überzeugender.',
-    chaotisch: 'Zusätzliche absurde Lösungswege.',
-    hilfsbereit: 'Mehr Vorteile aus Nebenquests.',
-    beobachtend: 'Findet leichter versteckte Hinweise.',
-  };
-  const labels = {
-    energy: 'Energie', hunger: 'Hunger', thirst: 'Durst', bladder: 'Pinkeln', alcohol: 'Alkohol', highness: 'Breitheit',
-  };
-  const itemLabels = { wasser: 'Wasser', wuerste: 'Würste', bier: 'Bier', batida: 'Batida de Coco' };
-  const colors = { energy: '#69cf9a', hunger: '#e7a95e', thirst: '#66b8db', bladder: '#dbc755', alcohol: '#e66b65', highness: '#ad82dc' };
-
-  const nameInput = document.querySelector('#name');
-  const skinInput = document.querySelector('#skin');
-  const hairInput = document.querySelector('#hair');
-  const shirtInput = document.querySelector('#shirt');
-  const traitInput = document.querySelector('#trait');
-  const avatar = document.querySelector('#avatar');
-
-  [nameInput, skinInput, hairInput, shirtInput, traitInput].forEach((input) => input.addEventListener('input', updatePreview));
-  document.querySelector('#start').addEventListener('click', () => {
-    const name = nameInput.value.trim();
-    if (!name) return;
-    state.profile = { name, skin: skinInput.value, hair: hairInput.value, shirt: shirtInput.value, trait: traitInput.value };
-    state.mode = 'world';
-    persist();
-    launch();
-  });
-  document.querySelector('#reset').addEventListener('click', () => {
-    localStorage.removeItem(STORAGE);
-    location.reload();
-  });
-  document.querySelector('#action').addEventListener('pointerdown', () => { actionRequested = true; });
-
-  document.querySelectorAll('[data-dir]').forEach((button) => {
-    const direction = button.dataset.dir;
-    const stop = () => directions.delete(direction);
-    button.addEventListener('pointerdown', (event) => {
-      event.preventDefault();
-      button.setPointerCapture?.(event.pointerId);
-      directions.add(direction);
-    });
-    button.addEventListener('pointerup', stop);
-    button.addEventListener('pointercancel', stop);
-    button.addEventListener('pointerleave', stop);
-  });
-
-  updatePreview();
-  if (state.profile) launch();
-
-  function updatePreview() {
-    avatar.style.setProperty('--skin', skinInput.value);
-    avatar.style.setProperty('--hair', hairInput.value);
-    avatar.style.setProperty('--shirt', shirtInput.value);
-    document.querySelector('#preview-name').textContent = nameInput.value || 'Deine Figur';
-    document.querySelector('#preview-trait').textContent = traitTexts[traitInput.value];
-  }
-
-  function launch() {
-    creator.classList.add('hidden');
-    shell.classList.remove('hidden');
-    renderHud();
-    if (!game) game = createGame();
-  }
-
-  function load() {
-    try {
-      return Object.assign(structuredClone(initial), JSON.parse(localStorage.getItem(STORAGE) || 'null') || {});
-    } catch {
-      return structuredClone(initial);
-    }
-  }
-
-  function persist() {
-    localStorage.setItem(STORAGE, JSON.stringify(state));
-    renderHud();
-  }
-
-  function clamp(value) { return Math.max(0, Math.min(100, Math.round(value * 10) / 10)); }
-
-  function advance(minutes) {
-    state.minutes += minutes;
-    while (state.minutes >= 1440) { state.minutes -= 1440; state.day += 1; }
-    const hours = minutes / 60;
-    state.needs.energy = clamp(state.needs.energy - hours * 5);
-    state.needs.hunger = clamp(state.needs.hunger + hours * 7);
-    state.needs.thirst = clamp(state.needs.thirst + hours * 9);
-    state.needs.bladder = clamp(state.needs.bladder + hours * 5 + state.needs.alcohol * .02);
-    state.needs.alcohol = clamp(state.needs.alcohol - hours * 4);
-    state.needs.highness = clamp(state.needs.highness - hours * 3);
-    persist();
-  }
-
-  function useItem(item) {
-    if (!state.inventory[item]) return;
-    state.inventory[item] -= 1;
-    if (item === 'wasser') { state.needs.thirst = clamp(state.needs.thirst - 30); state.needs.bladder = clamp(state.needs.bladder + 12); }
-    if (item === 'wuerste') state.needs.hunger = clamp(state.needs.hunger - 35);
-    if (item === 'bier') { state.needs.thirst = clamp(state.needs.thirst - 8); state.needs.bladder = clamp(state.needs.bladder + 20); state.needs.alcohol = clamp(state.needs.alcohol + 18); }
-    if (item === 'batida') { state.needs.alcohol = clamp(state.needs.alcohol + 24); state.needs.bladder = clamp(state.needs.bladder + 10); }
-    persist();
-  }
-
-  function renderHud() {
-    if (!state.profile) return;
-    const hour = Math.floor(state.minutes / 60) % 24;
-    const minute = state.minutes % 60;
-    const phase = hour < 6 ? 'Nacht' : hour < 12 ? 'Morgen' : hour < 18 ? 'Tag' : 'Abend';
-    document.querySelector('#day-phase').textContent = `Tag ${state.day} · ${phase}`;
-    document.querySelector('#clock').textContent = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
-    document.querySelector('#mode').textContent = state.mode === 'world' ? 'Top-down' : state.mode === 'battle' ? 'Rundenkampf' : 'Minispiel';
-    document.querySelector('#world-controls').classList.toggle('hidden', state.mode !== 'world');
-    document.querySelector('#needs').innerHTML = Object.entries(state.needs).map(([key, value]) => `<div class="need"><div class="need-head"><span>${labels[key]}</span><span>${Math.round(value)}</span></div><div class="track"><div class="fill" style="width:${value}%;background:${colors[key]}"></div></div></div>`).join('');
-    const inventory = document.querySelector('#inventory');
-    inventory.innerHTML = '';
-    Object.entries(state.inventory).forEach(([item, count]) => {
-      const button = document.createElement('button');
-      button.className = 'chip';
-      button.disabled = count <= 0;
-      button.textContent = `${itemLabels[item] || item} × ${count}`;
-      button.addEventListener('click', () => useItem(item));
-      inventory.appendChild(button);
-    });
-    document.querySelector('#team-name').textContent = state.profile.name;
-    document.querySelector('#team-list').textContent = state.team.length ? ` + ${state.team.map((member) => member.name).join(', ')}` : '· noch keine Begleiter';
-  }
-
-  function setMode(mode) { state.mode = mode; persist(); }
-
-  function createGame() {
-    class BootScene extends Phaser.Scene {
-      constructor() { super('Boot'); }
-      create() {
-        makeCharacter(this, 'player', 0xf3c969, 0x24444a);
-        makeCharacter(this, 'gundula', 0xe47d99, 0x5d294f);
-        makeCharacter(this, 'uli', 0x7ab9d8, 0x263f67);
-        makeCharacter(this, 'rival', 0xe4694f, 0x5c2018);
-        const marker = this.make.graphics({ x: 0, y: 0, add: false });
-        marker.fillStyle(0xffd75a, .95); marker.fillCircle(18, 18, 16); marker.lineStyle(3, 0xffffff, .8); marker.strokeCircle(18, 18, 16); marker.generateTexture('marker', 36, 36); marker.destroy();
-        this.scene.start('World');
-      }
-    }
-
-    class WorldScene extends Phaser.Scene {
-      constructor() { super('World'); this.points = []; this.lastTick = 0; this.lastSave = 0; }
-      create() {
-        setMode('world');
-        this.physics.world.setBounds(0, 0, 960, 640);
-        this.cameras.main.setBounds(0, 0, 960, 640);
-        drawMap(this);
-        this.player = this.physics.add.sprite(state.position.x, state.position.y, 'player').setCollideWorldBounds(true).setDepth(20);
-        this.cameras.main.startFollow(this.player, true, .12, .12); this.cameras.main.setZoom(1.08);
-        this.cursors = this.input.keyboard?.createCursorKeys();
-        this.keys = this.input.keyboard?.addKeys('W,A,S,D,E,SPACE');
-        this.keys?.E.on('down', () => this.interact()); this.keys?.SPACE.on('down', () => this.interact());
-        this.message = this.add.text(480, 595, 'Erkunde den Platz. Personen und gelbe Marker sind interaktiv.', { fontFamily: 'system-ui', fontSize: '17px', color: '#fff8dc', backgroundColor: '#14241fe6', padding: { x: 16, y: 10 }, align: 'center', wordWrap: { width: 700 } }).setOrigin(.5).setScrollFactor(0).setDepth(100);
-        this.overlay = this.add.rectangle(480, 320, 960, 640, 0x10254a, 0).setScrollFactor(0).setDepth(80).setBlendMode(Phaser.BlendModes.MULTIPLY);
-        this.time.addEvent({ delay: 1000, loop: true, callback: () => this.light() }); this.light();
-      }
-      update(time) {
-        let x = 0, y = 0;
-        if (this.cursors?.left.isDown || this.keys?.A.isDown || directions.has('left')) x--;
-        if (this.cursors?.right.isDown || this.keys?.D.isDown || directions.has('right')) x++;
-        if (this.cursors?.up.isDown || this.keys?.W.isDown || directions.has('up')) y--;
-        if (this.cursors?.down.isDown || this.keys?.S.isDown || directions.has('down')) y++;
-        const vector = new Phaser.Math.Vector2(x, y).normalize().scale(155);
-        this.player.setVelocity(vector.x, vector.y); if (x) this.player.setFlipX(x < 0);
-        if ((x || y) && time - this.lastSave > 500) { this.lastSave = time; state.position = { x: this.player.x, y: this.player.y }; persist(); }
-        if (actionRequested) { actionRequested = false; this.interact(); }
-        if (time - this.lastTick > 12000) { this.lastTick = time; advance(5); }
-      }
-      interact() {
-        const nearest = this.points.map((point) => ({ point, distance: Phaser.Math.Distance.Between(this.player.x, this.player.y, point.x, point.y) })).filter((entry) => entry.distance <= entry.point.radius).sort((a, b) => a.distance - b.distance)[0];
-        if (!nearest) return this.say('Hier gibt es gerade nichts zu tun.');
-        nearest.point.action();
-      }
-      say(text) { this.message.setText(text); this.message.setAlpha(1); this.tweens.add({ targets: this.message, alpha: .82, duration: 2200, yoyo: true }); }
-      light() {
-        const hour = state.minutes / 60; let alpha = 0;
-        if (hour >= 19) alpha = Math.min(.62, (hour - 19) * .12); if (hour < 6) alpha = .62; if (hour >= 6 && hour < 8) alpha = Math.max(0, .45 - (hour - 6) * .22);
-        this.overlay.setAlpha(alpha);
-      }
-    }
-
-    class BattleScene extends Phaser.Scene {
-      constructor() { super('Battle'); }
-      create() {
-        setMode('battle'); this.enemy = 72; this.hero = 85; this.locked = false;
-        const g = this.add.graphics(); g.fillGradientStyle(0x173044, 0x173044, 0x684a36, 0x684a36, 1); g.fillRect(0, 0, 960, 640);
-        this.add.text(480, 48, 'CAMPING-DUELL', titleStyle()).setOrigin(.5);
-        this.add.image(225, 250, 'player').setScale(3.2); this.add.image(735, 250, 'rival').setScale(3.2);
-        this.add.text(225, 145, state.profile.name, nameStyle('#78cfa4')).setOrigin(.5); this.add.text(735, 145, 'Rivalen-Ronny', nameStyle('#ef8b72')).setOrigin(.5);
-        this.heroBar = bar(this, 145, 365, 0x67d69a); this.enemyBar = bar(this, 655, 365, 0xef765f); this.bars();
-        this.log = this.add.text(480, 430, 'Ronny blockiert den Weg zum Strand.', boxStyle()).setOrigin(.5);
-        button(this, 220, 540, 'Trockener Konter', () => this.turn(false)); button(this, 480, 540, 'Stuhl-Blockade', () => this.turn(true)); button(this, 740, 540, 'Zurückziehen', () => this.back());
-      }
-      turn(guard) {
-        if (this.locked) return; this.locked = true;
-        const damage = Phaser.Math.Between(guard ? 8 : 15, guard ? 14 : 25); this.enemy = Math.max(0, this.enemy - damage); this.bars(); this.log.setText(`${guard ? 'Campingstuhl-Blockade' : 'Trockener Konter'}: ${damage} Fassungsschaden.`);
-        if (!this.enemy) return this.time.delayedCall(700, () => this.win());
-        this.time.delayedCall(850, () => { const hit = Phaser.Math.Between(guard ? 5 : 10, guard ? 10 : 18); this.hero = Math.max(0, this.hero - hit); this.bars(); this.log.setText(`Ronnys ungefragter Vortrag kostet dich ${hit} Fassung.`); this.locked = false; if (!this.hero) this.time.delayedCall(900, () => this.back()); });
-      }
-      bars() { this.heroBar.setScale(this.hero / 85, 1); this.enemyBar.setScale(this.enemy / 72, 1); }
-      win() { if (!state.team.some((m) => m.id === 'ronny')) state.team.push({ id: 'ronny', name: 'Ronny' }); state.flags.firstBattleWon = true; advance(25); this.log.setText('Sieg. Ronny schließt sich deinem Team an.'); this.time.delayedCall(1600, () => this.back()); }
-      back() { setMode('world'); this.scene.start('World'); }
-    }
-
-    class FlipCupScene extends Phaser.Scene {
-      constructor() { super('FlipCup'); }
-      create() {
-        setMode('flip-cup'); this.phase = 'drink'; this.power = 0; this.direction = 1; this.attempts = 0;
-        const g = this.add.graphics(); g.fillGradientStyle(0x173d36, 0x173d36, 0x6a412c, 0x6a412c, 1); g.fillRect(0, 0, 960, 640); g.fillStyle(0x8c5c35, 1); g.fillRoundedRect(90, 380, 780, 110, 18);
-        this.add.text(480, 56, 'FLIP CUP', titleStyle()).setOrigin(.5); this.message = this.add.text(480, 120, 'Tippe, wenn der Marker im goldenen Bereich ist.', nameStyle('#fff1c1')).setOrigin(.5);
-        this.add.rectangle(480, 205, 520, 32, 0x0e1715); this.add.rectangle(480, 205, 120, 28, 0xe4bd55); this.add.rectangle(480, 205, 54, 28, 0x79d59d); this.marker = this.add.rectangle(230, 205, 8, 44, 0xffffff);
-        const cup = this.add.graphics(); cup.fillStyle(0xd94d45, 1); cup.fillRoundedRect(-30, -48, 60, 82, 8); cup.fillStyle(0xffffff, .9); cup.fillRect(-29, -35, 58, 8); this.cup = this.add.container(480, 340, [cup]);
-        this.input.on('pointerdown', () => this.tap()); this.input.keyboard?.on('keydown-SPACE', () => this.tap());
-      }
-      update(_, delta) { if (this.phase === 'done') return; this.power += delta * (this.phase === 'drink' ? .22 : .17) * this.direction; if (this.power >= 100) { this.power = 100; this.direction = -1; } if (this.power <= 0) { this.power = 0; this.direction = 1; } this.marker.x = 230 + this.power * 5; }
-      tap() {
-        if (this.phase === 'done') return; const distance = Math.abs(this.power - 50);
-        if (this.phase === 'drink') { if (distance <= 18) { this.phase = 'flip'; this.power = 0; this.message.setText('Gut geleert. Jetzt den Becher flippen.'); } else { this.attempts++; this.message.setText('Nicht sauber geleert. Noch einmal.'); this.check(); } return; }
-        this.attempts++; if (distance <= 12) { this.phase = 'done'; this.tweens.add({ targets: this.cup, angle: 360, y: 300, duration: 550, onComplete: () => this.finish(true) }); } else { this.message.setText('Der Becher landet auf der Seite.'); this.check(); }
-      }
-      check() { if (this.attempts >= 3) { this.phase = 'done'; this.finish(false); } }
-      finish(won) { state.flags[won ? 'flipCupWon' : 'flipCupTried'] = true; advance(15); this.message.setText(won ? 'Sauberer Flip. Du gewinnst die Runde.' : 'Drei Versuche vorbei. Respekt für den Einsatz.'); button(this, 480, 520, 'Zurück zum Platz', () => { setMode('world'); this.scene.start('World'); }); }
-    }
-
-    function makeCharacter(scene, key, shirt, trousers) { const g = scene.make.graphics({ x: 0, y: 0, add: false }); g.fillStyle(0xf3c8a8, 1); g.fillCircle(16, 9, 7); g.fillStyle(shirt, 1); g.fillRoundedRect(7, 15, 18, 17, 5); g.fillStyle(trousers, 1); g.fillRect(8, 29, 7, 12); g.fillRect(18, 29, 7, 12); g.generateTexture(key, 32, 42); g.destroy(); }
-    function drawMap(scene) {
-      const g = scene.add.graphics(); g.fillStyle(0x88b56b, 1); g.fillRect(0, 0, 960, 640); g.fillStyle(0xd5bd87, 1); g.fillRoundedRect(32, 270, 330, 180, 24); g.fillStyle(0x8f9692, 1); for (let i = 0; i < 5; i++) g.fillRoundedRect(58 + i * 58, 300, 46, 92, 8); text(scene, 54, 278, 'PARKPLATZ'); g.fillStyle(0xe4dfcf, 1); g.fillRoundedRect(396, 220, 170, 146, 18); text(scene, 424, 228, 'TOILETTEN'); g.fillStyle(0xc7835d, 1); g.fillRoundedRect(626, 236, 210, 150, 22); text(scene, 645, 245, 'GUNDULA & ULI'); g.fillStyle(0x779b62, 1); g.fillRoundedRect(300, 34, 380, 142, 24); text(scene, 410, 48, 'NÖRDLICHES LAGER'); g.fillStyle(0x6d9259, 1); g.fillRoundedRect(270, 420, 420, 136, 24); text(scene, 396, 432, 'SÜDLICHES LAGER'); g.fillStyle(0xe6d7a4, 1); g.fillRect(700, 440, 260, 58); g.fillStyle(0x4e94b4, 1); g.fillRect(700, 498, 260, 142); text(scene, 776, 454, 'STRAND & SEE');
-      const gu = scene.add.image(682, 404, 'gundula').setDepth(15), uli = scene.add.image(742, 404, 'uli').setDepth(15); npcText(scene, 682, 368, 'Gundula'); npcText(scene, 742, 368, 'Uli');
-      scene.points.push({ x: gu.x, y: gu.y, radius: 72, action: () => { if (state.flags.gundulaConvinced) return scene.say('Gundula: „Ich behalte dich trotzdem im Auge.“'); if (state.inventory.batida > 0) { state.flags.gundulaConvinced = true; persist(); scene.say('Batida de Coco erwähnt: Gundulas Einlasschance steigt deutlich.'); } else scene.say('Gundula verlangt eine glaubwürdige Erklärung.'); } });
-      scene.points.push({ x: uli.x, y: uli.y, radius: 72, action: () => { state.flags.uliConvinced = true; persist(); scene.say('Uli gibt dir eine Parkplatzaufgabe. Einlasschance erhöht.'); } });
-      activity(scene, 220, 238, 'KAMPF', () => { state.position = { x: scene.player.x, y: scene.player.y }; persist(); scene.scene.start('Battle'); }); activity(scene, 568, 492, 'FLIP CUP', () => { state.position = { x: scene.player.x, y: scene.player.y }; persist(); scene.scene.start('FlipCup'); });
-    }
-    function text(scene, x, y, value) { scene.add.text(x, y, value, { fontFamily: 'system-ui', fontSize: '18px', fontStyle: 'bold', color: '#173027' }).setDepth(2); }
-    function npcText(scene, x, y, value) { scene.add.text(x, y, value, { fontFamily: 'system-ui', fontSize: '14px', fontStyle: 'bold', color: '#fff8dc', backgroundColor: '#173027cc', padding: { x: 6, y: 3 } }).setOrigin(.5).setDepth(16); }
-    function activity(scene, x, y, value, action) { scene.add.image(x, y, 'marker').setDepth(12); npcText(scene, x, y + 27, value); scene.points.push({ x, y, radius: 60, action }); }
-    function titleStyle() { return { fontFamily: 'system-ui', fontSize: '36px', fontStyle: 'bold', color: '#fff2c4' }; }
-    function nameStyle(color) { return { fontFamily: 'system-ui', fontSize: '20px', fontStyle: 'bold', color }; }
-    function boxStyle() { return { fontFamily: 'system-ui', fontSize: '18px', color: '#f8f2df', align: 'center', wordWrap: { width: 700 }, backgroundColor: '#101923dd', padding: { x: 18, y: 14 } }; }
-    function bar(scene, x, y, color) { scene.add.rectangle(x + 80, y, 168, 26, 0x10161c); return scene.add.rectangle(x, y, 160, 18, color).setOrigin(0, .5); }
-    function button(scene, x, y, label, action) { const b = scene.add.text(x, y, label, { fontFamily: 'system-ui', fontSize: '17px', fontStyle: 'bold', color: '#173027', backgroundColor: '#f4d47b', padding: { x: 18, y: 12 } }).setOrigin(.5).setInteractive({ useHandCursor: true }); b.on('pointerdown', action); return b; }
-
-    return new Phaser.Game({ type: Phaser.AUTO, parent: 'game', width: 960, height: 640, backgroundColor: '#10241f', antialias: true, physics: { default: 'arcade', arcade: { gravity: { x: 0, y: 0 }, debug: false } }, scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH, width: 960, height: 640 }, scene: [BootScene, WorldScene, BattleScene, FlipCupScene] });
-  }
+(()=>{'use strict';
+const K='tba-v3',D={profile:null,mode:'creator',day:1,min:420,needs:{energy:100,hunger:8,thirst:10,bladder:4,alcohol:0,highness:0},inv:{wasser:2,wuerste:1,bier:2,batida:1},team:[],flags:{},pos:{x:165,y:360},battle:{hero:85,enemy:72},flip:{phase:'drink',p:0,d:1,tries:0,done:false}};
+const clone=o=>JSON.parse(JSON.stringify(o)),load=()=>{try{const s=JSON.parse(localStorage.getItem(K)||'null')||{};return Object.assign(clone(D),s,{needs:Object.assign({},D.needs,s.needs||{}),inv:Object.assign({},D.inv,s.inv||{}),pos:Object.assign({},D.pos,s.pos||{}),battle:Object.assign({},D.battle,s.battle||{}),flip:Object.assign({},D.flip,s.flip||{})})}catch(e){return clone(D)}};
+const S=load(),$=q=>document.querySelector(q),creator=$('#creator'),shell=$('#game-shell'),host=$('#game'),controls=$('#world-controls'),menu=document.createElement('div');menu.className='mode-actions hidden';$('.frame').append(menu);
+const canvas=document.createElement('canvas');canvas.width=960;canvas.height=640;host.replaceChildren(canvas);const c=canvas.getContext('2d');if(!c){creator.innerHTML='<section class="creator-card"><h1>Startfehler</h1><p>Canvas wird nicht unterstützt.</p></section>';return}
+const dirs=new Set();let action=false,last=performance.now(),tick=last,msg='Erkunde den Platz. Personen und gelbe Marker sind interaktiv.',msgUntil=0;
+const labels={energy:'Energie',hunger:'Hunger',thirst:'Durst',bladder:'Pinkeln',alcohol:'Alkohol',highness:'Breitheit'},items={wasser:'Wasser',wuerste:'Würste',bier:'Bier',batida:'Batida de Coco'},cols={energy:'#69cf9a',hunger:'#e7a95e',thirst:'#66b8db',bladder:'#dbc755',alcohol:'#e66b65',highness:'#ad82dc'},traits={charmant:'Bessere Chancen in freundlichen Dialogen.',direkt:'Klare Antworten wirken überzeugender.',chaotisch:'Zusätzliche absurde Lösungswege.',hilfsbereit:'Mehr Vorteile aus Nebenquests.',beobachtend:'Findet leichter versteckte Hinweise.'};
+const name=$('#name'),skin=$('#skin'),hair=$('#hair'),shirt=$('#shirt'),trait=$('#trait'),avatar=$('#avatar'),start=$('#start');if(S.profile){name.value=S.profile.name;skin.value=S.profile.skin;hair.value=S.profile.hair;shirt.value=S.profile.shirt;trait.value=S.profile.trait;start.textContent='Spiel fortsetzen'}
+[name,skin,hair,shirt,trait].forEach(i=>i.addEventListener('input',preview));preview();start.onclick=()=>{if(!name.value.trim())return;S.profile={name:name.value.trim(),skin:skin.value,hair:hair.value,shirt:shirt.value,trait:trait.value};mode('world');save();creator.classList.add('hidden');shell.classList.remove('hidden')};$('#reset').onclick=()=>{localStorage.removeItem(K);location.reload()};$('#action').onpointerdown=e=>{e.preventDefault();action=true};
+document.querySelectorAll('[data-dir]').forEach(b=>{const d=b.dataset.dir,stop=()=>dirs.delete(d);b.onpointerdown=e=>{e.preventDefault();dirs.add(d)};b.onpointerup=stop;b.onpointercancel=stop;b.onpointerleave=stop});addEventListener('keydown',e=>{const m={ArrowUp:'up',w:'up',W:'up',ArrowDown:'down',s:'down',S:'down',ArrowLeft:'left',a:'left',A:'left',ArrowRight:'right',d:'right',D:'right'};if(m[e.key])dirs.add(m[e.key]);if([' ','e','E'].includes(e.key))action=true});addEventListener('keyup',e=>{const m={ArrowUp:'up',w:'up',W:'up',ArrowDown:'down',s:'down',S:'down',ArrowLeft:'left',a:'left',A:'left',ArrowRight:'right',d:'right',D:'right'};if(m[e.key])dirs.delete(m[e.key])});
+function preview(){avatar.style.setProperty('--skin',skin.value);avatar.style.setProperty('--hair',hair.value);avatar.style.setProperty('--shirt',shirt.value);$('#preview-name').textContent=name.value||'Deine Figur';$('#preview-trait').textContent=traits[trait.value]}
+function save(){localStorage.setItem(K,JSON.stringify(S));hud()}function clamp(v){return Math.max(0,Math.min(100,v))}function advance(n){S.min+=n;while(S.min>=1440){S.min-=1440;S.day++}const h=n/60;S.needs.energy=clamp(S.needs.energy-h*5);S.needs.hunger=clamp(S.needs.hunger+h*7);S.needs.thirst=clamp(S.needs.thirst+h*9);S.needs.bladder=clamp(S.needs.bladder+h*5+S.needs.alcohol*.02);S.needs.alcohol=clamp(S.needs.alcohol-h*4);S.needs.highness=clamp(S.needs.highness-h*3);save()}
+function mode(m){S.mode=m;menu.replaceChildren();menu.classList.toggle('hidden',m==='world');controls.classList.toggle('hidden',m!=='world');hud()}
+function hud(){if(!S.profile)return;const h=Math.floor(S.min/60)%24,m=S.min%60,p=h<6?'Nacht':h<12?'Morgen':h<18?'Tag':'Abend';$('#day-phase').textContent=`Tag ${S.day} · ${p}`;$('#clock').textContent=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;$('#mode').textContent=S.mode==='world'?'Top-down':S.mode==='battle'?'Rundenkampf':'Minispiel';$('#needs').innerHTML=Object.entries(S.needs).map(([k,v])=>`<div class="need"><div class="need-head"><span>${labels[k]}</span><span>${Math.round(v)}</span></div><div class="track"><div class="fill" style="width:${v}%;background:${cols[k]}"></div></div></div>`).join('');const inv=$('#inventory');inv.replaceChildren();Object.entries(S.inv).forEach(([k,v])=>{const b=document.createElement('button');b.className='chip';b.disabled=v<=0;b.textContent=`${items[k]} × ${v}`;b.onclick=()=>use(k);inv.append(b)});$('#team-name').textContent=S.profile.name;$('#team-list').textContent=S.team.length?` + ${S.team.map(x=>x.name).join(', ')}`:'· noch keine Begleiter'}
+function use(k){if(!S.inv[k])return;S.inv[k]--;if(k==='wasser'){S.needs.thirst=clamp(S.needs.thirst-30);S.needs.bladder=clamp(S.needs.bladder+12)}if(k==='wuerste')S.needs.hunger=clamp(S.needs.hunger-35);if(k==='bier'){S.needs.thirst=clamp(S.needs.thirst-8);S.needs.bladder=clamp(S.needs.bladder+20);S.needs.alcohol=clamp(S.needs.alcohol+18)}if(k==='batida'){S.needs.alcohol=clamp(S.needs.alcohol+24);S.needs.bladder=clamp(S.needs.bladder+10)}save()}
+function btn(t,fn,primary=false){const b=document.createElement('button');b.className='mode-action'+(primary?' primary-mode':'');b.textContent=t;b.onclick=fn;menu.append(b)}function say(t){msg=t;msgUntil=performance.now()+3200}
+function loop(now){const d=Math.min(40,now-last);last=now;if(!shell.classList.contains('hidden')){if(S.mode==='world')worldUpdate(d,now);if(S.mode==='flip')flipUpdate(d);draw()}requestAnimationFrame(loop)}requestAnimationFrame(loop);
+function worldUpdate(d,now){let x=(dirs.has('right')?1:0)-(dirs.has('left')?1:0),y=(dirs.has('down')?1:0)-(dirs.has('up')?1:0);if(x||y){const l=Math.hypot(x,y);S.pos.x=Math.max(20,Math.min(940,S.pos.x+x/l*.17*d));S.pos.y=Math.max(20,Math.min(620,S.pos.y+y/l*.17*d))}if(action){action=false;interact()}if(now-tick>12000){tick=now;advance(5)}}
+function interact(){const ts=[{x:682,y:404,r:76,f:gundula},{x:742,y:404,r:76,f:uli},{x:220,y:238,r:70,f:battle},{x:568,y:492,r:70,f:flip}];const n=ts.map(t=>({t,d:Math.hypot(S.pos.x-t.x,S.pos.y-t.y)})).filter(x=>x.d<=x.t.r).sort((a,b)=>a.d-b.d)[0];n?n.t.f():say('Hier gibt es gerade nichts zu tun.')}
+function gundula(){if(S.flags.gundula)return say('Gundula: „Ich behalte dich trotzdem im Auge.“');if(S.inv.batida>0){S.flags.gundula=true;save();say('Batida de Coco erwähnt: Gundulas Einlasschance steigt deutlich.')}else say('Gundula verlangt eine glaubwürdige Erklärung.')}
+function uli(){S.flags.uli=true;save();say('Uli gibt dir eine Parkplatzaufgabe. Einlasschance erhöht.')}
+function battle(){S.battle={hero:85,enemy:72,lock:false};msg='Ronny blockiert den Weg zum Strand.';mode('battle');btn('Trockener Konter',()=>turn(false));btn('Stuhl-Blockade',()=>turn(true));btn('Zurückziehen',back)}
+function turn(guard){if(S.battle.lock)return;S.battle.lock=true;const dmg=rnd(guard?8:15,guard?14:25);S.battle.enemy=Math.max(0,S.battle.enemy-dmg);msg=`${guard?'Campingstuhl-Blockade':'Trockener Konter'}: ${dmg} Fassungsschaden.`;if(!S.battle.enemy){if(!S.team.some(x=>x.id==='ronny'))S.team.push({id:'ronny',name:'Ronny'});S.flags.battle=true;advance(25);msg='Sieg. Ronny schließt sich deinem Team an.';return setTimeout(back,1400)}setTimeout(()=>{const hit=rnd(guard?5:10,guard?10:18);S.battle.hero=Math.max(0,S.battle.hero-hit);msg=`Ronnys Vortrag kostet dich ${hit} Fassung.`;S.battle.lock=false;if(!S.battle.hero)setTimeout(back,900)},650)}
+function flip(){S.flip={phase:'drink',p:0,d:1,tries:0,done:false};msg='Tippe, wenn der Marker im goldenen Bereich ist.';mode('flip');btn('TIPPEN',flipTap,true);btn('Zurück zum Platz',back)}function flipUpdate(d){if(S.flip.done)return;S.flip.p+=d*.065*S.flip.d;if(S.flip.p>=100){S.flip.p=100;S.flip.d=-1}if(S.flip.p<=0){S.flip.p=0;S.flip.d=1}}
+function flipTap(){if(S.flip.done)return;const dist=Math.abs(S.flip.p-50);if(S.flip.phase==='drink'){if(dist<=18){S.flip.phase='flip';S.flip.p=0;msg='Gut geleert. Jetzt den Becher flippen.'}else{S.flip.tries++;msg='Nicht sauber geleert. Noch einmal.';check()}return}S.flip.tries++;if(dist<=12)finish(true);else{msg='Der Becher landet auf der Seite.';check()}}function check(){if(S.flip.tries>=3)finish(false)}function finish(w){S.flip.done=true;S.flags[w?'flipWon':'flipTried']=true;advance(15);msg=w?'Sauberer Flip. Du gewinnst die Runde.':'Drei Versuche vorbei. Respekt für den Einsatz.'}
+function back(){mode('world');say('Zurück auf dem Campingplatz.');save()}function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a}
+function draw(){c.clearRect(0,0,960,640);S.mode==='world'?drawWorld():S.mode==='battle'?drawBattle():drawFlip()}
+function rr(x,y,w,h,r){c.beginPath();c.roundRect(x,y,w,h,r);c.fill()}function text(t,x,y,col='#173027',align='left',size=18){c.fillStyle=col;c.textAlign=align;c.font=`800 ${size}px system-ui`;c.fillText(t,x,y)}function area(x,y,w,h,col,t,tx,ty){c.fillStyle=col;rr(x,y,w,h,22);text(t,tx,ty)}function char(x,y,shirt,tr='#243a3e',s=1){c.save();c.translate(x,y);c.scale(s,s);c.fillStyle='#f3c8a8';c.beginPath();c.arc(0,-16,8,0,Math.PI*2);c.fill();c.fillStyle=shirt;rr(-10,-7,20,20,5);c.fillStyle=tr;c.fillRect(-9,10,7,14);c.fillRect(2,10,7,14);c.restore()}function tag(t,x,y){c.font='700 15px system-ui';const w=c.measureText(t).width+16;c.fillStyle='#173027dd';rr(x-w/2,y-17,w,25,7);text(t,x,y,'#fff8dc','center',15)}function message(t,y=592){c.fillStyle='#14241fee';rr(130,y-29,700,58,12);c.fillStyle='#fff8dc';c.textAlign='center';c.font='18px system-ui';c.fillText(t,480,y+6,660)}function marker(x,y,t){c.fillStyle='#ffd75a';c.beginPath();c.arc(x,y,18,0,Math.PI*2);c.fill();c.strokeStyle='#fff';c.lineWidth=3;c.stroke();tag(t,x,y+35)}
+function drawWorld(){c.fillStyle='#88b56b';c.fillRect(0,0,960,640);area(32,270,330,180,'#d5bd87','PARKPLATZ',54,292);c.fillStyle='#8f9692';for(let i=0;i<5;i++)rr(58+i*58,310,46,92,8);area(396,220,170,146,'#e4dfcf','TOILETTEN',420,248);area(626,236,210,150,'#c7835d','GUNDULA & ULI',642,264);area(300,34,380,142,'#779b62','NÖRDLICHES LAGER',402,66);area(270,420,420,136,'#6d9259','SÜDLICHES LAGER',392,452);c.fillStyle='#e6d7a4';c.fillRect(700,440,260,58);c.fillStyle='#4e94b4';c.fillRect(700,498,260,142);text('STRAND & SEE',774,476);char(682,404,'#e47d99','#5d294f');char(742,404,'#7ab9d8','#263f67');tag('Gundula',682,365);tag('Uli',742,365);marker(220,238,'KAMPF');marker(568,492,'FLIP CUP');char(S.pos.x,S.pos.y,S.profile.shirt);const h=S.min/60,a=h>=19?Math.min(.58,(h-19)*.12):h<6?.58:h<8?Math.max(0,.42-(h-6)*.21):0;if(a){c.fillStyle=`rgba(16,37,74,${a})`;c.fillRect(0,0,960,640)}message(msgUntil>performance.now()?msg:'Erkunde den Platz. Personen und gelbe Marker sind interaktiv.')}
+function bar(x,y,r,col){c.fillStyle='#10161c';rr(x,y-13,168,26,8);c.fillStyle=col;rr(x+4,y-9,Math.max(1,160*r),18,6)}function drawBattle(){const g=c.createLinearGradient(0,0,0,640);g.addColorStop(0,'#173044');g.addColorStop(1,'#684a36');c.fillStyle=g;c.fillRect(0,0,960,640);text('CAMPING-DUELL',480,64,'#fff2c4','center',36);char(225,255,S.profile.shirt,'#243a3e',3.2);char(735,255,'#e4694f','#5c2018',3.2);tag(S.profile.name,225,142);tag('Rivalen-Ronny',735,142);bar(145,360,S.battle.hero/85,'#67d69a');bar(655,360,S.battle.enemy/72,'#ef765f');message(msg,430)}
+function drawFlip(){const g=c.createLinearGradient(0,0,0,640);g.addColorStop(0,'#173d36');g.addColorStop(1,'#6a412c');c.fillStyle=g;c.fillRect(0,0,960,640);text('FLIP CUP',480,64,'#fff2c4','center',36);text(msg,480,122,'#fff1c1','center',21);c.fillStyle='#0e1715';rr(220,190,520,32,8);c.fillStyle='#e4bd55';c.fillRect(420,192,120,28);c.fillStyle='#79d59d';c.fillRect(453,192,54,28);c.fillStyle='#fff';c.fillRect(226+S.flip.p*5,184,8,44);c.fillStyle='#8c5c35';rr(90,380,780,110,18);c.fillStyle='#d94d45';rr(450,270,60,82,8);c.fillStyle='#fff';c.fillRect(451,282,58,8)}
 })();
