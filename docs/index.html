@@ -3,90 +3,88 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#102b24" />
+  <meta name="theme-color" content="#101814" />
   <meta name="color-scheme" content="dark" />
+  <meta name="description" content="Tales of the Blaue Adria – ein schwarzhumoriges Camping-RPG für Browser und Smartphone." />
+  <link rel="manifest" href="./manifest.webmanifest?v=8" />
+  <link rel="stylesheet" href="./styles.css?v=8" />
   <title>Tales of the Blaue Adria</title>
-  <link rel="stylesheet" href="./styles.css?v=3" />
-  <link rel="stylesheet" href="./compat.css?v=3" />
 </head>
 <body>
-  <main id="creator" class="creator-page">
-    <section class="creator-card">
-      <div>
-        <p class="eyebrow">Freitag · 07:00 Uhr</p>
-        <h1>Tales of the Blaue Adria</h1>
-        <p>Erstelle deine Figur. Danach startet der erste spielbare Technik-Prototyp mit Oberwelt, Kampf, Flip Cup, Bedürfnissen und Teamrekrutierung.</p>
-        <label>Name<input id="name" value="André" maxlength="18" /></label>
-        <div class="colors">
-          <label>Haut<input id="skin" type="color" value="#efc09b" /></label>
-          <label>Haare<input id="hair" type="color" value="#49301f" /></label>
-          <label>Oberteil<input id="shirt" type="color" value="#e3b74f" /></label>
-        </div>
-        <label>Startmerkmal
-          <select id="trait">
-            <option value="charmant">Charmant</option>
-            <option value="direkt">Direkt</option>
-            <option value="chaotisch">Chaotisch</option>
-            <option value="hilfsbereit">Hilfsbereit</option>
-            <option value="beobachtend">Beobachtend</option>
-          </select>
-        </label>
-        <button id="start" class="primary">Wochenende starten</button>
-      </div>
-      <div class="preview">
-        <div id="avatar" class="avatar"><i></i><b></b><span></span><em></em></div>
-        <strong id="preview-name">André</strong>
-        <small id="preview-trait">Bessere Chancen in freundlichen Dialogen.</small>
-      </div>
-    </section>
-  </main>
+  <div id="boot-screen" class="boot-screen">
+    <div class="boot-logo">
+      <span class="boot-kicker">EIN VÖLLIG UNNÖTIGES CAMPING-RPG</span>
+      <h1>Tales of the<br><strong>Blaue Adria</strong></h1>
+      <p id="boot-status">Lade schlechte Entscheidungen …</p>
+      <div class="boot-progress"><i id="boot-progress"></i></div>
+    </div>
+  </div>
 
-  <main id="game-shell" class="game-shell hidden">
-    <header class="topbar">
-      <div><p class="eyebrow" id="day-phase">Tag 1 · Morgen</p><strong id="clock">07:00</strong></div>
-      <span class="mode" id="mode">Top-down</span>
-      <button id="reset" class="quiet">Neustart</button>
+  <main id="app" class="app hidden" aria-live="polite">
+    <header class="hud-top">
+      <button id="menu-button" class="icon-button" aria-label="Menü öffnen">☰</button>
+      <div class="hud-time"><small id="day-label">Freitag · Morgen</small><strong id="clock-label">07:00</strong></div>
+      <div class="hud-quest" id="quest-compact"><small>AKTIVE QUEST</small><strong id="quest-compact-title">Einkaufen ohne Hirnschaden</strong></div>
+      <button id="journal-button" class="icon-button" aria-label="Questlog öffnen">📓</button>
     </header>
-    <section id="needs" class="needs"></section>
-    <section class="frame">
-      <div id="game"></div>
-      <div id="world-controls" class="controls">
-        <div class="dpad">
-          <button data-dir="up" class="up">▲</button>
-          <button data-dir="left" class="left">◀</button>
-          <button data-dir="right" class="right">▶</button>
-          <button data-dir="down" class="down">▼</button>
-        </div>
-        <button id="action" class="action">AKTION</button>
+    <section class="needs-strip" id="needs-strip" aria-label="Statuswerte"></section>
+    <section class="game-stage" id="game-stage">
+      <canvas id="game-canvas" width="1280" height="720" aria-label="Spielansicht"></canvas>
+      <div id="vignette" class="vignette"></div>
+      <div id="toast-stack" class="toast-stack"></div>
+      <div id="objective-banner" class="objective-banner hidden"></div>
+      <div id="touch-controls" class="touch-controls hidden" aria-label="Touch-Steuerung">
+        <div class="virtual-stick" id="virtual-stick"><div class="stick-base"></div><div class="stick-knob" id="stick-knob"></div></div>
+        <button id="action-button" class="action-orb" aria-label="Interagieren"><span>!</span><small>AKTION</small></button>
       </div>
+      <div id="scene-actions" class="scene-actions hidden"></div>
     </section>
-    <footer class="bottom">
-      <div><p class="eyebrow">Inventar</p><div id="inventory" class="chips"></div></div>
-      <div class="team"><p class="eyebrow">Team</p><strong id="team-name">André</strong><span id="team-list">· noch keine Begleiter</span></div>
+    <footer class="hud-bottom">
+      <button id="team-button" class="hud-tab"><span>👥</span><small>TEAM</small></button>
+      <button id="inventory-button" class="hud-tab"><span>🎒</span><small>INVENTAR</small></button>
+      <div class="quick-slots" id="quick-slots"></div>
+      <button id="map-button" class="hud-tab"><span>🗺️</span><small>KARTE</small></button>
+      <button id="status-button" class="hud-tab"><span>🫀</span><small>STATUS</small></button>
     </footer>
   </main>
 
-  <noscript>Dieses Spiel benötigt JavaScript.</noscript>
+  <section id="creator-screen" class="screen hidden">
+    <div class="panel creator-panel">
+      <div class="creator-copy">
+        <p class="eyebrow">FREITAG · 07:00 UHR</p><h2>Bevor alles eskaliert:</h2>
+        <p>Baue dir eine Figur, die wenigstens optisch so tut, als hätte sie ihr Leben im Griff.</p>
+        <label>Name<input id="profile-name" maxlength="18" value="André" autocomplete="off" /></label>
+        <div class="creator-grid"><label>Haut<input id="profile-skin" type="color" value="#efc09b" /></label><label>Haare<input id="profile-hair" type="color" value="#49301f" /></label><label>Oberteil<input id="profile-shirt" type="color" value="#e3b74f" /></label></div>
+        <label>Grundproblem<select id="profile-trait"></select></label>
+        <div id="trait-description" class="info-box"></div>
+        <button id="creator-next" class="primary-button">Ab in den Supermarkt</button>
+      </div>
+      <div class="creator-preview-card"><canvas id="avatar-canvas" width="360" height="460"></canvas><strong id="avatar-name">André</strong><small>Sieht bereit aus. Ist es nicht.</small></div>
+    </div>
+  </section>
+
+  <section id="shop-screen" class="screen hidden">
+    <div class="panel shop-panel">
+      <header class="panel-header"><div><p class="eyebrow">PROLOG · SUPERMARKT</p><h2>Einkaufen ohne Hirnschaden</h2></div><div class="money-card"><small>BUDGET</small><strong id="shop-money">25,00 €</strong></div></header>
+      <p>Du kannst nicht alles kaufen. Prioritäten setzen ist Erwachsensein mit schlechterem Marketing.</p>
+      <div id="shop-grid" class="shop-grid"></div>
+      <div class="shop-summary"><span id="shop-summary-text">Noch nichts im Wagen.</span><button id="shop-finish" class="primary-button">Bezahlen und losfahren</button></div>
+    </div>
+  </section>
+
+  <section id="dialogue-layer" class="overlay hidden">
+    <div class="dialogue-card"><div class="portrait" id="dialogue-portrait">G</div><div class="dialogue-main"><header><strong id="dialogue-name">Gundula</strong><button id="dialogue-skip" class="tiny-button">Überspringen</button></header><p id="dialogue-text"></p><div id="dialogue-choices" class="choice-list"></div></div></div>
+  </section>
+
+  <section id="drawer-layer" class="overlay drawer-overlay hidden"><div class="drawer" id="drawer"><header class="drawer-header"><div><p class="eyebrow" id="drawer-kicker">ÜBERSICHT</p><h2 id="drawer-title">Menü</h2></div><button id="drawer-close" class="icon-button">✕</button></header><div id="drawer-content" class="drawer-content"></div></div></section>
+  <section id="confirm-layer" class="overlay hidden"><div class="confirm-card"><h2 id="confirm-title">Sicher?</h2><p id="confirm-text"></p><div><button id="confirm-cancel" class="secondary-button">Abbrechen</button><button id="confirm-ok" class="danger-button">Ja, weg damit</button></div></div></section>
+  <div id="fatal-error" class="fatal-error hidden"><div><p class="eyebrow">TECHNISCHER TOTALAUSFALL</p><h2>Das Spiel hat sich hingelegt.</h2><pre id="fatal-message"></pre><button onclick="location.reload()" class="primary-button">Neu laden</button></div></div>
+
   <script>
-    window.addEventListener('error', function (event) {
-      document.body.innerHTML = '<main class="creator-page"><section class="creator-card"><div><p class="eyebrow">Technischer Startfehler</p><h1>Das Spiel konnte nicht starten.</h1><p>' + String(event.message || 'Unbekannter Fehler') + '</p><button class="primary" onclick="location.reload()">Neu laden</button></div></section></main>';
-    });
-    if (window.CanvasRenderingContext2D && !CanvasRenderingContext2D.prototype.roundRect) {
-      CanvasRenderingContext2D.prototype.roundRect = function (x, y, width, height, radius) {
-        var r = Math.max(0, Math.min(Number(radius) || 0, Math.abs(width) / 2, Math.abs(height) / 2));
-        this.moveTo(x + r, y);
-        this.lineTo(x + width - r, y);
-        this.quadraticCurveTo(x + width, y, x + width, y + r);
-        this.lineTo(x + width, y + height - r);
-        this.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
-        this.lineTo(x + r, y + height);
-        this.quadraticCurveTo(x, y + height, x, y + height - r);
-        this.lineTo(x, y + r);
-        this.quadraticCurveTo(x, y, x + r, y);
-        return this;
-      };
-    }
+    window.addEventListener('error',function(event){var box=document.getElementById('fatal-error');if(!box)return;box.classList.remove('hidden');document.getElementById('fatal-message').textContent=String(event.message||'Unbekannter Fehler')});
+    window.addEventListener('unhandledrejection',function(event){var box=document.getElementById('fatal-error');if(!box)return;box.classList.remove('hidden');document.getElementById('fatal-message').textContent=String(event.reason||'Unbekannter Promise-Fehler')});
   </script>
-  <script src="./game.js?v=3"></script>
+  <script src="./content.js?v=8"></script>
+  <script src="./game.js?v=8"></script>
 </body>
 </html>
