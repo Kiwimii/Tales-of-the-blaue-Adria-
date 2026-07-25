@@ -1,12 +1,12 @@
 {
   "name": "Tales of the Blaue Adria",
   "short_name": "Blaue Adria",
-  "start_url": "./?v=15",
+  "start_url": "./?v=23",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#101814",
   "theme_color": "#101814",
-  "description": "Ein schwarzhumoriges mobiles Camping-RPG mit Freundesgruppe, Tagesablauf, Teamkämpfen, Minispielen und Sonntagsfinale.",
+  "description": "Ein schwarzhumoriges mobiles Camping-RPG mit detaillierter Cartoonwelt, Freundesgruppe, Teamkämpfen, Minispielen und Sonntagsfinale.",
   "icons": []
 }
