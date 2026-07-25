@@ -34,7 +34,7 @@ jobs:
           node --check docs/hotfix-v13.js
           node --check docs/ux-v15.js
           node --check docs/ux-runtime-v15.js
-      - name: Syntax · professional design modules
+      - name: Syntax · professional design and expansion modules
         run: |
           node --check docs/design-core-v23.js
           node --check docs/design-world-v23.js
@@ -43,6 +43,7 @@ jobs:
           node --check docs/design-minigames-v23.js
           node --check docs/design-atmosphere-v23.js
           node --check docs/design-runtime-v23.js
+          node --check docs/expansion-v25.js
       - name: Check required page elements
         run: |
           for id in boot-screen boot-status boot-progress app game-canvas game-stage needs-strip touch-controls virtual-stick stick-knob action-button scene-actions toast-stack objective-banner creator-screen shop-screen dialogue-layer drawer-layer fatal-error; do
@@ -50,17 +51,20 @@ jobs:
           done
       - name: Check design assets and module order
         run: |
-          grep -q 'design-v23.css?v=23' docs/index.html
-          grep -q 'design-faces-v23.css?v=23' docs/index.html
-          grep -q 'design-core-v23.js?v=23' docs/index.html
-          grep -q 'design-world-v23.js?v=23' docs/index.html
-          grep -q 'design-characters-v23.js?v=23' docs/index.html
-          grep -q 'design-battle-v23.js?v=23' docs/index.html
-          grep -q 'design-minigames-v23.js?v=23' docs/index.html
-          grep -q 'design-atmosphere-v23.js?v=23' docs/index.html
-          grep -q 'design-runtime-v23.js?v=23' docs/index.html
+          grep -q 'design-v23.css?v=25' docs/index.html
+          grep -q 'design-faces-v23.css?v=25' docs/index.html
+          grep -q 'expansion-v25.css?v=25' docs/index.html
+          grep -q 'design-core-v23.js?v=25' docs/index.html
+          grep -q 'design-world-v23.js?v=25' docs/index.html
+          grep -q 'design-characters-v23.js?v=25' docs/index.html
+          grep -q 'design-battle-v23.js?v=25' docs/index.html
+          grep -q 'design-minigames-v23.js?v=25' docs/index.html
+          grep -q 'design-atmosphere-v23.js?v=25' docs/index.html
+          grep -q 'design-runtime-v23.js?v=25' docs/index.html
+          grep -q 'expansion-v25.js?v=25' docs/index.html
           grep -q "Sprint 24 · v2.3.0" docs/design-runtime-v23.js
-          grep -q '"start_url": "./?v=23"' docs/manifest.webmanifest
+          grep -q '"start_url": "./?v=25"' docs/manifest.webmanifest
+          grep -q "Sprint 20 · v1.5.0" docs/SPRINTS.md
       - name: Check forbidden stale runtime
         run: |
           ! grep -q 'game.js?v=8' docs/index.html

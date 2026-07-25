@@ -1,4 +1,4 @@
-# Entwicklungsstand – zehn Sprints
+# Entwicklungsstand – zwanzig Sprints
 
 ## Sprint 1: Mobile Spielbühne und visuelles System
 
@@ -84,12 +84,73 @@
 - Endgame am Sonntag um 12 Uhr mit mehreren Ergebnissen
 - Neue HUDs, mobile Statusleisten, Dialoge, Karten, Menüs, Szenenknöpfe und Touch-Steuerung
 - Automatische GitHub-Validierung für Syntax, HTML-Integration und Lade-Reihenfolge
-- Vollständiger Integrationslauf erfolgreich bestanden
+
+## Sprint 11: Geführter Einstieg
+
+- Einmalige, nicht blockierende Kurzsteuerung nach dem Prolog
+- Klare Hinweise für Tastatur und Touch
+- Kontextmeldungen statt zusätzlicher Pflichtdialoge
+
+## Sprint 12: Schnellsteuerung und Pause
+
+- Tastenkürzel für Menü, Questlog, Inventar und Karte
+- Eigene Pausenfunktion mit sichtbarer Rückmeldung
+- Eingaben in Formularfeldern bleiben unangetastet
+
+## Sprint 13: Intelligente Statuswarnungen
+
+- Priorisierte Warnungen für Blase, Durst, Energie und Hunger
+- Sperrzeit gegen nervige Meldungswiederholungen
+- Warnsystem kann vollständig deaktiviert werden
+
+## Sprint 14: Erfolge und Metafortschritt
+
+- Acht persistente Erfolge für Erkundung, Kämpfe, Gespräche und Wochenendfortschritt
+- Freigeschaltete Erfolge erhöhen den Ruf leicht
+- Erfolge werden im Ereignisprotokoll dokumentiert
+
+## Sprint 15: Entdeckbare Campingplatzwelt
+
+- Neue Bereiche werden beim ersten Betreten gespeichert
+- Entdeckungen erscheinen als Toast und im Protokoll
+- Grundlage für spätere Geheimnisse und Sammelaufgaben
+
+## Sprint 16: Verbesserte Questführung
+
+- Situative Fortschrittsanzeige für wichtige Quests
+- Konkrete Handlungsempfehlungen statt bloßer Beschreibung
+- Aktuelle Aufgabe wird im Adria-Protokoll zusammengefasst
+
+## Sprint 17: Barrierefreiheit und Komfort
+
+- Einstellbare Textgröße
+- Hoher Kontrast und ruhigeres HUD
+- Statuswarnungen und Grafikqualität separat konfigurierbar
+- Einstellungen werden im Spielstand gespeichert
+
+## Sprint 18: Adaptive Leistung
+
+- Laufende FPS-Messung ohne externe Bibliothek
+- Automatischer Energiesparmodus bei schwächeren Geräten
+- Manuelle Wahl zwischen hoher und reduzierter Qualität
+
+## Sprint 19: Automatische Sicherung
+
+- Separates lokales Sicherheitsbackup alle 30 Sekunden
+- Wiederherstellung direkt aus dem Komfortmenü
+- Defekte oder fehlende Backups werden sauber abgefangen
+
+## Sprint 20: Adria-Protokoll
+
+- Übersicht über Entdeckungen, Erfolge, Schritte und Chaos
+- Zusammenfassung der aktiven Quest
+- Situative Empfehlung für den nächsten sinnvollen Schritt
+- Vollständig in das bestehende Menü integriert
 
 ## Aktueller Build
 
-**Sprint 10 · v1.3.0**
+**Sprint 20 · v1.5.0**
 
 Spielbarer Link:
 
-https://kiwimii.github.io/Tales-of-the-blaue-Adria-/?v=13
+https://kiwimii.github.io/Tales-of-the-blaue-Adria-/?v=25
