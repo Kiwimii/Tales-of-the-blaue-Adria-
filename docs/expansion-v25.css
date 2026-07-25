@@ -1,0 +1,12 @@
+:root{--tba-text-scale:1}
+body{font-size:calc(16px * var(--tba-text-scale))}
+.tba-tip{position:absolute;z-index:45;top:16px;left:50%;width:min(560px,calc(100% - 24px));padding:12px 14px;border:3px solid #263226;background:#fff3bd;color:#20251f;box-shadow:6px 6px 0 #182018;transform:translate(-50%,-150%);opacity:0;transition:transform .2s ease,opacity .2s ease;pointer-events:none;font-family:monospace}
+.tba-tip.show{transform:translate(-50%,0);opacity:1}.tba-tip strong,.tba-tip span{display:block}.tba-tip strong{margin-bottom:4px;color:#7f2d2d;text-transform:uppercase}.tba-tip span{line-height:1.35}
+.expansion-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:18px}.expansion-metrics article{padding:12px;border:2px solid #eadb9b;background:#26362d;box-shadow:3px 3px 0 #0a100d}.expansion-metrics small,.expansion-metrics strong{display:block}.expansion-metrics small{color:#d9c986;font:700 .65rem monospace}.expansion-metrics strong{margin-top:5px;color:#fff1b0;font:900 1.35rem monospace}
+.expansion-report h3{margin:18px 0 5px;color:#ffe27a;font-family:monospace;text-transform:uppercase}.expansion-report p{margin:0;line-height:1.55}
+.expansion-settings{display:grid;gap:14px}.expansion-settings label{display:grid;gap:6px;font-weight:800}.expansion-settings select,.expansion-settings button{min-height:48px;padding:10px 12px;border:2px solid #e9d38c;background:#1c2b24;color:#fff7d7;font:800 1rem monospace}.expansion-settings .form-row{display:flex;align-items:center;gap:10px;padding:10px;border:2px solid #ffffff22;background:#ffffff08}.expansion-settings input[type=checkbox]{width:24px;height:24px}
+.tba-high-contrast{filter:contrast(1.18) saturate(1.08)}.tba-high-contrast .hud-top,.tba-high-contrast .hud-bottom,.tba-high-contrast .drawer{background:#050806!important}.tba-high-contrast button{border-color:#fff0a6!important}
+.tba-calm-hud .needs-strip .need-chip:not(.danger){opacity:.58}.tba-calm-hud .hud-bottom{opacity:.88}.tba-calm-hud .vignette{display:none}
+.tba-low-quality .vignette,.tba-low-quality .design-particle,.tba-low-quality canvas+div:not(.toast-stack):not(.objective-banner):not(.touch-controls):not(.scene-actions){animation:none!important}.tba-low-quality *{text-shadow:none!important}
+@media(max-width:620px){.tba-tip{top:8px;font-size:.78rem}.expansion-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(prefers-reduced-motion:reduce){.tba-tip{transition:none}}
