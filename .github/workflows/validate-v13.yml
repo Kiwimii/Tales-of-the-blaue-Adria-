@@ -45,22 +45,24 @@ jobs:
           node --check docs/design-runtime-v23.js
           node --check docs/expansion-v25.js
           node --check docs/expansion-v28.js
+          node --check docs/popup-policy-v29.js
       - name: Check required page elements
         run: |
           for id in boot-screen boot-status boot-progress app game-canvas game-stage needs-strip touch-controls virtual-stick stick-knob action-button scene-actions toast-stack objective-banner creator-screen shop-screen dialogue-layer drawer-layer fatal-error; do
             grep -q "id=\"$id\"" docs/index.html || { echo "Missing #$id"; exit 1; }
           done
-      - name: Check Sprint 28 assets and order
+      - name: Check Sprint 29 assets and order
         run: |
-          grep -q 'design-v23.css?v=28' docs/index.html
-          grep -q 'design-faces-v23.css?v=28' docs/index.html
-          grep -q 'expansion-v25.css?v=28' docs/index.html
-          grep -q 'expansion-v28.css?v=28' docs/index.html
-          grep -q 'design-core-v23.js?v=28' docs/index.html
-          grep -q 'design-runtime-v23.js?v=28' docs/index.html
-          grep -q 'expansion-v25.js?v=28' docs/index.html
-          grep -q 'expansion-v28.js?v=28' docs/index.html
-          grep -q '"start_url": "./?v=28"' docs/manifest.webmanifest
+          grep -q 'design-v23.css?v=29' docs/index.html
+          grep -q 'design-faces-v23.css?v=29' docs/index.html
+          grep -q 'expansion-v25.css?v=29' docs/index.html
+          grep -q 'expansion-v28.css?v=29' docs/index.html
+          grep -q 'design-core-v23.js?v=29' docs/index.html
+          grep -q 'design-runtime-v23.js?v=29' docs/index.html
+          grep -q 'expansion-v25.js?v=29' docs/index.html
+          grep -q 'expansion-v28.js?v=29' docs/index.html
+          grep -q 'popup-policy-v29.js?v=29' docs/index.html
+          grep -q '"start_url": "./?v=29"' docs/manifest.webmanifest
           grep -q 'Sprint 28 · v1.8.0' docs/SPRINTS-21-28.md
       - name: Check forbidden stale runtime
         run: |
