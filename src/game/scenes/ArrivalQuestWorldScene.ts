@@ -1,7 +1,6 @@
 import Phaser from 'phaser';
 import {
   ARRIVAL_POSITIONS,
-  arrivalStage,
   arrivalTarget,
   arrivalUnloadCount,
   isArrivalIntroActive,
@@ -34,9 +33,17 @@ interface ToggleObstacle {
   body: Phaser.Physics.Arcade.StaticBody;
 }
 
+const PERSISTENT_STORY_INTERACTIONS = new Set([
+  'arrival-board',
+  'npc-gundula-story',
+  'npc-uli-story',
+  'home-door-story',
+]);
+
 export class ArrivalQuestWorldScene extends RealisticWorldScene {
   private storyState!: GameSnapshot;
   private storyUnsubscribe?: () => void;
+  private storyInteractions: StoryInteraction[] = [];
   private deferredInteractions: StoryInteraction[] = [];
   private deferredRestored = false;
   private deferredMarkers: Phaser.GameObjects.Image[] = [];
@@ -71,11 +78,19 @@ export class ArrivalQuestWorldScene extends RealisticWorldScene {
     this.deferredInteractions = existing.filter((point) => !replaced.has(point.id));
     existing.length = 0;
 
-    this.deferredMarkers = this.children.list.filter((child): child is Phaser.GameObjects.Image => (
-      child instanceof Phaser.GameObjects.Image
-      && ['door-marker', 'activity-marker'].includes(child.texture.key)
-    ));
-    this.deferredMarkers.forEach((marker) => marker.setVisible(false));
+    for (const child of this.children.list) {
+      if (!(child instanceof Phaser.GameObjects.Image)) continue;
+      if (!['door-marker', 'activity-marker'].includes(child.texture.key)) continue;
+      child.setVisible(false);
+      const isOriginalHomeDoor = child.texture.key === 'door-marker'
+        && Phaser.Math.Distance.Between(
+          child.x,
+          child.y,
+          ARRIVAL_POSITIONS.homeDoor.x,
+          ARRIVAL_POSITIONS.homeDoor.y,
+        ) < 8;
+      if (!isOriginalHomeDoor) this.deferredMarkers.push(child);
+    }
   }
 
   private createStoryVisuals(): void {
@@ -98,8 +113,7 @@ export class ArrivalQuestWorldScene extends RealisticWorldScene {
 
   private installStoryInteractions(): void {
     const internals = this as unknown as SceneInternals;
-    const interactions = internals.interactions ?? [];
-    interactions.push(
+    this.storyInteractions = [
       this.interaction('arrival-trunk', 'arrival', ARRIVAL_POSITIONS.trunk, 82, 'Kofferraum durchsuchen', () => this.inspectTrunk()),
       this.interaction('arrival-board', 'arrival', ARRIVAL_POSITIONS.reservationBoard, 76, 'Reservierungsbrett prüfen', () => this.inspectReservationBoard()),
       this.interaction('npc-gundula-story', 'arrival', ARRIVAL_POSITIONS.gundula, 74, 'Bei Gundula anmelden', () => this.talkToGundula()),
@@ -112,7 +126,8 @@ export class ArrivalQuestWorldScene extends RealisticWorldScene {
       this.interaction('arrival-unload-cable', 'central', ARRIVAL_POSITIONS.cable, 66, 'Kabeltrommel anschließen', () => this.unloadCable()),
       this.interaction('arrival-first-beer', 'central', ARRIVAL_POSITIONS.firstBeer, 72, 'Erstes Bier öffnen', () => this.openFirstBeer()),
       this.interaction('home-door-story', 'central', ARRIVAL_POSITIONS.homeDoor, 68, 'Eigenes Zelt betreten', () => this.enterHomeTent()),
-    );
+    ];
+    internals.interactions?.push(...this.storyInteractions);
   }
 
   private interaction(
@@ -127,6 +142,10 @@ export class ArrivalQuestWorldScene extends RealisticWorldScene {
   }
 
   private inspectTrunk(): void {
+    if (this.isEntryCompleted()) {
+      this.showStoryMessage('Der Wagen ist längst auf dem Taucherplatz. Im Kofferraum liegen nur noch Pfand, Kabelreste und Beweismittel gegen die Anmeldung.');
+      return;
+    }
     if (this.storyState.flags.arrivalDocumentsFound) {
       this.showStoryMessage('Im Kofferraum liegen weiterhin der Zettel „T.T.“, Taucherplatz, 3 Personen, 2 Zelte und kein Strom. Nichts davon beschreibt die sichtbare Ladung vollständig.');
       return;
@@ -140,6 +159,10 @@ export class ArrivalQuestWorldScene extends RealisticWorldScene {
   }
 
   private inspectReservationBoard(): void {
+    if (this.isEntryCompleted()) {
+      this.showStoryMessage('Am Brett hängt eure Buchung unter „Tauchgruppe Tiefenrausch“. Daneben: mehrere frühere Aliasnamen und Gundulas handschriftlicher Vermerk „Sonntag nachberechnen“.');
+      return;
+    }
     if (!this.storyState.flags.arrivalDocumentsFound) {
       this.showStoryMessage('Das Brett enthält zu viele Aliasnamen. Ohne den Zettel aus dem Kofferraum ist das reine Verwaltungsarchäologie.');
       return;
@@ -152,6 +175,11 @@ export class ArrivalQuestWorldScene extends RealisticWorldScene {
   }
 
   private talkToGundula(): void {
+    if (this.isEntryCompleted()) {
+      gameStore.socialize('gundula');
+      this.showStoryMessage('Gundula: „Der Taucherplatz ist eurer. Personen, Zelte und Strom sind trotzdem nicht plötzlich kostenlos geworden. Wir sehen uns Sonntag.“');
+      return;
+    }
     if (!this.storyState.flags.reservationSolved) {
       this.showStoryMessage('Gundula: „Ohne Reservierungsnamen bist du für mich nur Gepäck mit Frisur.“ Prüfe erst Zettel und Reservierungsbrett.');
       return;
@@ -164,6 +192,11 @@ export class ArrivalQuestWorldScene extends RealisticWorldScene {
   }
 
   private talkToUli(): void {
+    if (this.isEntryCompleted()) {
+      gameStore.socialize('uli');
+      this.showStoryMessage('Uli: „Der Taucherplatz steht noch. Das Aldimania-Oberteil leider auch.“');
+      return;
+    }
     if (!this.storyState.flags.gundulaConvinced) {
       this.showStoryMessage('Uli: „Erst Gundulas Stempel. Ich kontrolliere Geometrie, nicht Existenz.“');
       return;
@@ -180,6 +213,10 @@ export class ArrivalQuestWorldScene extends RealisticWorldScene {
   }
 
   private startEntryDebate(): void {
+    if (this.isEntryCompleted()) {
+      this.showStoryMessage('Die Einlassdiskussion ist abgeschlossen. Gundula und Uli sparen ihre Restenergie für die Abrechnung am Sonntag.');
+      return;
+    }
     if (!this.storyState.flags.uliInspectionPassed) {
       this.showStoryMessage('Gundula und Uli diskutieren nur mit vollständig geprüften Problemfällen. Erst Anmeldung und Kleidungskontrolle abschließen.');
       return;
@@ -192,6 +229,10 @@ export class ArrivalQuestWorldScene extends RealisticWorldScene {
   }
 
   private parkAtTaucherplatz(): void {
+    if (this.isEntryCompleted()) {
+      this.showStoryMessage('Der Wagen steht bereits auf dem Taucherplatz. Mehr Platz wäre nur mit einer weiteren falschen Reservierung möglich.');
+      return;
+    }
     if (!this.storyState.flags.entryDebateWon) {
       this.showStoryMessage('Der Taucherplatz liegt hinter der geschlossenen Schranke. Erst die Einlassdiskussion gewinnen.');
       return;
@@ -206,11 +247,15 @@ export class ArrivalQuestWorldScene extends RealisticWorldScene {
   }
 
   private organizePower(): void {
+    if (this.isEntryCompleted() && !this.storyState.flags.powerAccessOrganized) {
+      this.showStoryMessage('Der Platz ist bereits bezogen. Der vorhandene Stromanschluss gilt für diesen älteren Spielstand als organisiert.');
+      return;
+    }
     if (!this.storyState.flags.carParkedAtTaucherplatz) {
       this.showStoryMessage('Ohne Wagen, Kabel und Gepäck gibt es am Stromkasten nur abstrakte Probleme. Erst auf dem Taucherplatz parken.');
       return;
     }
-    if (this.storyState.flags.powerConnected) {
+    if (this.storyState.flags.powerAccessOrganized) {
       this.showStoryMessage('Der Anschluss ist organisiert. Sobald die Kabeltrommel ausgeladen ist, wird aus Verwaltungstheorie tatsächlich Strom.');
       return;
     }
@@ -218,7 +263,7 @@ export class ArrivalQuestWorldScene extends RealisticWorldScene {
   }
 
   private unload(flag: string, minutes: number, text: string): void {
-    if (!this.storyState.flags.powerConnected) {
+    if (!this.storyState.flags.powerAccessOrganized) {
       this.showStoryMessage('Erst klären, welchen Stromanschluss ihr benutzen dürft oder zumindest glaubwürdig benutzen könnt.');
       return;
     }
@@ -232,7 +277,7 @@ export class ArrivalQuestWorldScene extends RealisticWorldScene {
   }
 
   private unloadCable(): void {
-    if (!this.storyState.flags.powerConnected) {
+    if (!this.storyState.flags.powerAccessOrganized) {
       this.showStoryMessage('Erst Anschluss oder Adapter organisieren, dann lohnt sich die Kabeltrommel.');
       return;
     }
@@ -241,12 +286,17 @@ export class ArrivalQuestWorldScene extends RealisticWorldScene {
       return;
     }
     gameStore.setFlag('arrivalCableUnloaded');
+    gameStore.setFlag('powerConnected');
     gameStore.setFlag('powerPhysicallyConnected');
     gameStore.advanceMinutes(7);
     this.showStoryMessage('STROM LÄUFT · Die Kabeltrommel verbindet Taucherplatz und Anschluss. Ob der Anschluss bezahlt ist, bleibt eine Frage für die Abreise.');
   }
 
   private openFirstBeer(): void {
+    if (this.isEntryCompleted() && !this.storyState.flags.firstBeerOpened) {
+      this.showStoryMessage('Dieser Spielstand hat den Einlass bereits vor Sprint 57 abgeschlossen. Der Taucherplatz gilt automatisch als bezogen.');
+      return;
+    }
     if (arrivalUnloadCount(this.storyState) < 3) {
       this.showStoryMessage(`Noch nicht. Erst vollständig ausladen (${arrivalUnloadCount(this.storyState)}/3). Ein Meilenstein braucht wenigstens eine halbwegs stehende Kühlbox.`);
       return;
@@ -263,11 +313,11 @@ export class ArrivalQuestWorldScene extends RealisticWorldScene {
     gameStore.setFlag('uliConvinced');
     gameStore.advanceMinutes(2);
     this.cameras.main.flash(500, 244, 212, 123, false);
-    this.showStoryMessage('MEILENSTEIN · ERSTES BIER. Reservierung gefunden, Schranke bezwungen, Taucherplatz bezogen, Strom irgendwie vorhanden. Das eigentliche Wochenende beginnt.');
+    this.showStoryMessage('MEILENSTEIN · ERSTES BIER. Reservierung gefunden, Schranke bezwungen, Taucherplatz bezogen, Strom tatsächlich angeschlossen. Das eigentliche Wochenende beginnt.');
   }
 
   private enterHomeTent(): void {
-    if (!this.storyState.flags.arrivalTentsUnloaded) {
+    if (!this.storyState.flags.arrivalTentsUnloaded && !this.isEntryCompleted()) {
       this.showStoryMessage('Hier liegt bisher nur eine freie Parzelle. Das eigene Zelt steckt noch im Wagen.');
       return;
     }
@@ -287,12 +337,13 @@ export class ArrivalQuestWorldScene extends RealisticWorldScene {
   private refreshStory(next: GameSnapshot): void {
     this.storyState = next;
     const introActive = isArrivalIntroActive(next);
-    const parked = Boolean(next.flags.carParkedAtTaucherplatz);
-    const tentsUnloaded = Boolean(next.flags.arrivalTentsUnloaded);
+    const legacyComplete = next.quests.entry?.status === 'completed';
+    const parked = legacyComplete || Boolean(next.flags.carParkedAtTaucherplatz);
+    const tentsUnloaded = legacyComplete || Boolean(next.flags.arrivalTentsUnloaded);
 
     this.initialCar?.setVisible(!parked);
     this.pitchCar?.setVisible(parked);
-    this.powerBox?.setVisible(parked || next.flags.entryDebateWon);
+    this.powerBox?.setVisible(parked || Boolean(next.flags.entryDebateWon));
     this.drinksCargo?.setVisible(Boolean(next.flags.arrivalDrinksUnloaded));
     this.tentCargo?.setVisible(Boolean(next.flags.arrivalTentsUnloaded));
     this.cableCargo?.setVisible(Boolean(next.flags.arrivalCableUnloaded));
@@ -312,14 +363,24 @@ export class ArrivalQuestWorldScene extends RealisticWorldScene {
 
   private restoreDeferredWorld(): void {
     if (this.deferredRestored) return;
-    const interactions = (this as unknown as SceneInternals).interactions;
-    interactions?.push(...this.deferredInteractions);
+    const internals = this as unknown as SceneInternals;
+    if (internals.interactions) {
+      internals.interactions = internals.interactions.filter((point) => (
+        !this.storyInteractions.some((storyPoint) => storyPoint.id === point.id)
+        || PERSISTENT_STORY_INTERACTIONS.has(point.id)
+      ));
+      internals.interactions.push(...this.deferredInteractions);
+    }
     this.deferredMarkers.forEach((marker) => marker.setVisible(true));
     this.deferredRestored = true;
   }
 
   private storyShutdown(): void {
     this.storyUnsubscribe?.();
+  }
+
+  private isEntryCompleted(): boolean {
+    return this.storyState.quests.entry?.status === 'completed';
   }
 
   private showStoryMessage(text: string): void {
