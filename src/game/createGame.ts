@@ -1,13 +1,18 @@
 import Phaser from 'phaser';
+import { installArrivalQuestRuntime } from './arrivalQuestRuntime';
+import { ArrivalQuestWorldScene } from './scenes/ArrivalQuestWorldScene';
 import { BattleScene } from './scenes/BattleScene';
 import { BeerPongScene } from './scenes/BeerPongScene';
 import { BootScene } from './scenes/BootScene';
+import { EntryDebateScene } from './scenes/EntryDebateScene';
 import { FlunkyballScene } from './scenes/FlunkyballScene';
 import { FlipCupScene } from './scenes/FlipCupScene';
 import { InteriorScene } from './scenes/InteriorScene';
-import { RealisticWorldScene } from './scenes/RealisticWorldScene';
+import { ReservationPuzzleScene } from './scenes/ReservationPuzzleScene';
+import { gameStore } from './state/GameStore';
 
 export function createGame(parent: HTMLElement): Phaser.Game {
+  installArrivalQuestRuntime(gameStore);
   return new Phaser.Game({
     type: Phaser.AUTO,
     parent,
@@ -33,7 +38,9 @@ export function createGame(parent: HTMLElement): Phaser.Game {
     },
     scene: [
       BootScene,
-      RealisticWorldScene,
+      ArrivalQuestWorldScene,
+      ReservationPuzzleScene,
+      EntryDebateScene,
       InteriorScene,
       BattleScene,
       FlipCupScene,
