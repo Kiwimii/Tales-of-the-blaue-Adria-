@@ -1,8 +1,23 @@
-export type GameMode = 'creator' | 'shop' | 'world' | 'battle' | 'flip-cup';
+export type GameMode =
+  | 'intro'
+  | 'creator'
+  | 'shop'
+  | 'world'
+  | 'interior'
+  | 'battle'
+  | 'flip-cup'
+  | 'beer-pong'
+  | 'flunkyball';
 
 export type Direction = 'up' | 'down' | 'left' | 'right';
 
 export type Trait = 'charmant' | 'direkt' | 'chaotisch' | 'hilfsbereit' | 'beobachtend';
+
+export type HairStyle = 'kurz' | 'welle' | 'buzz' | 'cap';
+
+export type BodyType = 'schmal' | 'normal' | 'breit';
+
+export type Accessory = 'keins' | 'brille' | 'bart' | 'ohrring';
 
 export type Skill = 'charm' | 'nerve' | 'focus' | 'chaos' | 'teamwork';
 
@@ -17,6 +32,10 @@ export interface PlayerProfile {
   skinTone: string;
   hair: string;
   shirt: string;
+  shorts: string;
+  hairStyle: HairStyle;
+  bodyType: BodyType;
+  accessory: Accessory;
   trait: Trait;
 }
 
@@ -123,12 +142,13 @@ export interface EncounterState {
 }
 
 export interface PrologueState {
+  introSeen: boolean;
   shoppingComplete: boolean;
   spent: number;
 }
 
 export interface SessionState {
-  version: 2;
+  version: 3;
   mode: GameMode;
   profile: PlayerProfile | null;
   prologue: PrologueState;
@@ -146,6 +166,8 @@ export interface SessionState {
   encounter: EncounterState | null;
   chronicle: ChronicleEntry[];
   worldPosition: { x: number; y: number };
+  currentInterior: string | null;
+  activityResults: Record<string, { attempts: number; completed: boolean; best: number }>;
 }
 
 export interface GameSnapshot extends SessionState {

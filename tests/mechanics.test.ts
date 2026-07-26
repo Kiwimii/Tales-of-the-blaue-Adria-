@@ -60,16 +60,20 @@ const manni: TeamMember = {
 
 function state(overrides: Partial<SessionState> = {}): SessionState {
   const base: SessionState = {
-    version: 2,
+    version: 3,
     mode: 'world',
     profile: {
       name: 'André',
       skinTone: '#efc09b',
       hair: '#49301f',
       shirt: '#e3b74f',
+      shorts: '#263b47',
+      hairStyle: 'kurz',
+      bodyType: 'normal',
+      accessory: 'keins',
       trait: 'charmant',
     },
-    prologue: { shoppingComplete: true, spent: 20 },
+    prologue: { introSeen: true, shoppingComplete: true, spent: 20 },
     day: 1,
     minutes: 600,
     money: 5,
@@ -93,6 +97,8 @@ function state(overrides: Partial<SessionState> = {}): SessionState {
     encounter: null,
     chronicle: [],
     worldPosition: { x: 0, y: 0 },
+    currentInterior: null,
+    activityResults: {},
   };
 
   return {

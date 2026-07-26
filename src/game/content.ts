@@ -22,6 +22,16 @@ export interface QuestDefinition {
   reward: string;
 }
 
+export interface RelationshipCharacter {
+  id: string;
+  name: string;
+  nickname: string;
+  color: string;
+  portrait: string;
+  line: string;
+  group: 'platzteam' | 'freunde' | 'campingplatz';
+}
+
 export const ITEMS: Record<string, ItemDefinition> = {
   wasser: {
     id: 'wasser',
@@ -121,6 +131,24 @@ export const QUESTS: Record<string, QuestDefinition> = {
     objective: 'Gewinne Flip Cup im Südlager.',
     reward: 'Ruf und Gruppenrespekt',
   },
+  pong: {
+    id: 'pong',
+    title: 'Kunstflug im Plastikbecher',
+    objective: 'Versenke drei Würfe beim Beer Pong im Partyzelt.',
+    reward: 'Susi-Respekt und Ruf',
+  },
+  flunky: {
+    id: 'flunky',
+    title: 'Flasche um, Resthirn aus',
+    objective: 'Gewinne die Flunkyball-Staffel am Strand.',
+    reward: 'Strandruhm und Momentum',
+  },
+  reunion: {
+    id: 'reunion',
+    title: 'Neun Freunde, null Aufsicht',
+    objective: 'Finde die komplette Freundesgruppe auf dem Platz.',
+    reward: 'Gruppenbonus und ein erstaunlich vollständiges Wochenende',
+  },
   recovery: {
     id: 'recovery',
     title: 'Noch ein Mensch werden',
@@ -132,6 +160,130 @@ export const QUESTS: Record<string, QuestDefinition> = {
 export const INITIAL_QUESTS: Record<string, QuestProgress> = Object.fromEntries(
   Object.keys(QUESTS).map((id) => [id, { status: id === 'entry' ? 'active' : 'locked', stage: 0 }]),
 );
+
+export const RELATIONSHIP_CHARACTERS: RelationshipCharacter[] = [
+  {
+    id: 'gundula',
+    name: 'Gundula',
+    nickname: 'Die Platzordnung',
+    color: '#e57c9d',
+    portrait: 'G',
+    line: '„Ich sehe dich. Auch wenn ich gerade nicht hinsehe. Das ist Verwaltung.“',
+    group: 'platzteam',
+  },
+  {
+    id: 'uli',
+    name: 'Uli',
+    nickname: 'Der Parkplatz',
+    color: '#61a6d0',
+    portrait: 'U',
+    line: '„Parkplatz vier. Die Zahl zwischen drei und fünf.“',
+    group: 'platzteam',
+  },
+  {
+    id: 'manni',
+    name: 'Manni Mische',
+    nickname: 'Der Versorger',
+    color: '#63b879',
+    portrait: 'M',
+    line: '„Mischungsverhältnis ist auch nur angewandte Mathematik.“',
+    group: 'campingplatz',
+  },
+  {
+    id: 'ronny',
+    name: 'Rivalen-Ronny',
+    nickname: 'Parkplatz-Philosoph',
+    color: '#e45f4d',
+    portrait: 'R',
+    line: '„Ich erkläre dir das kurz.“ Er erklärt nichts jemals kurz.',
+    group: 'campingplatz',
+  },
+  {
+    id: 'andre',
+    name: 'André',
+    nickname: 'Der Organisator',
+    color: '#f0b64f',
+    portrait: 'A',
+    line: '„Ich hatte einen Ablaufplan. Dann seid ihr angekommen.“',
+    group: 'freunde',
+  },
+  {
+    id: 'rene',
+    name: 'René',
+    nickname: 'Der Diplomat',
+    color: '#4fb7a6',
+    portrait: 'R',
+    line: '„Lass mich reden. Du kannst so aussehen, als würdest du etwas bereuen.“',
+    group: 'freunde',
+  },
+  {
+    id: 'lars',
+    name: 'Lars',
+    nickname: 'Der Pegelmanager',
+    color: '#5b9be0',
+    portrait: 'L',
+    line: '„Wasser? Klar. Ist doch im Bier drin.“',
+    group: 'freunde',
+  },
+  {
+    id: 'danny',
+    name: 'Danny',
+    nickname: 'Der Frühabreiser',
+    color: '#dd6e73',
+    portrait: 'D',
+    line: '„Sonntag früh habe ich einen wichtigen Termin: nicht aufräumen.“',
+    group: 'freunde',
+  },
+  {
+    id: 'gregor',
+    name: 'Gregor',
+    nickname: 'Der Grillphilosoph',
+    color: '#d8793d',
+    portrait: 'G',
+    line: '„Die Wurst ist nicht verbrannt. Sie hat Charakter entwickelt.“',
+    group: 'freunde',
+  },
+  {
+    id: 'felix',
+    name: 'Felix',
+    nickname: 'Der Flirtbeauftragte',
+    color: '#bd65cf',
+    portrait: 'F',
+    line: '„Blickkontakt. Gut, sie suchte die Toilette, aber Blickkontakt.“',
+    group: 'freunde',
+  },
+  {
+    id: 'masl',
+    name: 'Masl',
+    nickname: 'Der Spielleiter',
+    color: '#68b86f',
+    portrait: 'M',
+    line: '„Wenn ich verliere, war die Regel offensichtlich unklar.“',
+    group: 'freunde',
+  },
+  {
+    id: 'schubert',
+    name: 'Schubert',
+    nickname: 'Der Botaniker',
+    color: '#6fa56d',
+    portrait: 'S',
+    line: '„Das sind keine roten Augen. Das ist botanische Begeisterung.“',
+    group: 'freunde',
+  },
+  {
+    id: 'schima',
+    name: 'Schima',
+    nickname: 'Der Nachtmensch',
+    color: '#596ab8',
+    portrait: 'S',
+    line: '„Tagsüber Energiesparmodus. Ab Mitternacht gesellschaftliche Abrissbirne.“',
+    group: 'freunde',
+  },
+];
+
+export const FRIEND_IDS = RELATIONSHIP_CHARACTERS
+  .filter((character) => character.group === 'freunde')
+  .map((character) => character.id);
 
 export const TEAM_MEMBERS: Record<string, TeamMember> = {
   manni: {

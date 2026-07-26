@@ -4,20 +4,23 @@ Ein schwarzhumoriges, storygetriebenes Camping-RPG für Smartphone und Desktop. 
 
 ## Jetzt spielen
 
-**Veröffentlichte Alpha:** [Build v29 starten](https://kiwimii.github.io/Tales-of-the-blaue-Adria-/?v=29)
+**Vollständige Legacy-Alpha:** [Build v29 starten](https://kiwimii.github.io/Tales-of-the-blaue-Adria-/?v=29)
+
+**Neue Next-Alpha:** [Sprints 34–43 starten](https://kiwimii.github.io/Tales-of-the-blaue-Adria-/next/?v=43)
 
 Inhaltlicher Stand: **Sprint 28 · v1.8.0 · Build v29**
 
 Die Alpha ist von Freitagmorgen bis zum Sonntagsfinale spielbar. Spielstände, Export/Import, mobile Steuerung und Offline-Nutzung werden unterstützt.
 
-Die Zielarchitektur enthält zusätzlich die **Gameplay-Sprints 29–33**. Sie vertiefen Einkauf, Entscheidungen, Beziehungen, Gruppenrollen, Bedürfnisse, Quests, Kampf und Flip Cup, sind aber wegen noch fehlender Gesamtparität bewusst noch nicht als GitHub-Pages-Fassung veröffentlicht.
+Die Zielarchitektur enthält die **Gameplay-Sprints 29–43** und wird parallel unter `/next/` veröffentlicht. Neu sind unter anderem der Weltraum-Schriftcrawl, die ausgebaute Charaktererstellung, die Gundula-/Uli-Einlassquest mit physischem Tor, eine neue große Welt, betretbare Innenräume, 13 sichtbare Beziehungen sowie überarbeitetes Flip Cup, Beer Pong und Flunkyball.
 
 ## Entwicklungsstatus
 
 | Bereich | Status | Verbindliche Rolle |
 | --- | --- | --- |
 | `docs/` | umfangreiche, veröffentlichte Alpha | Referenz für Funktionsumfang und GitHub-Pages-Release |
-| `src/` | baubare React-/Phaser-/TypeScript-Migration | einzige Zielarchitektur für die weitere Entwicklung |
+| `src/` | spielbare React-/Phaser-/TypeScript-Next-Alpha | einzige Zielarchitektur für die weitere Entwicklung |
+| `docs/next/` | gebauter Next-Preview | separater GitHub-Pages-Release der Zielarchitektur |
 
 `docs/` ist ab jetzt **feature-frozen**: Dort werden nur kritische Fehler, Kompatibilität, PWA und Release-Stabilität gepflegt. Neue Spielinhalte werden erst wieder umgesetzt, wenn sie in der Zielarchitektur entstehen. Der Wechsel der veröffentlichten Fassung erfolgt erst nach nachgewiesener Funktionsparität.
 
@@ -27,7 +30,7 @@ Die vollständige Entscheidung und ihre Abnahmekriterien stehen in [ARCHITECTURE
 
 - Charaktererstellung und Supermarkt-Prolog mit 25-Euro-Budget
 - frei begehbarer, an einer Luftaufnahme orientierter Campingplatz
-- neun Freunde mit Tagesabläufen, Dialogen, Werten und Fähigkeiten
+- neun Freunde mit Positionen, Dialogen, Werten und Fähigkeiten
 - Zeit, Bedürfnisse, Alkohol, Würde, Chaos, Beziehungen und Inventar
 - Quests, Kontrollen durch Gundula und Uli und mehrere Enden
 - rundenbasierte Teamkämpfe
@@ -62,4 +65,4 @@ Der Befehl prüft:
 - automatisierte Store-, Persistenz- und Freitag-bis-Sonntag-Endgame-Szenarien
 - den vollständigen Vite-Produktionsbuild
 
-Die detaillierte Sprint-Historie liegt in [SPRINTS.md](docs/SPRINTS.md), [SPRINTS-21-28.md](docs/SPRINTS-21-28.md) und [SPRINTS-29-33.md](docs/SPRINTS-29-33.md).
+Die detaillierte Sprint-Historie liegt in [SPRINTS.md](docs/SPRINTS.md), [SPRINTS-21-28.md](docs/SPRINTS-21-28.md), [SPRINTS-29-33.md](docs/SPRINTS-29-33.md) und [SPRINTS-34-43.md](docs/SPRINTS-34-43.md).
