@@ -1,0 +1,19 @@
+{
+  "name": "Tales of the Blaue Adria – Next",
+  "short_name": "Blaue Adria",
+  "description": "Ein schwarzhumoriges Camping-RPG für Smartphone und Desktop.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0b1714",
+  "theme_color": "#102b24",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

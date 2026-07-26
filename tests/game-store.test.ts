@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { FRIEND_IDS } from '../src/game/content';
 import { GameStore, STORAGE_KEY, type StorageAdapter } from '../src/game/state/GameStore';
 import type { PlayerProfile } from '../src/game/types';
 
@@ -7,6 +8,10 @@ const profile: PlayerProfile = {
   skinTone: '#efc09b',
   hair: '#49301f',
   shirt: '#e3b74f',
+  shorts: '#263b47',
+  hairStyle: 'kurz',
+  bodyType: 'normal',
+  accessory: 'keins',
   trait: 'charmant',
 };
 
@@ -17,10 +22,20 @@ describe('GameStore', () => {
 
     expect(first.day).toBe(1);
     expect(first.clockLabel).toBe('07:00');
-    expect(first.mode).toBe('creator');
+    expect(first.mode).toBe('intro');
+    expect(first.prologue.introSeen).toBe(false);
 
     first.inventory.bier = 999;
     expect(store.snapshot().inventory.bier).toBe(0);
+  });
+
+  it('moves from the cinematic intro into character creation without auto-skipping it', () => {
+    const store = new GameStore(memoryStorage());
+    store.completeIntro();
+    expect(store.snapshot()).toMatchObject({
+      mode: 'creator',
+      prologue: { introSeen: true, shoppingComplete: false },
+    });
   });
 
   it('persists a profile and notifies subscribers', () => {
@@ -37,7 +52,7 @@ describe('GameStore', () => {
     expect(JSON.parse(storage.getItem(STORAGE_KEY) ?? '{}')).toMatchObject({
       profile,
       mode: 'battle',
-      version: 2,
+      version: 3,
     });
   });
 
@@ -60,7 +75,7 @@ describe('GameStore', () => {
     expect(store.snapshot()).toMatchObject({
       mode: 'world',
       money: 4,
-      prologue: { shoppingComplete: true, spent: 21 },
+      prologue: { introSeen: true, shoppingComplete: true, spent: 21 },
       inventory: { wasser: 2, wuerste: 1, bier: 1, klopapier: 1, chips: 1 },
     });
   });
@@ -101,6 +116,8 @@ describe('GameStore', () => {
       level: 2,
       resolve: 70,
       maxResolve: 70,
+      loyalty: 50,
+      bonuses: { battle: 4, social: 1, games: 1, recovery: 0 },
     };
 
     store.recruit(ronny);
@@ -126,12 +143,13 @@ describe('GameStore', () => {
     expect(repaired.needs.thirst).toBe(77);
     expect(repaired.needs.energy).toBe(100);
     expect(repaired.inventory.bier).toBe(0);
-    expect(repaired.version).toBe(2);
+    expect(repaired.version).toBe(3);
   });
 
   it('resolves entry decisions deterministically and unlocks the campsite quest chain', () => {
     const store = readyStore({ batida: 1, wasser: 1 });
 
+    expect(store.openEncounter('uli-entry')).toBe(false);
     expect(store.openEncounter('gundula-entry')).toBe(true);
     expect(store.resolveEncounter('batida', 1)).toBe(true);
     expect(store.snapshot().encounter?.result?.outcome).toBe('great');
@@ -148,6 +166,7 @@ describe('GameStore', () => {
     });
     expect(state.quests.entry.status).toBe('completed');
     expect(state.quests.paper.status).toBe('active');
+    expect(state.quests.reunion.status).toBe('active');
     expect(state.inventory.batida).toBe(0);
     expect(state.relationships.gundula).toBeGreaterThan(0);
   });
@@ -184,6 +203,36 @@ describe('GameStore', () => {
     expect(second.minutes).toBe(first.minutes);
   });
 
+  it('tracks interiors and the new minigame results in the same persistent state', () => {
+    const store = readyStore({ wasser: 1 });
+    store.enterInterior('party-tent');
+    expect(store.snapshot()).toMatchObject({ mode: 'interior', currentInterior: 'party-tent' });
+
+    store.recordActivity('beerPong', true, 'perfect', 420);
+    store.recordActivity('flunkyball', false, 'solid', 80);
+    const state = store.snapshot();
+
+    expect(state.activityResults).toMatchObject({
+      beerPong: { attempts: 1, completed: true, best: 420 },
+      flunkyball: { attempts: 1, completed: false, best: 80 },
+    });
+    expect(state.quests.pong.status).toBe('completed');
+    store.leaveInterior();
+    expect(store.snapshot()).toMatchObject({ mode: 'world', currentInterior: null });
+  });
+
+  it('completes the reunion quest only after all nine friends were found', () => {
+    const store = readyStore({ wasser: 1 });
+    store.setFlag('gundulaConvinced');
+    store.setFlag('uliConvinced');
+
+    for (const id of FRIEND_IDS.slice(0, -1)) store.socialize(id);
+    expect(store.snapshot().quests.reunion).toMatchObject({ status: 'active', stage: 8 });
+
+    store.socialize(FRIEND_IDS.at(-1) ?? '');
+    expect(store.snapshot().quests.reunion).toMatchObject({ status: 'completed', stage: 99 });
+  });
+
   it('migrates the former v1 save without throwing away the playable position', () => {
     const storage = memoryStorage({
       [STORAGE_KEY]: JSON.stringify({
@@ -197,11 +246,37 @@ describe('GameStore', () => {
     });
 
     const state = new GameStore(storage).snapshot();
-    expect(state.version).toBe(2);
+    expect(state.version).toBe(3);
     expect(state.mode).toBe('world');
     expect(state.prologue.shoppingComplete).toBe(true);
     expect(state.inventory.wasser).toBe(3);
-    expect(state.worldPosition).toEqual({ x: 444, y: 222 });
+    expect(state.worldPosition).toEqual({ x: 830, y: 1030 });
+    expect(state.profile).toMatchObject({
+      shorts: '#263b47',
+      hairStyle: 'kurz',
+      bodyType: 'normal',
+      accessory: 'keins',
+    });
+  });
+
+  it('migrates the v2 mechanics save and preserves gate progress', () => {
+    const storage = memoryStorage({
+      [STORAGE_KEY]: JSON.stringify({
+        version: 2,
+        profile,
+        mode: 'world',
+        prologue: { shoppingComplete: true, spent: 21 },
+        flags: { gundulaConvinced: true, uliConvinced: true, gateOpen: true },
+        worldPosition: { x: 910, y: 480 },
+        relationships: { gundula: 24 },
+      }),
+    });
+    const state = new GameStore(storage).snapshot();
+    expect(state.version).toBe(3);
+    expect(state.prologue.introSeen).toBe(true);
+    expect(state.flags.gateOpen).toBe(true);
+    expect(state.worldPosition).toEqual({ x: 910, y: 480 });
+    expect(state.relationships.gundula).toBe(24);
   });
 });
 

@@ -55,16 +55,20 @@ const ronny: TeamMember = {
 
 function snapshot(overrides: Partial<GameSnapshot> = {}): GameSnapshot {
   const base: GameSnapshot = {
-    version: 2,
+    version: 3,
     mode: 'battle',
     profile: {
       name: 'André',
       skinTone: '#efc09b',
       hair: '#49301f',
       shirt: '#e3b74f',
+      shorts: '#263b47',
+      hairStyle: 'kurz',
+      bodyType: 'normal',
+      accessory: 'keins',
       trait: 'direkt',
     },
-    prologue: { shoppingComplete: true, spent: 20 },
+    prologue: { introSeen: true, shoppingComplete: true, spent: 20 },
     day: 1,
     minutes: 700,
     money: 5,
@@ -92,6 +96,8 @@ function snapshot(overrides: Partial<GameSnapshot> = {}): GameSnapshot {
     phaseLabel: 'Morgen',
     conditionLabel: 'Stabil',
     currentObjective: '',
+    currentInterior: null,
+    activityResults: {},
   };
 
   return {

@@ -1,9 +1,9 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  base: '/Tales-of-the-blaue-Adria-/',
+  base: '/Tales-of-the-blaue-Adria-/next/',
   build: {
     target: 'es2022',
-    sourcemap: true,
+    sourcemap: false,
   },
 });

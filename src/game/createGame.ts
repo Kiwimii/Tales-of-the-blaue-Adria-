@@ -1,7 +1,10 @@
 import Phaser from 'phaser';
 import { BattleScene } from './scenes/BattleScene';
+import { BeerPongScene } from './scenes/BeerPongScene';
 import { BootScene } from './scenes/BootScene';
+import { FlunkyballScene } from './scenes/FlunkyballScene';
 import { FlipCupScene } from './scenes/FlipCupScene';
+import { InteriorScene } from './scenes/InteriorScene';
 import { WorldScene } from './scenes/WorldScene';
 
 export function createGame(parent: HTMLElement): Phaser.Game {
@@ -26,6 +29,14 @@ export function createGame(parent: HTMLElement): Phaser.Game {
       width: 960,
       height: 640,
     },
-    scene: [BootScene, WorldScene, BattleScene, FlipCupScene],
+    scene: [
+      BootScene,
+      WorldScene,
+      InteriorScene,
+      BattleScene,
+      FlipCupScene,
+      BeerPongScene,
+      FlunkyballScene,
+    ],
   });
 }
