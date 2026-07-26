@@ -2,10 +2,17 @@ import Phaser from 'phaser';
 import { applyRealisticWorldLayout, worldDepth } from '../worldRealism';
 import { ExpandedWorldScene } from './ExpandedWorldScene';
 
+interface RegionLockInternals {
+  overlay: Phaser.GameObjects.Rectangle;
+  border: Phaser.GameObjects.Rectangle;
+  label: Phaser.GameObjects.Text;
+}
+
 interface SceneInternals {
   player?: Phaser.Physics.Arcade.Sprite;
   shadow?: Phaser.GameObjects.Ellipse;
   gate?: Phaser.GameObjects.Container;
+  locks?: Map<string, RegionLockInternals>;
 }
 
 export class RealisticWorldScene extends ExpandedWorldScene {
@@ -33,6 +40,11 @@ export class RealisticWorldScene extends ExpandedWorldScene {
   private normalizeStaticDepths(): void {
     const internals = this as unknown as SceneInternals;
     internals.gate?.setDepth(worldDepth(1300));
+    internals.locks?.forEach((lock) => {
+      lock.overlay.setDepth(76);
+      lock.border.setDepth(77);
+      lock.label.setDepth(78);
+    });
 
     for (const child of this.children.list) {
       if (child instanceof Phaser.GameObjects.Sprite) {
