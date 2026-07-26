@@ -147,10 +147,13 @@
 - Situative Empfehlung für den nächsten sinnvollen Schritt
 - Vollständig in das bestehende Menü integriert
 
-## Aktueller Build
+## Fortsetzung
 
-**Sprint 20 · v1.5.0**
+- Sprints 21–28: siehe `SPRINTS-21-28.md`
+- Sprints 29–33: siehe `SPRINTS-29-33.md`
+- Sprints 34–43: siehe `SPRINTS-34-43.md`
 
-Spielbarer Link:
+## Aktuelle Builds
 
-https://kiwimii.github.io/Tales-of-the-blaue-Adria-/?v=25
+- Vollständige Legacy-Alpha: https://kiwimii.github.io/Tales-of-the-blaue-Adria-/?v=29
+- Neue Next-Alpha: https://kiwimii.github.io/Tales-of-the-blaue-Adria-/next/?v=43
