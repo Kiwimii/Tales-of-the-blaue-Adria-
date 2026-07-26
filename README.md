@@ -6,13 +6,13 @@ Ein schwarzhumoriges, storygetriebenes Camping-RPG für Smartphone und Desktop. 
 
 **Vollständige Legacy-Alpha:** [Build v29 starten](https://kiwimii.github.io/Tales-of-the-blaue-Adria-/?v=29)
 
-**Neue Next-Alpha:** [Sprint 57 starten](https://kiwimii.github.io/Tales-of-the-blaue-Adria-/next/?v=57)
+**Neue Next-Alpha:** [Sprint 72 starten](https://kiwimii.github.io/Tales-of-the-blaue-Adria-/next/?v=72)
 
 Inhaltlicher Stand: **Sprint 28 · v1.8.0 · Build v29**
 
 Die Alpha ist von Freitagmorgen bis zum Sonntagsfinale spielbar. Spielstände, Export/Import, mobile Steuerung und Offline-Nutzung werden unterstützt.
 
-Die Zielarchitektur enthält die **Gameplay-Sprints 29–57** und wird parallel unter `/next/` veröffentlicht. Neu sind unter anderem der Weltraum-Schriftcrawl, die ausgebaute Charaktererstellung, betretbare Innenräume, 13 sichtbare Beziehungen sowie überarbeitetes Flip Cup, Beer Pong und Flunkyball. Die Sprints 46–55 erweiterten die Außenwelt zu einer großen, datengetriebenen Karte mit sieben Regionen. Sprint 56 korrigierte Maßstab, Objektabstände, Wassergrenzen, Kollisionsflächen und Tiefensortierung. Sprint 57 ersetzt den kurzen Einlass durch eine räumlich zusammenhängende Story-Quest vom Kofferraum über das Reservierungsrätsel und den Verwaltungs-Tutorialkampf bis zum bezogenen Taucherplatz und ersten Bier.
+Die Zielarchitektur enthält die **Gameplay-Sprints 29–72** und wird parallel unter `/next/` veröffentlicht. Die Sprints 46–55 erweiterten die Außenwelt zu einer großen Karte mit sieben Regionen. Sprint 56 korrigierte Maßstab, Kollision und Tiefensortierung. Sprint 57 baute die zusammenhängende Ankunftsquest zum Taucherplatz. Die Sprints 58–72 vernetzen Körperzustände, visuelle Effekte, Kämpfe, Freundesbeziehungen, aktives Dreierteam, Flirts, Geschenke, Tagesroutinen, Kontrollgänge und Masls Minispiel zu einem gemeinsamen Metagame.
 
 ## Entwicklungsstatus
 
@@ -22,26 +22,29 @@ Die Zielarchitektur enthält die **Gameplay-Sprints 29–57** und wird parallel 
 | `src/` | spielbare React-/Phaser-/TypeScript-Next-Alpha | einzige Zielarchitektur für die weitere Entwicklung |
 | `docs/next/` | gebauter Next-Preview | separater GitHub-Pages-Release der Zielarchitektur |
 
-`docs/` ist ab jetzt **feature-frozen**: Dort werden nur kritische Fehler, Kompatibilität, PWA und Release-Stabilität gepflegt. Neue Spielinhalte werden erst wieder umgesetzt, wenn sie in der Zielarchitektur entstehen. Der Wechsel der veröffentlichten Fassung erfolgt erst nach nachgewiesener Funktionsparität.
+`docs/` ist feature-frozen. Neue Spielinhalte entstehen ausschließlich in der TypeScript-Zielarchitektur unter `src/`.
 
-Die vollständige Entscheidung und ihre Abnahmekriterien stehen in [ARCHITECTURE.md](docs/ARCHITECTURE.md). Den ehrlichen Migrationsstand zeigt [MIGRATION-CHECKLIST.md](docs/MIGRATION-CHECKLIST.md).
+Die Architekturentscheidung steht in [ARCHITECTURE.md](docs/ARCHITECTURE.md). Den Migrationsstand zeigt [MIGRATION-CHECKLIST.md](docs/MIGRATION-CHECKLIST.md).
 
 ## Aktueller Spielumfang
 
 - Charaktererstellung und Supermarkt-Prolog mit 25-Euro-Budget
-- zusammenhängende Ankunftsquest mit Reservierungsrätsel, Gundula-/Uli-Kontrolle, Tutorialkampf, Stromproblem, Ausladen und Bier-Meilenstein
-- frei begehbarer, in sieben Regionen gegliederter Campingplatz mit stufenweisen Freischaltungen
-- realistische Objektabstände, abgestufte Kollisionsflächen und Y-basierte Tiefensortierung
-- neun Freunde mit Positionen, Dialogen, Werten und Fähigkeiten
-- Zeit, Bedürfnisse, Alkohol, Würde, Chaos, Beziehungen und Inventar
-- Quests, Kontrollen durch Gundula und Uli und mehrere Enden
-- rundenbasierte Teamkämpfe
-- Flip Cup, Beer Pong, Flunkyball, Trinkduell und Sonntags-Aufräumspiel
-- lokale Spielstände mit Export, Import und Sicherheitsbackup
-- mobile Steuerung, Safe Areas und Querformat-Unterstützung
-- Minikarte, Bereichsbanner, Landmarken und adaptive Umgebungsanimationen
-- Questassistenz, Erfolge, Entdeckungen und Schnellaktionen
-- installierbare PWA mit versioniertem Offline-App-Shell
+- Ankunftsquest mit Reservierungsrätsel, Gundula-/Uli-Kontrolle, Tutorialkampf, Stromproblem, Ausladen und Bier-Meilenstein
+- frei begehbarer Campingplatz mit sieben stufenweise freigeschalteten Regionen
+- realistische Objektabstände, Kollisionsflächen und Y-basierte Tiefensortierung
+- systemische Zustände: Alkohol, Breitheit, Kater, Erschöpfung und Dehydrierung
+- visuelles Schwanken, Reaktionsverzögerung und Katerdarstellung
+- animierte Kampfintros mit wechselnden Kontrahentensprüchen
+- statusabhängige Kämpfe mit temporären Effekten
+- neun ausgearbeitete Freunde mit Stärken, Schwächen und eigenem Gruppenkanon
+- aktives Team aus maximal drei Freunden und mehrere Teamsynergien
+- dynamische Gespräche, anspruchsvolle Flirts mit maximal 20 Prozent Chance und individuelle Geschenke
+- Gundula und Uli mit Mittagspause und Kontrollgang um 18 Uhr
+- kompakte Zeltgruppe, Heckeninteraktion und Fahrzeug nur zum Be- und Entladen auf dem Platz
+- Masls Timing-Minispiel „Komm ans Loch“
+- Flip Cup, Beer Pong und Flunkyball mit Auswirkungen auf den anschließenden Pegel
+- Zeit, Bedürfnisse, Würde, Chaos, Beziehungen, Inventar und Tagesabläufe
+- lokale Spielstände, mobile Steuerung, Minikarte und installierbare PWA
 
 ## Lokale Entwicklung
 
@@ -52,8 +55,6 @@ npm ci
 npm run dev
 ```
 
-Der Entwicklungsserver startet die React-/Phaser-Zielarchitektur. Die veröffentlichte Referenzfassung kann statisch aus `docs/` ausgeliefert werden.
-
 ## Qualitätsprüfung
 
 ```bash
@@ -62,10 +63,10 @@ npm run check
 
 Der Befehl prüft:
 
-- Syntax, Vollständigkeit und Ladefolge aller veröffentlichten Runtime-Module
+- Syntax, Vollständigkeit und Ladefolge der Runtime
 - Build-Version, PWA-Manifest und Offline-Cache
-- TypeScript-Typen der Zielarchitektur
-- automatisierte Store-, Persistenz-, Welt-, Realismus-, Ankunftsquest- und Freitag-bis-Sonntag-Endgame-Szenarien
-- den vollständigen Vite-Produktionsbuild
+- TypeScript-Typen
+- Store-, Persistenz-, Welt-, Realismus-, Ankunftsquest-, Zustands-, Flirt-, Team- und Kampftests
+- Produktionsbuild und Next-Preview
 
-Die detaillierte Sprint-Historie liegt in [SPRINTS.md](docs/SPRINTS.md), [SPRINTS-21-28.md](docs/SPRINTS-21-28.md), [SPRINTS-29-33.md](docs/SPRINTS-29-33.md), [SPRINTS-34-43.md](docs/SPRINTS-34-43.md), [SPRINTS-44.md](docs/SPRINTS-44.md), [SPRINTS-45.md](docs/SPRINTS-45.md), [SPRINTS-46-55.md](docs/SPRINTS-46-55.md), [SPRINT-56.md](docs/SPRINT-56.md) und [SPRINT-57.md](docs/SPRINT-57.md).
+Die Sprint-Historie liegt in [SPRINTS.md](docs/SPRINTS.md), [SPRINTS-21-28.md](docs/SPRINTS-21-28.md), [SPRINTS-29-33.md](docs/SPRINTS-29-33.md), [SPRINTS-34-43.md](docs/SPRINTS-34-43.md), [SPRINTS-44.md](docs/SPRINTS-44.md), [SPRINTS-45.md](docs/SPRINTS-45.md), [SPRINTS-46-55.md](docs/SPRINTS-46-55.md), [SPRINT-56.md](docs/SPRINT-56.md), [SPRINT-57.md](docs/SPRINT-57.md) und [SPRINTS-58-72.md](docs/SPRINTS-58-72.md).
