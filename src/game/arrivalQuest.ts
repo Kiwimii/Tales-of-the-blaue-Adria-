@@ -32,7 +32,7 @@ export function arrivalUnloadCount(state: Pick<GameSnapshot, 'flags'>): number {
 export function arrivalStage(state: ArrivalState): ArrivalStage {
   if (state.quests.entry?.status === 'completed' || state.flags.firstBeerOpened) return 9;
   if (arrivalUnloadCount(state) === ARRIVAL_UNLOAD_FLAGS.length) return 8;
-  if (state.flags.powerConnected) return 7;
+  if (state.flags.powerAccessOrganized) return 7;
   if (state.flags.carParkedAtTaucherplatz) return 6;
   if (state.flags.entryDebateWon) return 5;
   if (state.flags.uliInspectionPassed) return 4;
@@ -57,11 +57,11 @@ export function arrivalObjective(state: ArrivalState): string {
     case 5:
       return 'Gehe durch die Schranke und bringe den Wagen auf den großzügigen Taucherplatz.';
     case 6:
-      return 'Prüfe den Stromkasten am Taucherplatz. Strom wurde natürlich nicht angemeldet.';
+      return 'Organisiere am Stromkasten einen Anschluss. Strom wurde natürlich nicht angemeldet.';
     case 7:
       return `Lade Getränke, Zeltsäcke und Kabeltrommel aus (${arrivalUnloadCount(state)}/${ARRIVAL_UNLOAD_FLAGS.length}).`;
     case 8:
-      return 'Alles steht. Öffne am Taucherplatz das erste Bier und erkläre die Anreise für beendet.';
+      return 'Alles steht und der Strom läuft. Öffne am Taucherplatz das erste Bier.';
     default:
       return 'Intro abgeschlossen. Der Taucherplatz ist bezogen und die erste Rechnung für Sonntag vorbereitet.';
   }
