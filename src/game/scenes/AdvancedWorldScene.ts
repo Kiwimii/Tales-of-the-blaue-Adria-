@@ -30,22 +30,17 @@ interface WorldInternals {
 }
 
 type AuthorityPhase = 'desk' | 'lunch' | 'patrol';
+type VisibleAuthority = Phaser.GameObjects.Sprite | Phaser.GameObjects.Text | Phaser.GameObjects.Ellipse;
 
 const PATROL_POINTS: Array<{ x: number; y: number }> = [
-  { x: 1040, y: 1460 },
-  { x: 835, y: 1325 },
-  { x: 760, y: 1120 },
-  { x: 420, y: 930 },
-  { x: 780, y: 900 },
-  { x: 1120, y: 1000 },
-  { x: 1260, y: 1160 },
-  { x: 900, y: 1325 },
+  { x: 1040, y: 1460 }, { x: 835, y: 1325 }, { x: 760, y: 1120 }, { x: 420, y: 930 },
+  { x: 780, y: 900 }, { x: 1120, y: 1000 }, { x: 1260, y: 1160 }, { x: 900, y: 1325 },
 ];
 
 export class AdvancedWorldScene extends ArrivalQuestWorldScene {
   private advancedState!: GameSnapshot;
   private authorityPhase: AuthorityPhase = 'desk';
-  private staticAuthority: Phaser.GameObjects.GameObject[] = [];
+  private staticAuthority: VisibleAuthority[] = [];
   private patrolGundula!: Phaser.Physics.Arcade.Sprite;
   private patrolUli!: Phaser.Physics.Arcade.Sprite;
   private patrolLabel!: Phaser.GameObjects.Text;
@@ -57,6 +52,7 @@ export class AdvancedWorldScene extends ArrivalQuestWorldScene {
   private lastAdvancedTime = 0;
   private interactionsUpgraded = false;
   private carReturnApplied = false;
+  private advancedUnsubscribe?: () => void;
 
   create(): void {
     super.create();
@@ -65,7 +61,8 @@ export class AdvancedWorldScene extends ArrivalQuestWorldScene {
     this.createAuthorityActors();
     this.createStatusPresentation();
     this.addHedgeInteraction();
-    gameStore.subscribe((snapshot) => { this.advancedState = snapshot; });
+    this.advancedUnsubscribe = gameStore.subscribe((snapshot) => { this.advancedState = snapshot; });
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.advancedUnsubscribe?.());
   }
 
   update(time: number): void {
@@ -78,11 +75,12 @@ export class AdvancedWorldScene extends ArrivalQuestWorldScene {
   }
 
   private captureAuthorityObjects(): void {
-    this.staticAuthority = this.children.list.filter((child) => {
+    this.staticAuthority = this.children.list.filter((child): child is VisibleAuthority => {
       if (child instanceof Phaser.GameObjects.Sprite) return ['npc-gundula', 'npc-uli'].includes(child.texture.key);
       if (child instanceof Phaser.GameObjects.Text) return ['Gundula', 'Uli'].includes(child.text);
       if (child instanceof Phaser.GameObjects.Ellipse) {
-        return (Phaser.Math.Distance.Between(child.x, child.y, 790, 1415) < 55 || Phaser.Math.Distance.Between(child.x, child.y, 885, 1415) < 55);
+        return Phaser.Math.Distance.Between(child.x, child.y, 790, 1415) < 55
+          || Phaser.Math.Distance.Between(child.x, child.y, 885, 1415) < 55;
       }
       return false;
     });
@@ -113,8 +111,7 @@ export class AdvancedWorldScene extends ArrivalQuestWorldScene {
     const interactions = (this as unknown as WorldInternals).interactions;
     if (!interactions) return;
     for (const point of interactions) {
-      const match = point.id.match(/^npc-(.+)$/);
-      const characterId = match?.[1];
+      const characterId = point.id.match(/^npc-(.+)$/)?.[1];
       if (!characterId || ['gundula', 'uli', 'manni', 'ronny'].includes(characterId)) continue;
       if (!FRIEND_ID_SET.has(characterId as never) && !ROMANCE_PROFILES[characterId as keyof typeof ROMANCE_PROFILES]) continue;
       point.prompt = `Mit ${RELATIONSHIP_CHARACTERS.find((entry) => entry.id === characterId)?.name ?? characterId} interagieren`;
@@ -134,8 +131,7 @@ export class AdvancedWorldScene extends ArrivalQuestWorldScene {
     const interactions = (this as unknown as WorldInternals).interactions;
     if (!interactions || interactions.some((point) => point.id === 'tent-hedge-relief')) return;
     interactions.push({
-      id: 'tent-hedge-relief', regionId: 'central', x: 690, y: 1230, radius: 78, prompt: 'In die Hecke brunsen',
-      action: () => this.useHedge(),
+      id: 'tent-hedge-relief', regionId: 'central', x: 690, y: 1230, radius: 78, prompt: 'In die Hecke brunsen', action: () => this.useHedge(),
     });
   }
 
@@ -146,8 +142,7 @@ export class AdvancedWorldScene extends ArrivalQuestWorldScene {
       needs: { bladder: -100 },
       metrics: caught ? { dignity: -10, chaos: 7 } : { dignity: -1, chaos: 3, momentum: 2 },
       relationships: caught ? { gundula: -12, uli: -9 } : { lars: 2, danny: 2 },
-      flags: { hedgeRelieved: true, hedgeCaught: caught },
-      minutes: 4,
+      flags: { hedgeRelieved: true, hedgeCaught: caught }, minutes: 4,
     }, caught ? 'Beim Brunsen in die Zelthecke vom Kontrollgang erwischt.' : 'Die Hecke neben der Zeltgruppe wurde zweckentfremdet.', caught ? 'bad' : 'neutral');
     if (caught) this.preparePatrolEncounter();
     else this.showAdvancedMessage('HECKE · Blase leer. Lars und Danny erklären den Standort damit offiziell für geeignet.');
@@ -156,6 +151,7 @@ export class AdvancedWorldScene extends ArrivalQuestWorldScene {
   private updateConditionPresentation(time: number): void {
     const player = (this as unknown as WorldInternals).player;
     if (!player) return;
+    const body = player.body as Phaser.Physics.Arcade.Body | null;
     const statuses = activeStatuses(this.advancedState.needs);
     const visuals = statusVisuals(this.advancedState.needs);
     this.statusLabel.setText(statuses.length
@@ -167,7 +163,7 @@ export class AdvancedWorldScene extends ArrivalQuestWorldScene {
     const delta = this.lastAdvancedTime ? Math.min(50, time - this.lastAdvancedTime) : 16;
     this.lastAdvancedTime = time;
     if (visuals.delayMs > 0) {
-      const current = new Phaser.Math.Vector2(player.body?.velocity.x ?? 0, player.body?.velocity.y ?? 0);
+      const current = new Phaser.Math.Vector2(body?.velocity.x ?? 0, body?.velocity.y ?? 0);
       const alpha = Math.max(0.04, Math.min(0.45, delta / (visuals.delayMs + delta)));
       this.delayedVelocity.lerp(current, alpha);
       player.setVelocity(this.delayedVelocity.x, this.delayedVelocity.y);
@@ -176,25 +172,24 @@ export class AdvancedWorldScene extends ArrivalQuestWorldScene {
       this.highGhost.y = Phaser.Math.Linear(this.highGhost.y, player.y + 2, 0.08);
       this.highGhost.setFlipX(player.flipX).setDepth(player.depth - 0.2);
     } else {
-      this.delayedVelocity.set(player.body?.velocity.x ?? 0, player.body?.velocity.y ?? 0);
+      this.delayedVelocity.set(body?.velocity.x ?? 0, body?.velocity.y ?? 0);
       this.highGhost.setAlpha(0);
     }
-    if (visuals.sway > 0 && (player.body?.velocity.length() ?? 0) > 4) player.setAngle(player.angle + Math.sin(time * 0.006) * 1.2 * visuals.sway);
+    if (visuals.sway > 0 && (body?.velocity.length() ?? 0) > 4) {
+      player.setAngle(player.angle + Math.sin(time * 0.006) * 1.2 * visuals.sway);
+    }
   }
 
   private updateAuthoritySchedule(time: number): void {
     if (!this.advancedState.flags.firstBeerOpened) return;
     const minute = this.advancedState.minutes % (24 * 60);
-    const nextPhase: AuthorityPhase = minute >= 12 * 60 && minute < 14 * 60
+    this.authorityPhase = minute >= 12 * 60 && minute < 14 * 60
       ? 'lunch'
-      : minute >= 18 * 60 && minute < 18 * 60 + 45
-        ? 'patrol'
-        : 'desk';
-    this.authorityPhase = nextPhase;
-    const staticVisible = nextPhase === 'desk';
+      : minute >= 18 * 60 && minute < 18 * 60 + 45 ? 'patrol' : 'desk';
+    const staticVisible = this.authorityPhase === 'desk';
     this.staticAuthority.forEach((object) => object.setVisible(staticVisible));
-    this.lunchLabel.setVisible(nextPhase === 'lunch');
-    const patrolVisible = nextPhase === 'patrol';
+    this.lunchLabel.setVisible(this.authorityPhase === 'lunch');
+    const patrolVisible = this.authorityPhase === 'patrol';
     this.patrolGundula.setVisible(patrolVisible);
     this.patrolUli.setVisible(patrolVisible);
     this.patrolLabel.setVisible(patrolVisible);
@@ -211,11 +206,8 @@ export class AdvancedWorldScene extends ArrivalQuestWorldScene {
       this.patrolLabel.setPosition(position.x, position.y - 54).setDepth(worldDepth(position.y + 40));
       this.syncAuthorityInteractions(position.x, position.y);
       this.checkPatrolSight(time);
-    } else if (nextPhase === 'lunch') {
-      this.syncAuthorityInteractions(1110, 1530);
-    } else {
-      this.syncAuthorityInteractions(835, 1390);
-    }
+    } else if (this.authorityPhase === 'lunch') this.syncAuthorityInteractions(1110, 1530);
+    else this.syncAuthorityInteractions(835, 1390);
   }
 
   private syncAuthorityInteractions(x: number, y: number): void {
@@ -240,11 +232,8 @@ export class AdvancedWorldScene extends ArrivalQuestWorldScene {
     const player = (this as unknown as WorldInternals).player;
     if (!player || this.advancedState.encounter || time < 1000) return;
     const caughtFlag = `patrolCaught-day-${this.advancedState.day}`;
-    if (this.advancedState.flags[caughtFlag]) return;
-    const distance = this.distanceToPatrol();
-    if (distance > 205) return;
-    const patrolRegion = regionAt(this.patrolGundula.x, this.patrolGundula.y).id;
-    if (regionAt(player.x, player.y).id !== patrolRegion) return;
+    if (this.advancedState.flags[caughtFlag] || this.distanceToPatrol() > 205) return;
+    if (regionAt(player.x, player.y).id !== regionAt(this.patrolGundula.x, this.patrolGundula.y).id) return;
     gameStore.setFlag(caughtFlag);
     this.preparePatrolEncounter();
   }
@@ -252,34 +241,26 @@ export class AdvancedWorldScene extends ArrivalQuestWorldScene {
   private preparePatrolEncounter(): void {
     const id = `patrol-control-${this.advancedState.day}`;
     ENCOUNTERS[id] = {
-      id,
-      speaker: 'Gundula & Uli',
-      portrait: 'GU',
-      intro: patrolOpening(this.advancedState),
+      id, speaker: 'Gundula & Uli', portrait: 'GU', intro: patrolOpening(this.advancedState),
       options: [
         {
           id: 'calm', label: 'Zustand sachlich erklären', hint: 'Fokus · Kater und Breitheit erschweren die Reaktion',
           challenge: { skill: 'focus', baseChance: 54, relation: 'gundula' },
-          successText: 'Die Erklärung ist zusammenhängend genug. Der Kontrollgang zieht weiter.',
-          failureText: 'Uli entdeckt drei Widersprüche, bevor du den ersten Satz beendet hast.',
+          successText: 'Die Erklärung ist zusammenhängend genug. Der Kontrollgang zieht weiter.', failureText: 'Uli entdeckt drei Widersprüche, bevor du den ersten Satz beendet hast.',
           success: { relationships: { gundula: 2, uli: 2 }, metrics: { dignity: 3 }, flags: { patrolPassed: true }, minutes: 4 },
           failure: { relationships: { gundula: -5, uli: -4 }, metrics: { dignity: -5, chaos: 3 }, minutes: 6 },
         },
         {
           id: 'team', label: 'Aktives Team reden lassen', hint: 'Teamwork · bis zu drei Partner und ihre Sozialwerte zählen',
           challenge: { skill: 'teamwork', baseChance: 48, relation: 'gundula' },
-          successText: 'Die Freundesgruppe produziert so viele parallele Erklärungen, dass Gundula nur eine Verwarnung notiert.',
-          failureText: 'Drei Erklärungen ergeben vier Versionen. Uli beginnt mitzuschreiben.',
-          success: { metrics: { reputation: 2, momentum: 3 }, flags: { patrolPassed: true }, minutes: 5 },
-          failure: { metrics: { dignity: -4, chaos: 5 }, minutes: 7 },
+          successText: 'Die Freundesgruppe produziert so viele parallele Erklärungen, dass Gundula nur eine Verwarnung notiert.', failureText: 'Drei Erklärungen ergeben vier Versionen. Uli beginnt mitzuschreiben.',
+          success: { metrics: { reputation: 2, momentum: 3 }, flags: { patrolPassed: true }, minutes: 5 }, failure: { metrics: { dignity: -4, chaos: 5 }, minutes: 7 },
         },
         {
           id: 'batida', label: 'Batida-Protokoll aktivieren', hint: 'Chaos · benötigt Batida de Coco', requiredItem: 'batida',
           challenge: { skill: 'chaos', baseChance: 76, relation: 'gundula' },
-          successText: 'Gundula erkennt das bekannte Kokos-Signal. Uli erklärt die Kontrolle für vorläufig beendet.',
-          failureText: 'Die Flasche ist dieses Mal nur Alkohol und keine Verwaltungsabkürzung.',
-          success: { relationships: { gundula: 4 }, metrics: { chaos: 3 }, flags: { patrolPassed: true }, minutes: 3 },
-          failure: { metrics: { dignity: -3, chaos: 4 }, minutes: 5 },
+          successText: 'Gundula erkennt das bekannte Kokos-Signal. Uli erklärt die Kontrolle für vorläufig beendet.', failureText: 'Die Flasche ist dieses Mal nur Alkohol und keine Verwaltungsabkürzung.',
+          success: { relationships: { gundula: 4 }, metrics: { chaos: 3 }, flags: { patrolPassed: true }, minutes: 3 }, failure: { metrics: { dignity: -3, chaos: 4 }, minutes: 5 },
         },
       ],
     };
@@ -305,8 +286,7 @@ export class AdvancedWorldScene extends ArrivalQuestWorldScene {
   }
 
   private showAdvancedMessage(text: string): void {
-    const showMessage = (this as unknown as WorldInternals).showMessage;
-    showMessage?.call(this, text);
+    (this as unknown as WorldInternals).showMessage?.call(this, text);
   }
 }
 
