@@ -1,18 +1,22 @@
 import Phaser from 'phaser';
+import { installAdvancedSystemsRuntime } from './advancedRuntime';
 import { installArrivalQuestRuntime } from './arrivalQuestRuntime';
-import { ArrivalQuestWorldScene } from './scenes/ArrivalQuestWorldScene';
-import { BattleScene } from './scenes/BattleScene';
+import { AdvancedBattleScene } from './scenes/AdvancedBattleScene';
+import { AdvancedEntryDebateScene } from './scenes/AdvancedEntryDebateScene';
+import { AdvancedWorldScene } from './scenes/AdvancedWorldScene';
 import { BeerPongScene } from './scenes/BeerPongScene';
 import { BootScene } from './scenes/BootScene';
-import { EntryDebateScene } from './scenes/EntryDebateScene';
 import { FlunkyballScene } from './scenes/FlunkyballScene';
 import { FlipCupScene } from './scenes/FlipCupScene';
 import { InteriorScene } from './scenes/InteriorScene';
+import { MaslHoleScene } from './scenes/MaslHoleScene';
 import { ReservationPuzzleScene } from './scenes/ReservationPuzzleScene';
+import { SocialScene } from './scenes/SocialScene';
 import { gameStore } from './state/GameStore';
 
 export function createGame(parent: HTMLElement): Phaser.Game {
   installArrivalQuestRuntime(gameStore);
+  installAdvancedSystemsRuntime(gameStore);
   return new Phaser.Game({
     type: Phaser.AUTO,
     parent,
@@ -38,11 +42,13 @@ export function createGame(parent: HTMLElement): Phaser.Game {
     },
     scene: [
       BootScene,
-      ArrivalQuestWorldScene,
+      AdvancedWorldScene,
       ReservationPuzzleScene,
-      EntryDebateScene,
+      AdvancedEntryDebateScene,
       InteriorScene,
-      BattleScene,
+      SocialScene,
+      AdvancedBattleScene,
+      MaslHoleScene,
       FlipCupScene,
       BeerPongScene,
       FlunkyballScene,
