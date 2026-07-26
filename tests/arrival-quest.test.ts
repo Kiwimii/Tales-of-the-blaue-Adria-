@@ -60,9 +60,15 @@ describe('arrival quest line', () => {
     expect(arrivalObjective(power)).toContain('Stromkasten');
   });
 
+  it('separates an assigned socket from a physically connected cable', () => {
+    const access = state({ powerAccessOrganized: true });
+    expect(arrivalStage(access)).toBe(7);
+    expect(access.flags.powerConnected).toBeUndefined();
+  });
+
   it('counts three physical unloading tasks before the beer milestone', () => {
     const unloading = state({
-      powerConnected: true,
+      powerAccessOrganized: true,
       arrivalDrinksUnloaded: true,
       arrivalTentsUnloaded: true,
     });
@@ -71,6 +77,7 @@ describe('arrival quest line', () => {
     expect(arrivalObjective(unloading)).toContain('(2/3)');
 
     const ready = state({
+      powerAccessOrganized: true,
       powerConnected: true,
       arrivalDrinksUnloaded: true,
       arrivalTentsUnloaded: true,
