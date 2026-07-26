@@ -27,7 +27,7 @@ assert(initial && initial.bytes < 300_000, 'Initial UI bundle must stay below 30
 assert(game && game.bytes > initial.bytes, 'Phaser must remain in the lazy game chunk.');
 assert(!readdirSync(resolve(output, 'assets')).some((file) => file.endsWith('.map')), 'Production source maps must not be published.');
 assert(manifest.start_url === './' && manifest.scope === './', 'Next PWA scope is invalid.');
-assert(worker.includes("tales-adria-next-s45"), 'Next service worker cache version is stale.');
+assert(worker.includes("tales-adria-next-s55"), 'Next service worker cache version is stale.');
 
 console.log(`Next validation passed: ${linkedAssets.length} linked files, ${Math.round(initial.bytes / 1024)} kB initial UI, lazy Phaser chunk.`);
 
