@@ -20,6 +20,7 @@ export class WorldScene extends Phaser.Scene {
   private message!: Phaser.GameObjects.Text;
   private nightOverlay!: Phaser.GameObjects.Rectangle;
   private lastNeedTick = 0;
+  private unsubscribeStore?: () => void;
 
   private readonly onMobileInput = (event: Event): void => {
     const detail = (event as CustomEvent<InputEventDetail>).detail;
@@ -59,10 +60,11 @@ export class WorldScene extends Phaser.Scene {
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       window.removeEventListener(INPUT_EVENT, this.onMobileInput);
       window.removeEventListener(ACTION_EVENT, this.onAction);
+      this.unsubscribeStore?.();
     });
 
     this.message = this.add
-      .text(480, 596, 'Erkunde den Parkplatz und sprich mit Gundula und Uli.', {
+      .text(480, 596, gameStore.snapshot().currentObjective, {
         fontFamily: 'system-ui, sans-serif',
         fontSize: '17px',
         color: '#f5f1df',
@@ -74,6 +76,10 @@ export class WorldScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setScrollFactor(0)
       .setDepth(100);
+
+    this.unsubscribeStore = gameStore.subscribe((state) => {
+      if (!state.encounter) this.message.setText(state.currentObjective);
+    });
 
     this.nightOverlay = this.add
       .rectangle(480, 320, 960, 640, 0x10254a, 0)
@@ -90,6 +96,11 @@ export class WorldScene extends Phaser.Scene {
   }
 
   update(time: number): void {
+    if (gameStore.snapshot().encounter) {
+      this.player.setVelocity(0, 0);
+      return;
+    }
+
     const speed = 155;
     let horizontal = 0;
     let vertical = 0;
@@ -176,13 +187,42 @@ export class WorldScene extends Phaser.Scene {
     this.add.text(gundula.x, gundula.y - 36, 'Gundula', this.npcStyle()).setOrigin(0.5).setDepth(16);
     this.add.text(uli.x, uli.y - 36, 'Uli', this.npcStyle()).setOrigin(0.5).setDepth(16);
 
+    const manni = this.physics.add.staticSprite(566, 388, 'manni').setDepth(15);
+    this.add.text(manni.x, manni.y - 36, 'Manni', this.npcStyle()).setOrigin(0.5).setDepth(16);
+
     this.addActivity(220, 238, 'KAMPF', () => {
+      const state = gameStore.snapshot();
+      if (!state.flags.gateOpen) {
+        this.showMessage('Erst Einlass klären. Ronny wartet ungebeten, aber nicht grenzenlos.');
+        return;
+      }
+      if (state.quests.rival.status === 'completed') {
+        this.showMessage('Ronny wurde bereits überzeugt. Wiederholtes Farmen von Ruf ist nicht drin.');
+        return;
+      }
       gameStore.setWorldPosition(this.player.x, this.player.y);
       this.scene.start('battle');
     });
     this.addActivity(568, 492, 'FLIP CUP', () => {
+      const state = gameStore.snapshot();
+      if (!state.flags.gateOpen) {
+        this.showMessage('Ohne Einlass kein Flip Cup. Selbst das Chaos hat Verwaltungswege.');
+        return;
+      }
+      if (state.quests.flip.status === 'completed') {
+        this.showMessage('Die Flip-Cup-Runde ist gewonnen. Der Rufbonus ist bereits verbucht.');
+        return;
+      }
       gameStore.setWorldPosition(this.player.x, this.player.y);
       this.scene.start('flip-cup');
+    });
+    this.addActivity(360, 492, 'PAUSE', () => {
+      gameStore.rest(60);
+      this.showMessage('Eine Stunde im Zelt: mehr Energie, weniger Zeit und langsam wachsender Kater.');
+    });
+    this.addActivity(480, 300, 'TOILETTE', () => {
+      gameStore.relieve();
+      this.showMessage('Sanitärgebäude benutzt. Die Blase ist wieder aus der Eskalationskette.');
     });
 
     this.interactionPoints.push(
@@ -199,6 +239,13 @@ export class WorldScene extends Phaser.Scene {
         y: uli.y,
         radius: 72,
         action: () => this.talkToUli(),
+      },
+      {
+        id: 'manni',
+        x: manni.x,
+        y: manni.y,
+        radius: 70,
+        action: () => this.talkToManni(),
       },
     );
   }
@@ -230,13 +277,7 @@ export class WorldScene extends Phaser.Scene {
       return;
     }
 
-    if ((state.inventory.batida ?? 0) > 0) {
-      gameStore.setFlag('gundulaConvinced');
-      this.showMessage('Du erwähnst die Batida de Coco. Gundula ist plötzlich deutlich gesprächsbereiter. Einlasschance erhöht.');
-      return;
-    }
-
-    this.showMessage('Gundula: „Wer bist du und warum glaubst du, hier einfach reinzukommen?“ Eine passende Dialogquest folgt im nächsten Sprint.');
+    gameStore.openEncounter('gundula-entry');
   }
 
   private talkToUli(): void {
@@ -246,8 +287,20 @@ export class WorldScene extends Phaser.Scene {
       return;
     }
 
-    gameStore.setFlag('uliConvinced');
-    this.showMessage('Uli prüft deine Geschichte und gibt dir eine erste Parkplatzaufgabe. Einlasschance erhöht.');
+    gameStore.openEncounter('uli-entry');
+  }
+
+  private talkToManni(): void {
+    const state = gameStore.snapshot();
+    if (!state.flags.gateOpen) {
+      this.showMessage('Manni ist hinter dem Einlass. Erst Gundula und Uli überzeugen.');
+      return;
+    }
+    if (state.quests.paper.status === 'completed') {
+      this.showMessage('Manni: „Du hast mir den Arsch gerettet. Leider ziemlich wörtlich.“');
+      return;
+    }
+    gameStore.openEncounter('manni-paper');
   }
 
   private showMessage(text: string): void {

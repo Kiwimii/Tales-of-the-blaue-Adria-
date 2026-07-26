@@ -10,6 +10,8 @@ Inhaltlicher Stand: **Sprint 28 · v1.8.0 · Build v29**
 
 Die Alpha ist von Freitagmorgen bis zum Sonntagsfinale spielbar. Spielstände, Export/Import, mobile Steuerung und Offline-Nutzung werden unterstützt.
 
+Die Zielarchitektur enthält zusätzlich die **Gameplay-Sprints 29–33**. Sie vertiefen Einkauf, Entscheidungen, Beziehungen, Gruppenrollen, Bedürfnisse, Quests, Kampf und Flip Cup, sind aber wegen noch fehlender Gesamtparität bewusst noch nicht als GitHub-Pages-Fassung veröffentlicht.
+
 ## Entwicklungsstatus
 
 | Bereich | Status | Verbindliche Rolle |
@@ -60,4 +62,4 @@ Der Befehl prüft:
 - automatisierte Store-, Persistenz- und Freitag-bis-Sonntag-Endgame-Szenarien
 - den vollständigen Vite-Produktionsbuild
 
-Die detaillierte Sprint-Historie liegt in [SPRINTS.md](docs/SPRINTS.md) und [SPRINTS-21-28.md](docs/SPRINTS-21-28.md).
+Die detaillierte Sprint-Historie liegt in [SPRINTS.md](docs/SPRINTS.md), [SPRINTS-21-28.md](docs/SPRINTS-21-28.md) und [SPRINTS-29-33.md](docs/SPRINTS-29-33.md).

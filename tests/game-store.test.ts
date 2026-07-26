@@ -20,7 +20,7 @@ describe('GameStore', () => {
     expect(first.mode).toBe('creator');
 
     first.inventory.bier = 999;
-    expect(store.snapshot().inventory.bier).toBe(2);
+    expect(store.snapshot().inventory.bier).toBe(0);
   });
 
   it('persists a profile and notifies subscribers', () => {
@@ -37,6 +37,31 @@ describe('GameStore', () => {
     expect(JSON.parse(storage.getItem(STORAGE_KEY) ?? '{}')).toMatchObject({
       profile,
       mode: 'battle',
+      version: 2,
+    });
+  });
+
+  it('enforces the 25 euro supermarket budget and carries the selection into the world', () => {
+    const store = new GameStore(memoryStorage());
+    store.setProfile(profile);
+
+    expect(store.snapshot().mode).toBe('shop');
+    expect(store.completeShopping({ batida: 3 })).toMatchObject({ ok: false, total: 30 });
+
+    const result = store.completeShopping({
+      wasser: 2,
+      wuerste: 1,
+      bier: 1,
+      klopapier: 1,
+      chips: 1,
+    });
+
+    expect(result).toEqual({ ok: true, total: 21 });
+    expect(store.snapshot()).toMatchObject({
+      mode: 'world',
+      money: 4,
+      prologue: { shoppingComplete: true, spent: 21 },
+      inventory: { wasser: 2, wuerste: 1, bier: 1, klopapier: 1, chips: 1 },
     });
   });
 
@@ -53,6 +78,8 @@ describe('GameStore', () => {
 
   it('applies item effects and refuses unavailable items', () => {
     const store = new GameStore(memoryStorage());
+    store.setProfile(profile);
+    store.completeShopping({ wasser: 2, bier: 1 });
     store.advanceMinutes(60);
     const before = store.snapshot();
 
@@ -62,6 +89,7 @@ describe('GameStore', () => {
     expect(after.needs.thirst).toBeLessThan(before.needs.thirst);
 
     expect(store.useItem('unbekannt')).toBe(false);
+    expect(store.useItem('klopapier')).toBe(false);
   });
 
   it('does not recruit the same team member twice', () => {
@@ -97,9 +125,92 @@ describe('GameStore', () => {
     expect(repaired.minutes).toBe(420);
     expect(repaired.needs.thirst).toBe(77);
     expect(repaired.needs.energy).toBe(100);
-    expect(repaired.inventory.bier).toBe(2);
+    expect(repaired.inventory.bier).toBe(0);
+    expect(repaired.version).toBe(2);
+  });
+
+  it('resolves entry decisions deterministically and unlocks the campsite quest chain', () => {
+    const store = readyStore({ batida: 1, wasser: 1 });
+
+    expect(store.openEncounter('gundula-entry')).toBe(true);
+    expect(store.resolveEncounter('batida', 1)).toBe(true);
+    expect(store.snapshot().encounter?.result?.outcome).toBe('great');
+    store.closeEncounter();
+
+    store.openEncounter('uli-entry');
+    store.resolveEncounter('observe', 1);
+    const state = store.snapshot();
+
+    expect(state.flags).toMatchObject({
+      gundulaConvinced: true,
+      uliConvinced: true,
+      gateOpen: true,
+    });
+    expect(state.quests.entry.status).toBe('completed');
+    expect(state.quests.paper.status).toBe('active');
+    expect(state.inventory.batida).toBe(0);
+    expect(state.relationships.gundula).toBeGreaterThan(0);
+  });
+
+  it('turns a quest item into a persistent group role', () => {
+    const store = readyStore({ klopapier: 1, wasser: 1 });
+    store.setFlag('gundulaConvinced');
+    store.setFlag('uliConvinced');
+
+    store.openEncounter('manni-paper');
+    store.resolveEncounter('help', 1);
+
+    const state = store.snapshot();
+    expect(state.quests.paper.status).toBe('completed');
+    expect(state.inventory.klopapier).toBe(0);
+    expect(state.team).toEqual([
+      expect.objectContaining({
+        id: 'manni',
+        role: 'Versorger',
+        bonuses: expect.objectContaining({ recovery: 5 }),
+      }),
+    ]);
+  });
+
+  it('prevents completed activities from being farmed repeatedly', () => {
+    const store = readyStore({ wasser: 1 });
+    store.recordActivity('flipCup', true, 'perfect');
+    const first = store.snapshot();
+
+    store.recordActivity('flipCup', true, 'perfect');
+    const second = store.snapshot();
+
+    expect(second.metrics).toEqual(first.metrics);
+    expect(second.minutes).toBe(first.minutes);
+  });
+
+  it('migrates the former v1 save without throwing away the playable position', () => {
+    const storage = memoryStorage({
+      [STORAGE_KEY]: JSON.stringify({
+        version: 1,
+        profile,
+        mode: 'world',
+        money: 7,
+        inventory: { wasser: 3, bier: 1 },
+        worldPosition: { x: 444, y: 222 },
+      }),
+    });
+
+    const state = new GameStore(storage).snapshot();
+    expect(state.version).toBe(2);
+    expect(state.mode).toBe('world');
+    expect(state.prologue.shoppingComplete).toBe(true);
+    expect(state.inventory.wasser).toBe(3);
+    expect(state.worldPosition).toEqual({ x: 444, y: 222 });
   });
 });
+
+function readyStore(cart: Record<string, number>): GameStore {
+  const store = new GameStore(memoryStorage());
+  store.setProfile(profile);
+  expect(store.completeShopping(cart).ok).toBe(true);
+  return store;
+}
 
 function memoryStorage(initial: Record<string, string> = {}): StorageAdapter {
   const values = new Map(Object.entries(initial));

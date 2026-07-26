@@ -9,6 +9,7 @@ export class BootScene extends Phaser.Scene {
     this.createCharacterTexture('player', 0xf3c969, 0x24444a);
     this.createCharacterTexture('gundula', 0xe47d99, 0x5d294f);
     this.createCharacterTexture('uli', 0x7ab9d8, 0x263f67);
+    this.createCharacterTexture('manni', 0x67b87c, 0x244e32);
     this.createCharacterTexture('rival', 0xe4694f, 0x5c2018);
 
     const marker = this.make.graphics({ x: 0, y: 0 });

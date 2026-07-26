@@ -1,13 +1,23 @@
-export type GameMode = 'creator' | 'world' | 'battle' | 'flip-cup';
+export type GameMode = 'creator' | 'shop' | 'world' | 'battle' | 'flip-cup';
 
 export type Direction = 'up' | 'down' | 'left' | 'right';
+
+export type Trait = 'charmant' | 'direkt' | 'chaotisch' | 'hilfsbereit' | 'beobachtend';
+
+export type Skill = 'charm' | 'nerve' | 'focus' | 'chaos' | 'teamwork';
+
+export type ChallengeOutcome = 'great' | 'success' | 'failure' | 'disaster';
+
+export type QuestStatus = 'locked' | 'active' | 'completed' | 'failed';
+
+export type ChronicleTone = 'neutral' | 'good' | 'warn' | 'bad';
 
 export interface PlayerProfile {
   name: string;
   skinTone: string;
   hair: string;
   shirt: string;
-  trait: 'charmant' | 'direkt' | 'chaotisch' | 'hilfsbereit' | 'beobachtend';
+  trait: Trait;
 }
 
 export interface Needs {
@@ -17,6 +27,22 @@ export interface Needs {
   bladder: number;
   alcohol: number;
   highness: number;
+  hangover: number;
+  courage: number;
+}
+
+export interface WeekendMetrics {
+  dignity: number;
+  chaos: number;
+  reputation: number;
+  momentum: number;
+}
+
+export interface TeamBonuses {
+  battle: number;
+  social: number;
+  games: number;
+  recovery: number;
 }
 
 export interface TeamMember {
@@ -26,23 +52,105 @@ export interface TeamMember {
   level: number;
   resolve: number;
   maxResolve: number;
+  loyalty: number;
+  bonuses: TeamBonuses;
+}
+
+export interface QuestProgress {
+  status: QuestStatus;
+  stage: number;
+}
+
+export interface ChronicleEntry {
+  id: number;
+  day: number;
+  minutes: number;
+  text: string;
+  tone: ChronicleTone;
+}
+
+export interface ChallengeDefinition {
+  skill: Skill;
+  baseChance: number;
+  relation?: string;
+}
+
+export interface EffectSet {
+  needs?: Partial<Needs>;
+  metrics?: Partial<WeekendMetrics>;
+  relationships?: Record<string, number>;
+  flags?: Record<string, boolean>;
+  quests?: Record<string, QuestStatus>;
+  items?: Record<string, number>;
+  minutes?: number;
+  recruit?: string;
+}
+
+export interface EncounterOption {
+  id: string;
+  label: string;
+  hint: string;
+  challenge: ChallengeDefinition;
+  requiredItem?: string;
+  consumeItemOnSuccess?: string;
+  successText: string;
+  failureText: string;
+  greatText?: string;
+  disasterText?: string;
+  success: EffectSet;
+  failure: EffectSet;
+}
+
+export interface EncounterDefinition {
+  id: string;
+  speaker: string;
+  portrait: string;
+  intro: string;
+  options: EncounterOption[];
+}
+
+export interface EncounterResult {
+  optionId: string;
+  outcome: ChallengeOutcome;
+  chance: number;
+  roll: number;
+  text: string;
+}
+
+export interface EncounterState {
+  id: string;
+  result: EncounterResult | null;
+}
+
+export interface PrologueState {
+  shoppingComplete: boolean;
+  spent: number;
 }
 
 export interface SessionState {
-  version: 1;
+  version: 2;
   mode: GameMode;
   profile: PlayerProfile | null;
+  prologue: PrologueState;
   day: number;
   minutes: number;
   money: number;
   needs: Needs;
+  metrics: WeekendMetrics;
   inventory: Record<string, number>;
   team: TeamMember[];
+  relationships: Record<string, number>;
+  quests: Record<string, QuestProgress>;
+  activeQuest: string | null;
   flags: Record<string, boolean>;
+  encounter: EncounterState | null;
+  chronicle: ChronicleEntry[];
   worldPosition: { x: number; y: number };
 }
 
 export interface GameSnapshot extends SessionState {
   clockLabel: string;
   phaseLabel: string;
+  conditionLabel: string;
+  currentObjective: string;
 }
