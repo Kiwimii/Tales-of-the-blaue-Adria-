@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { conditionModifier, minigameWindow, totalTeamBonus } from '../mechanics';
 import { gameStore } from '../state/GameStore';
+import { addCinematicFrame } from '../visuals';
 
 type FlunkyStage = 'throw' | 'sprint' | 'drink' | 'done';
 
@@ -109,6 +110,7 @@ export class FlunkyballScene extends Phaser.Scene {
       backgroundColor: '#fff0c8b8',
       padding: { x: 13, y: 7 },
     }).setOrigin(0.5);
+    addCinematicFrame(this, 0x56aeca);
   }
 
   private drawBeachBackdrop(graphics: Phaser.GameObjects.Graphics): void {

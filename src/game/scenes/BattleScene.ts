@@ -6,6 +6,7 @@ import {
   type CombatState,
 } from '../combat';
 import { gameStore } from '../state/GameStore';
+import { addCinematicFrame } from '../visuals';
 
 export class BattleScene extends Phaser.Scene {
   private combat!: CombatState;
@@ -87,6 +88,7 @@ export class BattleScene extends Phaser.Scene {
     this.addButton(375, 555, 'Stuhl-Blockade', () => this.playerTurn('guard'));
     this.addButton(610, 555, 'Team-Zuruf', () => this.playerTurn('rally'));
     this.addButton(825, 555, 'Rückzug', () => this.withdraw());
+    addCinematicFrame(this, 0xef685c);
   }
 
   private drawCombatant(x: number, y: number, texture: string, label: string, accent: string): void {

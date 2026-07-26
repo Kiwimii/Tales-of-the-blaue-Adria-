@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { minigameAttempts, minigameWindow } from '../mechanics';
 import { gameStore } from '../state/GameStore';
+import { addCinematicFrame } from '../visuals';
 
 export class FlipCupScene extends Phaser.Scene {
   private marker!: Phaser.GameObjects.Rectangle;
@@ -96,6 +97,7 @@ export class FlipCupScene extends Phaser.Scene {
       fontSize: '14px',
       color: '#d7ccb0',
     }).setOrigin(0.5);
+    addCinematicFrame(this, 0xf4c75d);
   }
 
   update(_: number, delta: number): void {
