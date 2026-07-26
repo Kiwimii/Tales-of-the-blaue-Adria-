@@ -7,7 +7,10 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "validate:legacy": "node scripts/validate-legacy.mjs",
+    "check": "npm run validate:legacy && npm run typecheck && npm run test && npm run build"
   },
   "dependencies": {
     "phaser": "4.2.1",
@@ -18,7 +21,8 @@
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "typescript": "^5.9.3",
-    "vite": "8.1.5"
+    "vite": "8.1.5",
+    "vitest": "^3.2.4"
   },
   "engines": {
     "node": ">=24"

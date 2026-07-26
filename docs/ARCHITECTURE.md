@@ -1,0 +1,55 @@
+# Architekturentscheidung
+
+**Status:** angenommen  
+**Datum:** 26. Juli 2026
+
+## Entscheidung
+
+React 19, Phaser 4, TypeScript und Vite bilden die einzige Zielarchitektur. Die bisher veröffentlichte Canvas-Fassung in `docs/` bleibt vorübergehend die spielbare Referenz, wird aber nicht mehr um neue Spielinhalte erweitert.
+
+Die GitHub-Pages-Veröffentlichung wechselt erst von `docs/` auf den neuen Build, wenn die in `MIGRATION-CHECKLIST.md` definierten Paritätskriterien erfüllt sind.
+
+## Warum diese Grenze notwendig ist
+
+Die Canvas-Fassung enthält den größten Teil des Spiels, ist aber über viele nacheinander geladene globale Skripte gewachsen. Dadurch werden Änderungen, Save-Migrationen und vollständige Tests zunehmend riskant.
+
+Die React-/Phaser-Fassung besitzt eine klarere Trennung:
+
+- React verwaltet Menüs, HUD, Einstellungen und barrierearme Oberflächen.
+- Phaser verwaltet Welt, Bewegung, Kämpfe und Minispiele.
+- `GameStore` ist die einzige Quelle für den persistenten Spielzustand.
+- TypeScript und automatisierte Tests sichern Schnittstellen und Kernregeln ab.
+
+Ein sofortiger Austausch wäre trotzdem falsch: Die neue Fassung hat noch keine inhaltliche Parität. Deshalb bleibt die Alpha spielbar, während die Migration kontrolliert in vertikalen Abschnitten erfolgt.
+
+## Verbindliche Entwicklungsregeln
+
+1. Neue Spielfunktionen entstehen ausschließlich in `src/`.
+2. Änderungen in `docs/` sind auf kritische Fehler, Browserkompatibilität, Offline-Funktion und Release-Sicherheit begrenzt.
+3. Jeder migrierte Abschnitt umfasst Spielzustand, UI, mobile Eingabe, Persistenz und Tests.
+4. Ein Abschnitt gilt nicht als migriert, wenn nur eine vereinfachte Demo vorhanden ist.
+5. Das Save-Format wird versioniert; vor dem Release muss ein Importpfad für bestehende v13-Spielstände vorhanden sein.
+6. Der neue Build wird erst veröffentlicht, wenn `npm run check` erfolgreich ist und der manuelle Release-Durchlauf bestanden wurde.
+
+## Reihenfolge der Migration
+
+1. Charaktererstellung, Einkauf und Einlass
+2. vollständige Weltkarte, Kollisionen und NPC-Tagespläne
+3. Freunde, Dialoge, Beziehungen und Quests
+4. Inventar, Bedürfnisse, Kontrollen und Schlaf
+5. Kämpfe und Teamverwaltung
+6. alle fünf Minispiele
+7. Freitag-bis-Sonntag-Zeitplan, Aufräumen und alle Enden
+8. Import bestehender Spielstände, PWA-Umschaltung und Release
+
+## Abnahmekriterien für den Architekturwechsel
+
+- alle Zeilen der Migrationscheckliste sind abgeschlossen
+- keine ungefangenen Fehler im kompletten Freitag-bis-Sonntag-Durchlauf
+- alle Enden sind automatisiert erreichbar und bewertet
+- Desktop-, Android- und iPhone-Touchsteuerung sind manuell geprüft
+- Speichern, Laden, Export, Import und Migration eines v13-Spielstands funktionieren
+- Erststart und Wiederholungsstart funktionieren online und offline
+- keine kritischen oder hohen Fehler in der Release-Checkliste
+
+Sound, Musik und zusätzliches Balancing sind wichtige Release-Themen, aber keine Voraussetzung für die technische Umschaltung. Sie werden nach Funktionsparität bearbeitet, damit sie nicht doppelt implementiert werden.

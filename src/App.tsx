@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import type { CSSProperties, ReactElement } from 'react';
 import type Phaser from 'phaser';
-import { createGame } from './game/createGame';
 import { sendAction, sendDirection } from './game/events';
 import { gameStore } from './game/state/GameStore';
 import type { Direction, GameSnapshot, PlayerProfile } from './game/types';
@@ -22,7 +22,7 @@ const needLabels: Array<[keyof GameSnapshot['needs'], string]> = [
   ['highness', 'Breitheit'],
 ];
 
-export default function App(): JSX.Element {
+export default function App(): ReactElement {
   const [snapshot, setSnapshot] = useState<GameSnapshot>(() => gameStore.snapshot());
   const gameHostRef = useRef<HTMLDivElement>(null);
   const gameRef = useRef<Phaser.Game | null>(null);
@@ -32,9 +32,16 @@ export default function App(): JSX.Element {
 
   useEffect(() => {
     if (!hasProfile || !gameHostRef.current || gameRef.current) return;
-    gameRef.current = createGame(gameHostRef.current);
+    const host = gameHostRef.current;
+    let cancelled = false;
+
+    void import('./game/createGame').then(({ createGame }) => {
+      if (cancelled || gameRef.current) return;
+      gameRef.current = createGame(host);
+    });
 
     return () => {
+      cancelled = true;
       gameRef.current?.destroy(true);
       gameRef.current = null;
     };
@@ -98,13 +105,13 @@ export default function App(): JSX.Element {
   );
 }
 
-function CharacterCreator(): JSX.Element {
+function CharacterCreator(): ReactElement {
   const [profile, setProfile] = useState<PlayerProfile>(defaultProfile);
   const previewStyle = useMemo(() => ({
     '--skin': profile.skinTone,
     '--hair': profile.hair,
     '--shirt': profile.shirt,
-  }) as React.CSSProperties, [profile]);
+  }) as CSSProperties, [profile]);
 
   const update = <K extends keyof PlayerProfile>(key: K, value: PlayerProfile[K]): void => {
     setProfile((current) => ({ ...current, [key]: value }));
@@ -160,8 +167,8 @@ function CharacterCreator(): JSX.Element {
   );
 }
 
-function DPad(): JSX.Element {
-  const button = (direction: Direction, label: string, className: string): JSX.Element => (
+function DPad(): ReactElement {
+  const button = (direction: Direction, label: string, className: string): ReactElement => (
     <button
       type="button"
       className={`dpad-button ${className}`}

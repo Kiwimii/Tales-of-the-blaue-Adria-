@@ -32,7 +32,7 @@ export interface SessionState {
   version: 1;
   mode: GameMode;
   profile: PlayerProfile | null;
-  day: 1;
+  day: number;
   minutes: number;
   money: number;
   needs: Needs;

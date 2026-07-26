@@ -1,68 +1,63 @@
 # Tales of the Blaue Adria
 
-Ein schwarzhumoriges, storygetriebenes Camping-RPG für Smartphone und Desktop. Das Spiel verbindet eine frei begehbare Top-down-Welt mit Dialogproben, Bedürfnissen, festen Tagesabläufen, Quests, einer rekrutierbaren Freundesgruppe, rundenbasierten Teamkämpfen und direkt eingebetteten Minispielen.
+Ein schwarzhumoriges, storygetriebenes Camping-RPG für Smartphone und Desktop. Das Spiel verbindet eine frei begehbare Top-down-Welt mit Dialogproben, Bedürfnissen, festen Tagesabläufen, Quests, einer rekrutierbaren Freundesgruppe, rundenbasierten Teamkämpfen und eingebetteten Minispielen.
 
-## Spielbare Fassung
+## Jetzt spielen
 
-https://kiwimii.github.io/Tales-of-the-blaue-Adria-/?v=13
+**Veröffentlichte Alpha:** [Build v29 starten](https://kiwimii.github.io/Tales-of-the-blaue-Adria-/?v=29)
 
-Aktueller Build: **Sprint 10 · v1.3.0**
+Inhaltlicher Stand: **Sprint 28 · v1.8.0 · Build v29**
+
+Die Alpha ist von Freitagmorgen bis zum Sonntagsfinale spielbar. Spielstände, Export/Import, mobile Steuerung und Offline-Nutzung werden unterstützt.
+
+## Entwicklungsstatus
+
+| Bereich | Status | Verbindliche Rolle |
+| --- | --- | --- |
+| `docs/` | umfangreiche, veröffentlichte Alpha | Referenz für Funktionsumfang und GitHub-Pages-Release |
+| `src/` | baubare React-/Phaser-/TypeScript-Migration | einzige Zielarchitektur für die weitere Entwicklung |
+
+`docs/` ist ab jetzt **feature-frozen**: Dort werden nur kritische Fehler, Kompatibilität, PWA und Release-Stabilität gepflegt. Neue Spielinhalte werden erst wieder umgesetzt, wenn sie in der Zielarchitektur entstehen. Der Wechsel der veröffentlichten Fassung erfolgt erst nach nachgewiesener Funktionsparität.
+
+Die vollständige Entscheidung und ihre Abnahmekriterien stehen in [ARCHITECTURE.md](docs/ARCHITECTURE.md). Den ehrlichen Migrationsstand zeigt [MIGRATION-CHECKLIST.md](docs/MIGRATION-CHECKLIST.md).
 
 ## Aktueller Spielumfang
 
 - Charaktererstellung und Supermarkt-Prolog mit 25-Euro-Budget
-- große, an der Luftaufnahme orientierte Campingplatzkarte
-- Zufahrt und Parkplatz im Nordwesten, Servicekern am Eingang, bewaldete Parzellen, Zeltlager, Festwiese, Kiosk, Hauptstrand und See im Osten
-- Gundula und Uli östlich des Sanitärgebäudes
-- kein Einlass während der Mittagspause von 13 bis 15 Uhr
-- gemeinsamer Kontrollrundgang von Gundula und Uli um 18 Uhr
-- Nachtruhekontrolle ab 22 Uhr
-- Gundulas besondere Abneigung gegen das Brunsen in ihre Hecke inklusive Folgen und Reinigungsquest
-- vollständige Freundesgruppe: André, René, Lars, Danny, Gregor, Felix, Masl, Schubert und Schima
-- individuelle Positionen, Tagesabläufe, Rollen, Dialoge, Werte und Fähigkeiten
-- Trinken, Spielen, Flirten, Kiffen, Grillen, Schlafen, Aufräumen und Schwimmen
-- Energie, Hunger, Durst, Blase, Alkohol, Breitheit, Mut, Kater, Flirtwert und Würde
-- Inventar, Kiosk, Quests, Beziehungen, Ruf, Chaos, Romantik und Ereignisprotokoll
-- rundenbasierte Teamkämpfe mit bis zu drei aktiven Figuren
+- frei begehbarer, an einer Luftaufnahme orientierter Campingplatz
+- neun Freunde mit Tagesabläufen, Dialogen, Werten und Fähigkeiten
+- Zeit, Bedürfnisse, Alkohol, Würde, Chaos, Beziehungen und Inventar
+- Quests, Kontrollen durch Gundula und Uli und mehrere Enden
+- rundenbasierte Teamkämpfe
 - Flip Cup, Beer Pong, Flunkyball, Trinkduell und Sonntags-Aufräumspiel
-- lokaler Speicherstand mit Export und Import
-- mobile Analogsteuerung, große Touch-Flächen, Safe Areas und Querformat-Unterstützung
-- Endgame am Sonntag um 12 Uhr mit mehreren möglichen Wochenendwertungen
-
-## Technische Struktur
-
-Die direkt über GitHub Pages getestete Fassung liegt modular in `docs/` und läuft ohne externes CDN als eigenständige Canvas-Web-App.
-
-Aktive Module:
-
-- `content-v13.js` – Figuren, Gegenstände, Dialoge, Quests und Enden
-- `map-v13.js` – Geometrie der an der Luftaufnahme orientierten Welt
-- `engine-v13.js` – Speicherstand, Zeit, Bedürfnisse, Menüs und mobile Eingabe
-- `world-v13.js` – Oberwelt, Kamera, NPC-Pläne, Kontrollen und Interaktionen
-- `activities-v13.js` – Kämpfe, Minispiele, Flirten, Aufräumen und Endgame
-- `hotfix-v13.js` – Torablauf, Schlafen, Ronny-Begegnung und Integrationsschutz
-
-Die automatische GitHub-Validierung prüft jedes Spielmodul mit `node --check`, notwendige HTML-Elemente, die Modulreihenfolge und veraltete Runtime-Verweise.
-
-Parallel liegt die langfristige Zielarchitektur in `src/`:
-
-- Phaser 4 für Oberwelt, Kämpfe und Minispiele
-- React für komplexe Menüs und Verwaltungsoberflächen
-- TypeScript und Vite
-- gemeinsamer persistenter Spielzustand zwischen allen Szenentypen
-- datengetriebene Inhalte für NPCs, Quests, Gegenstände und Dialoge
+- lokale Spielstände mit Export, Import und Sicherheitsbackup
+- mobile Steuerung, Safe Areas und Querformat-Unterstützung
+- Questassistenz, Erfolge, Entdeckungen und Schnellaktionen
+- installierbare PWA mit versioniertem Offline-App-Shell
 
 ## Lokale Entwicklung
 
+Voraussetzung: Node.js 24 oder neuer.
+
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
-## Produktionsbuild
+Der Entwicklungsserver startet die React-/Phaser-Zielarchitektur. Die veröffentlichte Referenzfassung kann statisch aus `docs/` ausgeliefert werden.
+
+## Qualitätsprüfung
 
 ```bash
-npm run build
+npm run check
 ```
 
-Die Sprint-Dokumentation liegt unter `docs/SPRINTS.md`.
+Der Befehl prüft:
+
+- Syntax, Vollständigkeit und Ladefolge aller veröffentlichten Runtime-Module
+- Build-Version, PWA-Manifest und Offline-Cache
+- TypeScript-Typen der Zielarchitektur
+- automatisierte Store-, Persistenz- und Freitag-bis-Sonntag-Endgame-Szenarien
+- den vollständigen Vite-Produktionsbuild
+
+Die detaillierte Sprint-Historie liegt in [SPRINTS.md](docs/SPRINTS.md) und [SPRINTS-21-28.md](docs/SPRINTS-21-28.md).
