@@ -28,15 +28,15 @@ const defaultProfile: PlayerProfile = {
   trait: 'charmant',
 };
 
-const needLabels: Array<[keyof GameSnapshot['needs'], string]> = [
-  ['energy', 'Energie'],
-  ['hunger', 'Hunger'],
-  ['thirst', 'Durst'],
-  ['bladder', 'Blase'],
-  ['alcohol', 'Alkohol'],
-  ['highness', 'Breitheit'],
-  ['hangover', 'Kater'],
-  ['courage', 'Mut'],
+const needLabels: Array<[keyof GameSnapshot['needs'], string, string]> = [
+  ['energy', 'Energie', '⚡'],
+  ['hunger', 'Hunger', '◆'],
+  ['thirst', 'Durst', '●'],
+  ['bladder', 'Blase', '◒'],
+  ['alcohol', 'Alkohol', '♨'],
+  ['highness', 'Breitheit', '✦'],
+  ['hangover', 'Kater', '☁'],
+  ['courage', 'Mut', '▲'],
 ];
 
 export default function App(): ReactElement {
@@ -77,9 +77,12 @@ export default function App(): ReactElement {
   return (
     <main className="game-shell">
       <header className="topbar">
-        <div>
-          <p className="eyebrow">Tag {snapshot.day} · {snapshot.phaseLabel}</p>
-          <strong>{snapshot.clockLabel}</strong>
+        <div className="brand-lockup">
+          <span className="brand-mark" aria-hidden="true">TA</span>
+          <div>
+            <p className="eyebrow">Tag {snapshot.day} · {snapshot.phaseLabel}</p>
+            <strong>{snapshot.clockLabel}</strong>
+          </div>
         </div>
         <div className="metric-strip" aria-label="Wochenendwerte">
           <Metric label="Würde" value={snapshot.metrics.dignity} />
@@ -93,12 +96,13 @@ export default function App(): ReactElement {
         </button>
         <div className="mode-chip">{modeName(snapshot.mode)}</div>
         <div className="topbar-actions">
-          <button className="quiet-button" type="button" onClick={() => gameStore.replayIntro()}>Intro</button>
-          <button className="quiet-button" type="button" onClick={() => gameStore.reset()}>Neustart</button>
+          <button className="quiet-button" type="button" onClick={() => gameStore.replayIntro()}>▶ Intro</button>
+          <button className="quiet-button" type="button" onClick={() => gameStore.reset()}>↺ Neustart</button>
         </div>
       </header>
 
       <section className="objective-bar">
+        <span className="quest-seal" aria-hidden="true">!</span>
         <div>
           <p className="eyebrow">{snapshot.activeQuest ? QUESTS[snapshot.activeQuest]?.title : 'Freies Spiel'}</p>
           <strong>{snapshot.currentObjective}</strong>
@@ -109,9 +113,12 @@ export default function App(): ReactElement {
       </section>
 
       <section className="needs-panel" aria-label="Statuswerte">
-        {needLabels.map(([key, label]) => (
+        {needLabels.map(([key, label, icon]) => (
           <div className={`need ${needWarning(key, snapshot.needs[key]) ? 'need-warning' : ''}`} key={key}>
-            <div className="need-label"><span>{label}</span><span>{Math.round(snapshot.needs[key])}</span></div>
+            <div className="need-label">
+              <span><i aria-hidden="true">{icon}</i>{label}</span>
+              <span>{Math.round(snapshot.needs[key])}</span>
+            </div>
             <div className="need-track">
               <div className={`need-fill need-${key}`} style={{ width: `${snapshot.needs[key]}%` }} />
             </div>

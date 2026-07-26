@@ -23,27 +23,36 @@ export class BattleScene extends Phaser.Scene {
     gameStore.setMode('battle');
     const snapshot = gameStore.snapshot();
     this.combat = createCombatState(snapshot);
-    this.cameras.main.setBackgroundColor('#1b2735');
+    this.cameras.main.setBackgroundColor('#07151c');
 
     const background = this.add.graphics();
-    background.fillGradientStyle(0x173044, 0x173044, 0x684a36, 0x684a36, 1);
+    background.fillGradientStyle(0x071c2a, 0x12363e, 0x40212b, 0x733728, 1);
     background.fillRect(0, 0, 960, 640);
-    background.fillStyle(0xe4c27a, 0.18);
-    for (let i = 0; i < 18; i += 1) {
-      background.fillCircle(Phaser.Math.Between(0, 960), Phaser.Math.Between(0, 640), Phaser.Math.Between(2, 6));
-    }
+    this.drawArena(background);
 
-    this.add.text(480, 42, 'CAMPING-DUELL', {
-      fontFamily: 'system-ui, sans-serif',
+    this.add.text(480, 24, 'HAUPTWEG · UNGEFRAGTE MEISTERSCHAFT', {
+      fontFamily: 'Arial, system-ui, sans-serif',
+      fontSize: '11px',
+      fontStyle: 'bold',
+      letterSpacing: 3,
+      color: '#66dac6',
+    }).setOrigin(0.5);
+    this.add.text(480, 55, 'CAMPING-DUELL', {
+      fontFamily: 'Arial Black, system-ui, sans-serif',
       fontSize: '34px',
       fontStyle: 'bold',
       color: '#fff2c4',
+      stroke: '#461820',
+      strokeThickness: 5,
     }).setOrigin(0.5);
 
-    this.roundLabel = this.add.text(480, 82, 'Runde 1', {
+    this.roundLabel = this.add.text(480, 94, 'Runde 1', {
       fontFamily: 'system-ui, sans-serif',
       fontSize: '15px',
-      color: '#d7ccb0',
+      fontStyle: 'bold',
+      color: '#fff0c0',
+      backgroundColor: '#07151fe0',
+      padding: { x: 14, y: 6 },
     }).setOrigin(0.5);
 
     this.drawCombatant(225, 255, 'player', snapshot.profile?.name ?? 'Du', '#78cfa4');
@@ -81,7 +90,10 @@ export class BattleScene extends Phaser.Scene {
   }
 
   private drawCombatant(x: number, y: number, texture: string, label: string, accent: string): void {
-    this.add.circle(x, y + 62, 82, 0x0c1218, 0.35);
+    this.add.ellipse(x + 8, y + 78, 182, 58, 0x03080c, 0.35);
+    this.add.circle(x, y + 10, 91, 0x07151c, 0.46)
+      .setStrokeStyle(4, Phaser.Display.Color.HexStringToColor(accent).color, 0.42);
+    this.add.circle(x, y + 10, 78, 0xffffff, 0.025);
     this.add.image(x, y, texture).setScale(3.2);
     this.add.text(x, y - 105, label, {
       fontFamily: 'system-ui, sans-serif',
@@ -92,8 +104,11 @@ export class BattleScene extends Phaser.Scene {
   }
 
   private makeBar(x: number, y: number, width: number, height: number, color: number): Phaser.GameObjects.Rectangle {
-    this.add.rectangle(x + width / 2, y, width + 8, height + 8, 0x10161c, 0.9);
-    return this.add.rectangle(x, y, width, height, color, 1).setOrigin(0, 0.5);
+    this.add.rectangle(x + width / 2, y, width + 12, height + 12, 0x07151c, 0.92)
+      .setStrokeStyle(2, 0xfff1c7, 0.2);
+    const bar = this.add.rectangle(x, y, width, height, color, 1).setOrigin(0, 0.5);
+    this.add.rectangle(x + width / 2, y - 4, width, 4, 0xffffff, 0.12);
+    return bar;
   }
 
   private addButton(x: number, y: number, label: string, action: () => void): void {
@@ -102,13 +117,46 @@ export class BattleScene extends Phaser.Scene {
       fontSize: '16px',
       fontStyle: 'bold',
       color: '#173027',
-      backgroundColor: '#f4d47b',
-      padding: { x: 16, y: 12 },
-    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+      backgroundColor: label === 'Rückzug' ? '#ef8b72' : '#f4d47b',
+      padding: { x: 17, y: 13 },
+    }).setOrigin(0.5)
+      .setStroke('#fff2c4', 1)
+      .setInteractive({ useHandCursor: true });
 
     button.on('pointerover', () => button.setScale(1.04));
     button.on('pointerout', () => button.setScale(1));
     button.on('pointerdown', action);
+  }
+
+  private drawArena(graphics: Phaser.GameObjects.Graphics): void {
+    graphics.fillStyle(0x040b10, 0.38);
+    graphics.fillRect(0, 470, 960, 170);
+    graphics.fillStyle(0xbda56f, 0.16);
+    graphics.fillEllipse(480, 382, 720, 178);
+    graphics.lineStyle(3, 0xf4c75d, 0.3);
+    graphics.strokeEllipse(480, 382, 720, 178);
+
+    graphics.lineStyle(2, 0xfff0ba, 0.28);
+    graphics.beginPath();
+    graphics.moveTo(0, 128);
+    for (let x = 0; x <= 960; x += 80) graphics.lineTo(x, 142 + ((x / 80) % 2) * 18);
+    graphics.strokePath();
+    const colors = [0xf4c75d, 0x66dac6, 0xef685c];
+    for (let index = 0; index < 13; index += 1) {
+      const x = 28 + index * 77;
+      const y = 140 + (index % 2) * 18;
+      graphics.fillStyle(colors[index % colors.length], 0.13);
+      graphics.fillCircle(x, y, 21);
+      graphics.fillStyle(colors[index % colors.length], 0.98);
+      graphics.fillCircle(x, y, 6);
+    }
+
+    for (let index = 0; index < 12; index += 1) {
+      const x = 18 + index * 86;
+      graphics.fillStyle(0x03090d, 0.7);
+      graphics.fillCircle(x, 488, 24);
+      graphics.fillRoundedRect(x - 23, 507, 46, 118, 18);
+    }
   }
 
   private playerTurn(action: CombatAction): void {

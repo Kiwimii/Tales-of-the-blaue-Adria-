@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { minigameAttempts, minigameWindow, resolveChallenge } from '../src/game/mechanics';
+import {
+  beerPongReticlePosition,
+  minigameAttempts,
+  minigameWindow,
+  resolveChallenge,
+} from '../src/game/mechanics';
 import type { GameSnapshot, SessionState, TeamMember } from '../src/game/types';
 
 describe('linked weekend mechanics', () => {
@@ -44,6 +49,26 @@ describe('linked weekend mechanics', () => {
     expect(minigameWindow(supported, 'flip')).toBeGreaterThan(minigameWindow(base, 'flip'));
     expect(minigameWindow(exhausted, 'flip')).toBeLessThan(minigameWindow(base, 'flip'));
     expect(minigameAttempts(supported)).toBeGreaterThanOrEqual(minigameAttempts(base));
+  });
+
+  it('moves the Beer Pong reticle across every cup even at maximum sway', () => {
+    const cups = [
+      { x: 480, y: 235 },
+      { x: 420, y: 305 },
+      { x: 540, y: 305 },
+      { x: 360, y: 375 },
+      { x: 480, y: 375 },
+      { x: 600, y: 375 },
+    ];
+
+    for (const cup of cups) {
+      let closest = Number.POSITIVE_INFINITY;
+      for (let step = 0; step <= 4500; step += 1) {
+        const reticle = beerPongReticlePosition(step / 4500, cup, 100);
+        closest = Math.min(closest, Math.hypot(reticle.x - cup.x, reticle.y - cup.y));
+      }
+      expect(closest).toBeLessThan(0.2);
+    }
   });
 });
 
