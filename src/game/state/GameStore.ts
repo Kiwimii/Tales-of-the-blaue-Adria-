@@ -1,6 +1,6 @@
 import type { GameMode, GameSnapshot, PlayerProfile, SessionState, TeamMember } from '../types';
 
-const STORAGE_KEY = 'tales-blaue-adria-save-v1';
+export const STORAGE_KEY = 'tales-blaue-adria-save-v1';
 
 const initialState: SessionState = {
   version: 1,
@@ -30,9 +30,19 @@ const initialState: SessionState = {
 
 type Listener = (snapshot: GameSnapshot) => void;
 
-class GameStore {
-  private state: SessionState = this.load();
+export interface StorageAdapter {
+  getItem(key: string): string | null;
+  setItem(key: string, value: string): void;
+  removeItem(key: string): void;
+}
+
+export class GameStore {
+  private state: SessionState;
   private listeners = new Set<Listener>();
+
+  constructor(private readonly storage: StorageAdapter = defaultStorage()) {
+    this.state = this.load();
+  }
 
   subscribe(listener: Listener): () => void {
     this.listeners.add(listener);
@@ -120,7 +130,7 @@ class GameStore {
   }
 
   reset(): void {
-    localStorage.removeItem(STORAGE_KEY);
+    this.storage.removeItem(STORAGE_KEY);
     this.state = structuredClone(initialState);
     this.emit();
   }
@@ -132,15 +142,32 @@ class GameStore {
   }
 
   private persist(): void {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state));
+    this.storage.setItem(STORAGE_KEY, JSON.stringify(this.state));
   }
 
   private load(): SessionState {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
+      const raw = this.storage.getItem(STORAGE_KEY);
       if (!raw) return structuredClone(initialState);
-      const parsed = JSON.parse(raw) as SessionState;
-      return parsed.version === 1 ? parsed : structuredClone(initialState);
+      const parsed = JSON.parse(raw) as Partial<SessionState>;
+      if (parsed.version !== 1) return structuredClone(initialState);
+
+      return {
+        ...structuredClone(initialState),
+        ...parsed,
+        version: 1,
+        day: positiveInteger(parsed.day, 1),
+        minutes: nonNegativeNumber(parsed.minutes, initialState.minutes),
+        profile: validProfile(parsed.profile) ? parsed.profile : null,
+        needs: numericObject(parsed.needs, initialState.needs),
+        inventory: numericObject(parsed.inventory, initialState.inventory),
+        team: Array.isArray(parsed.team) ? parsed.team : [],
+        flags: booleanObject(parsed.flags),
+        worldPosition: {
+          x: finiteNumber(parsed.worldPosition?.x, initialState.worldPosition.x),
+          y: finiteNumber(parsed.worldPosition?.y, initialState.worldPosition.y),
+        },
+      };
     } catch {
       return structuredClone(initialState);
     }
@@ -152,3 +179,57 @@ class GameStore {
 }
 
 export const gameStore = new GameStore();
+
+function defaultStorage(): StorageAdapter {
+  if (typeof window !== 'undefined' && window.localStorage) return window.localStorage;
+
+  const values = new Map<string, string>();
+  return {
+    getItem: (key) => values.get(key) ?? null,
+    setItem: (key, value) => values.set(key, value),
+    removeItem: (key) => values.delete(key),
+  };
+}
+
+function validProfile(value: PlayerProfile | null | undefined): value is PlayerProfile {
+  return Boolean(
+    value
+      && typeof value.name === 'string'
+      && typeof value.skinTone === 'string'
+      && typeof value.hair === 'string'
+      && typeof value.shirt === 'string',
+  );
+}
+
+function positiveInteger(value: unknown, fallback: number): number {
+  return typeof value === 'number' && Number.isInteger(value) && value > 0 ? value : fallback;
+}
+
+function nonNegativeNumber(value: unknown, fallback: number): number {
+  return typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value : fallback;
+}
+
+function finiteNumber(value: unknown, fallback: number): number {
+  return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
+}
+
+function numericObject<T extends object>(
+  value: unknown,
+  defaults: T,
+): T {
+  const result = { ...defaults } as Record<string, unknown>;
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return result as T;
+
+  for (const [key, entry] of Object.entries(value)) {
+    if (typeof entry === 'number' && Number.isFinite(entry)) result[key] = entry;
+  }
+  return result as T;
+}
+
+function booleanObject(value: unknown): Record<string, boolean> {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+
+  return Object.fromEntries(
+    Object.entries(value).filter((entry): entry is [string, boolean] => typeof entry[1] === 'boolean'),
+  );
+}

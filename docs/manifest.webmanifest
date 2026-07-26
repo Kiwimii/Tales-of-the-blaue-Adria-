@@ -8,5 +8,12 @@
   "background_color": "#101814",
   "theme_color": "#101814",
   "description": "Ein schwarzhumoriges mobiles Pixelart-Camping-RPG mit Freundesgruppe, Teamkämpfen, Minispielen und Sonntagsfinale.",
-  "icons": []
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
 }

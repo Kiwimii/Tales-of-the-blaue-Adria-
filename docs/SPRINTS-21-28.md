@@ -44,4 +44,6 @@
 
 **Sprint 28 · v1.8.0**
 
-https://kiwimii.github.io/Tales-of-the-blaue-Adria-/?v=28
+Veröffentlichter Cache-/PWA-Build: **v29**
+
+https://kiwimii.github.io/Tales-of-the-blaue-Adria-/?v=29

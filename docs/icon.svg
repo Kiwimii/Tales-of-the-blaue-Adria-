@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">Tales of the Blaue Adria</title>
+  <rect width="512" height="512" rx="96" fill="#101814"/>
+  <path d="M0 345C96 300 177 399 270 344s164-32 242 6v162H0Z" fill="#4e94b4"/>
+  <path d="M0 388c97-42 180 54 271 1s164-30 241 5" fill="none" stroke="#8ec4d4" stroke-width="22"/>
+  <path d="M97 312 190 149l93 163Z" fill="#e9a759" stroke="#fff3c9" stroke-width="18" stroke-linejoin="round"/>
+  <path d="M190 149v163" stroke="#6a412c" stroke-width="18"/>
+  <text x="346" y="286" fill="#fff3c9" font-family="system-ui,sans-serif" font-size="118" font-weight="900" text-anchor="middle">TBA</text>
+</svg>

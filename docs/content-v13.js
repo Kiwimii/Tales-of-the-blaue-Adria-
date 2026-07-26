@@ -1,6 +1,6 @@
 window.TBA13_CONTENT={
-  version:'1.3.0-sprint10',
-  build:'Sprint 10 · v1.3.0',
+  version:'1.8.0-sprint28',
+  build:'Sprint 28 · v1.8.0 · Build v29',
   traits:{
     charmant:{label:'Charmant',desc:'Kann selbst schlechten Unsinn wie eine halbwegs gute Idee verkaufen.',dialogue:14,flirt:15,battle:0},
     direkt:{label:'Direkt',desc:'Kurze Ansagen, wenig Diplomatie und erstaunlich viele beleidigte Gesichter.',dialogue:6,flirt:-2,battle:6},
