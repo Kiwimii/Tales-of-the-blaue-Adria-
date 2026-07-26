@@ -6,13 +6,13 @@ Ein schwarzhumoriges, storygetriebenes Camping-RPG für Smartphone und Desktop. 
 
 **Vollständige Legacy-Alpha:** [Build v29 starten](https://kiwimii.github.io/Tales-of-the-blaue-Adria-/?v=29)
 
-**Neue Next-Alpha:** [Sprint 55 starten](https://kiwimii.github.io/Tales-of-the-blaue-Adria-/next/?v=55)
+**Neue Next-Alpha:** [Sprint 56 starten](https://kiwimii.github.io/Tales-of-the-blaue-Adria-/next/?v=56)
 
 Inhaltlicher Stand: **Sprint 28 · v1.8.0 · Build v29**
 
 Die Alpha ist von Freitagmorgen bis zum Sonntagsfinale spielbar. Spielstände, Export/Import, mobile Steuerung und Offline-Nutzung werden unterstützt.
 
-Die Zielarchitektur enthält die **Gameplay-Sprints 29–55** und wird parallel unter `/next/` veröffentlicht. Neu sind unter anderem der Weltraum-Schriftcrawl, die ausgebaute Charaktererstellung, die Gundula-/Uli-Einlassquest mit physischem Tor, betretbare Innenräume, 13 sichtbare Beziehungen sowie überarbeitetes Flip Cup, Beer Pong und Flunkyball. Die Sprints 46–55 ersetzen die aktive Außenwelt durch eine deutlich größere, datengetriebene Karte mit sieben klaren Regionen, stufenweisen Freischaltungen, Minikarte, Landmarken, besserer Performance sowie erweitertem Licht, Wasser und Umgebungsanimationen.
+Die Zielarchitektur enthält die **Gameplay-Sprints 29–56** und wird parallel unter `/next/` veröffentlicht. Neu sind unter anderem der Weltraum-Schriftcrawl, die ausgebaute Charaktererstellung, die Gundula-/Uli-Einlassquest mit physischem Tor, betretbare Innenräume, 13 sichtbare Beziehungen sowie überarbeitetes Flip Cup, Beer Pong und Flunkyball. Die Sprints 46–55 erweiterten die Außenwelt zu einer großen, datengetriebenen Karte mit sieben Regionen. Sprint 56 korrigiert Maßstab, Objektabstände, Wassergrenzen, Kollisionsflächen, Tiefensortierung und unrealistische Umgebungsanimationen.
 
 ## Entwicklungsstatus
 
@@ -30,6 +30,7 @@ Die vollständige Entscheidung und ihre Abnahmekriterien stehen in [ARCHITECTURE
 
 - Charaktererstellung und Supermarkt-Prolog mit 25-Euro-Budget
 - frei begehbarer, in sieben Regionen gegliederter Campingplatz mit stufenweisen Freischaltungen
+- realistische Objektabstände, abgestufte Kollisionsflächen und Y-basierte Tiefensortierung
 - neun Freunde mit Positionen, Dialogen, Werten und Fähigkeiten
 - Zeit, Bedürfnisse, Alkohol, Würde, Chaos, Beziehungen und Inventar
 - Quests, Kontrollen durch Gundula und Uli und mehrere Enden
@@ -63,7 +64,7 @@ Der Befehl prüft:
 - Syntax, Vollständigkeit und Ladefolge aller veröffentlichten Runtime-Module
 - Build-Version, PWA-Manifest und Offline-Cache
 - TypeScript-Typen der Zielarchitektur
-- automatisierte Store-, Persistenz-, Welt- und Freitag-bis-Sonntag-Endgame-Szenarien
+- automatisierte Store-, Persistenz-, Welt-, Realismus- und Freitag-bis-Sonntag-Endgame-Szenarien
 - den vollständigen Vite-Produktionsbuild
 
-Die detaillierte Sprint-Historie liegt in [SPRINTS.md](docs/SPRINTS.md), [SPRINTS-21-28.md](docs/SPRINTS-21-28.md), [SPRINTS-29-33.md](docs/SPRINTS-29-33.md), [SPRINTS-34-43.md](docs/SPRINTS-34-43.md), [SPRINTS-44.md](docs/SPRINTS-44.md), [SPRINTS-45.md](docs/SPRINTS-45.md) und [SPRINTS-46-55.md](docs/SPRINTS-46-55.md).
+Die detaillierte Sprint-Historie liegt in [SPRINTS.md](docs/SPRINTS.md), [SPRINTS-21-28.md](docs/SPRINTS-21-28.md), [SPRINTS-29-33.md](docs/SPRINTS-29-33.md), [SPRINTS-34-43.md](docs/SPRINTS-34-43.md), [SPRINTS-44.md](docs/SPRINTS-44.md), [SPRINTS-45.md](docs/SPRINTS-45.md), [SPRINTS-46-55.md](docs/SPRINTS-46-55.md) und [SPRINT-56.md](docs/SPRINT-56.md).
