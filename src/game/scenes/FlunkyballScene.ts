@@ -39,22 +39,44 @@ export class FlunkyballScene extends Phaser.Scene {
     );
 
     const graphics = this.add.graphics();
-    graphics.fillGradientStyle(0x3d6d52, 0x3d6d52, 0xc69f64, 0xc69f64, 1);
+    graphics.fillGradientStyle(0x214d62, 0x4b7f80, 0xd18f62, 0xf0bd72, 1);
     graphics.fillRect(0, 0, 960, 640);
-    graphics.fillStyle(0xdec58c, 1);
+    graphics.fillStyle(0xffd77c, 0.35);
+    graphics.fillCircle(760, 120, 74);
+    graphics.fillStyle(0xffe6a5, 0.86);
+    graphics.fillCircle(760, 120, 45);
+    this.drawBeachBackdrop(graphics);
+    graphics.fillGradientStyle(0xe9d09a, 0xdac18c, 0xcaa875, 0xd8b980, 1);
     graphics.fillRect(0, 400, 960, 240);
-    graphics.fillStyle(0x4a91ad, 1);
+    graphics.fillGradientStyle(0x56aeca, 0x4c9fbe, 0x2d789d, 0x397f9f, 1);
     graphics.fillRect(0, 530, 960, 110);
-    graphics.fillStyle(0xd5c27f, 1);
+    graphics.lineStyle(3, 0xbfeaf0, 0.5);
+    for (let y = 548; y < 625; y += 22) graphics.lineBetween(20, y, 940, y - 7);
+    graphics.fillStyle(0x2d241d, 0.24);
+    graphics.fillEllipse(480, 430, 94, 28);
+    graphics.fillGradientStyle(0xe5d594, 0xd4c073, 0xa98c55, 0xbda264, 1);
     graphics.fillRoundedRect(455, 325, 50, 105, 10);
     graphics.fillStyle(0xeae4cd, 1);
     graphics.fillRect(462, 304, 36, 30);
+    graphics.fillStyle(0xef685c, 0.82);
+    graphics.fillRect(461, 361, 38, 13);
+    graphics.lineStyle(3, 0xffffff, 0.55);
+    graphics.strokeRoundedRect(455, 325, 50, 105, 10);
 
-    this.add.text(480, 45, 'FLUNKYBALL · DREI PHASEN, KEINE AUSREDEN', {
-      fontFamily: 'system-ui, sans-serif',
-      fontSize: '29px',
+    this.add.text(480, 24, 'STRANDMEISTERSCHAFT · BLAUE ADRIA', {
+      fontFamily: 'Arial, system-ui, sans-serif',
+      fontSize: '11px',
+      fontStyle: 'bold',
+      letterSpacing: 3,
+      color: '#173e48',
+    }).setOrigin(0.5);
+    this.add.text(480, 53, 'FLUNKYBALL', {
+      fontFamily: 'Arial Black, system-ui, sans-serif',
+      fontSize: '34px',
       fontStyle: 'bold',
       color: '#fff0bd',
+      stroke: '#214452',
+      strokeThickness: 5,
     }).setOrigin(0.5);
     this.message = this.add.text(480, 100, '1/3 WURF · Stoppe den Marker im Zielbereich.', {
       fontFamily: 'system-ui, sans-serif',
@@ -64,7 +86,9 @@ export class FlunkyballScene extends Phaser.Scene {
       padding: { x: 15, y: 9 },
     }).setOrigin(0.5);
 
-    this.add.rectangle(480, 190, 520, 34, 0x101714, 0.9);
+    this.add.rectangle(480, 190, 536, 50, 0x07151c, 0.28)
+      .setStrokeStyle(2, 0xfff0bd, 0.3);
+    this.add.rectangle(480, 190, 520, 34, 0x101714, 0.92);
     this.target = this.add.rectangle(480, 190, this.throwWindow * 10, 30, 0xe4bd55, 1);
     this.marker = this.add.rectangle(230, 190, 8, 46, 0xffffff, 1);
     this.progressLabel = this.add.text(480, 250, '', {
@@ -82,7 +106,33 @@ export class FlunkyballScene extends Phaser.Scene {
       fontFamily: 'system-ui, sans-serif',
       fontSize: '15px',
       color: '#20342e',
+      backgroundColor: '#fff0c8b8',
+      padding: { x: 13, y: 7 },
     }).setOrigin(0.5);
+  }
+
+  private drawBeachBackdrop(graphics: Phaser.GameObjects.Graphics): void {
+    graphics.fillStyle(0x173d35, 0.72);
+    for (const x of [35, 120, 850, 925]) {
+      graphics.fillRect(x - 7, 225, 14, 190);
+      graphics.fillCircle(x, 205, 68);
+      graphics.fillStyle(0x2c6248, 0.88);
+      graphics.fillCircle(x - 30, 230, 48);
+      graphics.fillCircle(x + 34, 232, 46);
+      graphics.fillStyle(0x173d35, 0.72);
+    }
+    graphics.fillStyle(0x36594a, 0.6);
+    for (let index = 0; index < 8; index += 1) {
+      const x = 70 + index * 120;
+      graphics.fillCircle(x, 381, 15 + (index % 3) * 4);
+    }
+    graphics.lineStyle(4, 0xfff0bd, 0.22);
+    graphics.lineBetween(180, 350, 780, 350);
+    for (let x = 210; x < 780; x += 76) {
+      const color = x % 3 === 0 ? 0xef685c : x % 2 === 0 ? 0xf4c75d : 0x66dac6;
+      graphics.fillStyle(color, 0.9);
+      graphics.fillTriangle(x, 350, x + 45, 350, x + 22, 377);
+    }
   }
 
   update(_: number, delta: number): void {

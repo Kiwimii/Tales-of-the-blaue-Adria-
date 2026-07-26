@@ -32,6 +32,29 @@ export interface ChallengeResolution {
   margin: number;
 }
 
+export interface Point {
+  x: number;
+  y: number;
+}
+
+/**
+ * Builds the Beer Pong aiming path around the active cup.
+ *
+ * The horizontal sweep always crosses the target's x coordinate and the
+ * vertical wave is zero at that exact point. Every cup is therefore reachable
+ * even when alcohol increases the amount of sway.
+ */
+export function beerPongReticlePosition(progress: number, target: Point, alcohol: number): Point {
+  const boundedProgress = clamp(progress, 0, 1);
+  const minX = 255;
+  const maxX = 705;
+  const x = minX + boundedProgress * (maxX - minX);
+  const sway = clamp(22 + alcohol * 0.16, 22, 38);
+  const relativeX = (x - target.x) / (maxX - minX);
+  const y = target.y + Math.sin(relativeX * Math.PI * 4) * sway;
+  return { x, y };
+}
+
 export function calculateChallengeChance(
   state: Pick<SessionState, 'profile' | 'needs' | 'metrics' | 'relationships' | 'team'>,
   challenge: ChallengeDefinition,

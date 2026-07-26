@@ -1,6 +1,6 @@
 # Migrationscheckliste
 
-Stand: 26. Juli 2026 · nach Gameplay-Sprint 43
+Stand: 26. Juli 2026 · nach Gameplay-Sprint 44
 
 | Bereich | Referenz in `docs/` | Zielarchitektur `src/` | Status |
 | --- | --- | --- | --- |
@@ -17,7 +17,7 @@ Stand: 26. Juli 2026 · nach Gameplay-Sprint 43
 | Teamverwaltung | aktives Team und Reserve | Manni/Ronny mit Loyalität und Rollenboni; Wechsel/Reserve fehlen | teilweise |
 | Kämpfe | Teamkampf, Wechsel, Status und Gegner-KI | taktisches Duell mit Zustand und Rollen; Wechsel/Status/KI-Tiefe fehlen | teilweise |
 | Flip Cup | vollständig | Best-of-three mit Gegnerfortschritt, zwei Phasen und dynamischem Timing | abgeschlossen |
-| Beer Pong | vollständig | Präzisionsspiel mit Zielbechern, Würfen und Zustandsmodifikatoren | abgeschlossen |
+| Beer Pong | vollständig | garantierte Zielbahn für jeden Becher, Wurfanimation, Präzision und Zustandsmodifikatoren | abgeschlossen |
 | Flunkyball | vollständig | Wurf-, Sprint- und Trinkphase mit Zustandsmodifikatoren | abgeschlossen |
 | Trinkduell | vollständig | fehlt | offen |
 | Sonntags-Aufräumen | vollständig | fehlt | offen |

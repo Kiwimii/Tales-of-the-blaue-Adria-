@@ -58,6 +58,7 @@ export class WorldScene extends Phaser.Scene {
     this.physics.world.setBounds(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
     this.cameras.main.setBounds(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
     this.drawGround();
+    this.drawSceneryDetails();
 
     const obstacles = this.drawWorldObjects();
     this.drawGate(this.gateWasOpen);
@@ -151,26 +152,58 @@ export class WorldScene extends Phaser.Scene {
 
   private drawGround(): void {
     const graphics = this.add.graphics();
-    graphics.fillStyle(0x73965c, 1);
+    graphics.fillGradientStyle(0x6f985f, 0x789e63, 0x567d50, 0x628651, 1);
     graphics.fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+    graphics.fillStyle(0xa4c178, 0.18);
+    for (let x = 22; x < WORLD_WIDTH; x += 44) {
+      for (let y = 18; y < WORLD_HEIGHT; y += 48) {
+        const offset = ((x / 44 + y / 48) % 3) * 4;
+        graphics.fillCircle(x + offset, y, 2);
+        graphics.fillRect(x + 9, y + 8, 2, 7);
+      }
+    }
 
-    graphics.fillStyle(0x4d91ae, 1);
+    graphics.fillStyle(0x3d83a4, 1);
     graphics.fillRoundedRect(1240, 30, 360, 760, 70);
-    graphics.fillStyle(0x8ec7d4, 0.55);
-    for (let y = 85; y < 760; y += 42) graphics.fillRoundedRect(1280, y, 270, 6, 3);
-    graphics.fillStyle(0xe4cf91, 1);
+    graphics.fillGradientStyle(0x62b3cb, 0x4b9fbd, 0x2f7096, 0x357e9d, 0.72);
+    graphics.fillRoundedRect(1260, 50, 340, 725, 58);
+    graphics.lineStyle(3, 0xb7ecf2, 0.45);
+    for (let y = 85; y < 760; y += 36) {
+      graphics.beginPath();
+      graphics.moveTo(1278, y);
+      graphics.lineTo(1355, y - 6);
+      graphics.lineTo(1440, y + 5);
+      graphics.lineTo(1535, y - 4);
+      graphics.strokePath();
+    }
+    graphics.fillStyle(0xe7cf8f, 1);
     graphics.fillRoundedRect(1125, 535, 155, 270, 36);
+    graphics.fillStyle(0xf2dfaa, 0.72);
+    for (let y = 555; y < 795; y += 26) {
+      graphics.fillEllipse(1170 + ((y / 26) % 2) * 20, y, 36, 5);
+    }
     this.add.text(1290, 66, 'BLAUE ADRIA', this.zoneLabel('#eaf9ff')).setDepth(2);
 
-    graphics.fillStyle(0xb9aa83, 1);
+    graphics.fillStyle(0x9f9576, 0.5);
+    graphics.fillRoundedRect(682, 777, 296, 323, 31);
+    graphics.fillStyle(0xbfae82, 1);
     graphics.fillRoundedRect(690, 785, 280, 315, 26);
-    graphics.fillStyle(0xd0bd8d, 1);
+    graphics.fillStyle(0xd5c18c, 1);
     graphics.fillRoundedRect(770, 40, 170, 765, 28);
     graphics.fillRoundedRect(250, 380, 1030, 92, 30);
     graphics.fillRoundedRect(260, 650, 920, 78, 30);
+    graphics.lineStyle(3, 0xf0dfaa, 0.35);
+    graphics.strokeRoundedRect(770, 40, 170, 765, 28);
+    graphics.strokeRoundedRect(250, 380, 1030, 92, 30);
+    graphics.strokeRoundedRect(260, 650, 920, 78, 30);
+    graphics.fillStyle(0x806f53, 0.16);
+    for (let x = 292; x < 1230; x += 72) graphics.fillEllipse(x, 426, 22, 8);
+    for (let x = 300; x < 1150; x += 78) graphics.fillEllipse(x, 691, 24, 8);
 
-    graphics.fillStyle(0x777d7b, 1);
+    graphics.fillGradientStyle(0x8c9290, 0x7e8583, 0x5d6262, 0x676d6b, 1);
     graphics.fillRoundedRect(510, 850, 690, 220, 24);
+    graphics.fillStyle(0xffffff, 0.045);
+    for (let y = 868; y < 1050; y += 28) graphics.fillRect(530, y, 650, 2);
     graphics.lineStyle(4, 0xd8d4bd, 0.85);
     for (let x = 550; x < 1160; x += 102) {
       graphics.lineBetween(x, 885, x, 1018);
@@ -183,6 +216,64 @@ export class WorldScene extends Phaser.Scene {
     this.add.text(1152, 764, 'STRAND', this.zoneLabel('#433521')).setDepth(2);
     this.add.text(430, 690, 'SÜDLAGER', this.zoneLabel('#26301d')).setDepth(2);
     this.add.text(455, 395, 'NORDLAGER', this.zoneLabel('#26301d')).setDepth(2);
+  }
+
+  private drawSceneryDetails(): void {
+    const details = this.add.graphics().setDepth(3);
+
+    details.fillStyle(0x24472e, 0.42);
+    for (let y = 105; y < 760; y += 54) {
+      details.fillTriangle(1218, y, 1235, y - 13, 1231, y + 14);
+      details.fillTriangle(1205, y + 8, 1224, y - 5, 1218, y + 22);
+    }
+
+    for (const [x, y] of [[330, 505], [480, 760], [1040, 760], [1090, 310]] as Array<[number, number]>) {
+      details.fillStyle(0x4d3828, 1);
+      details.fillRect(x - 4, y, 8, 48);
+      details.fillStyle(0xffdc7a, 0.16);
+      details.fillCircle(x, y, 29);
+      details.fillStyle(0xffdc7a, 1);
+      details.fillCircle(x, y, 7);
+      details.lineStyle(2, 0xfff3bd, 0.85);
+      details.strokeCircle(x, y, 10);
+    }
+
+    details.lineStyle(3, 0x44311f, 0.75);
+    details.lineBetween(745, 98, 1098, 112);
+    const flagColors = [0xef685c, 0xf4c75d, 0x66dac6, 0x6e9fd2];
+    for (let index = 0; index < 12; index += 1) {
+      const x = 756 + index * 29;
+      const y = 99 + index * 1.15;
+      details.fillStyle(flagColors[index % flagColors.length], 0.95);
+      details.fillTriangle(x, y, x + 22, y + 2, x + 11, y + 24);
+    }
+
+    details.fillStyle(0x2a251f, 0.28);
+    details.fillEllipse(745, 621, 128, 48);
+    details.lineStyle(8, 0x75614a, 1);
+    details.strokeCircle(745, 610, 39);
+    const glow = this.add.circle(745, 608, 48, 0xffa142, 0.12).setDepth(4);
+    const flame = this.add.graphics().setDepth(5);
+    flame.fillStyle(0xff5f3b, 0.95);
+    flame.fillTriangle(726, 615, 746, 574, 765, 615);
+    flame.fillStyle(0xffd15d, 0.98);
+    flame.fillTriangle(736, 614, 748, 588, 757, 614);
+    this.tweens.add({
+      targets: [glow, flame],
+      alpha: { from: 0.72, to: 1 },
+      scale: { from: 0.96, to: 1.04 },
+      duration: 540,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.InOut',
+    });
+
+    this.add.text(745, 650, 'FEUERSTELLE', {
+      ...this.zoneLabel('#fff0bd'),
+      fontSize: '12px',
+      backgroundColor: '#173027b8',
+      padding: { x: 6, y: 3 },
+    }).setOrigin(0.5).setDepth(6);
   }
 
   private drawWorldObjects(): Phaser.GameObjects.Zone[] {
@@ -202,45 +293,94 @@ export class WorldScene extends Phaser.Scene {
     const { x, y, width, height } = object;
 
     if (object.kind === 'building') {
-      graphics.fillStyle(0x000000, 0.2);
-      graphics.fillRoundedRect(x + 10, y + 12, width, height, 16);
+      graphics.fillStyle(0x102018, 0.26);
+      graphics.fillEllipse(x + width / 2 + 10, y + height + 8, width * 0.96, 36);
       graphics.fillStyle(color, 1);
       graphics.fillRoundedRect(x, y, width, height, 16);
       graphics.fillStyle(0x573526, 1);
       graphics.fillTriangle(x - 8, y + 18, x + width / 2, y - 42, x + width + 8, y + 18);
+      graphics.fillStyle(0x7f5237, 1);
+      graphics.fillTriangle(x + 8, y + 17, x + width / 2, y - 31, x + width - 8, y + 17);
       graphics.lineStyle(4, 0xffffff, 0.18);
       graphics.strokeRoundedRect(x, y, width, height, 16);
+      graphics.fillStyle(0x69a8bc, 1);
+      graphics.fillRoundedRect(x + 22, y + 42, 48, 42, 5);
+      graphics.fillRoundedRect(x + width - 70, y + 42, 48, 42, 5);
+      graphics.lineStyle(3, 0xe7f6ef, 0.58);
+      graphics.lineBetween(x + 46, y + 43, x + 46, y + 83);
+      graphics.lineBetween(x + width - 46, y + 43, x + width - 46, y + 83);
+      graphics.fillStyle(0x52382d, 1);
+      graphics.fillRoundedRect(x + width / 2 - 25, y + height - 65, 50, 65, 7);
+      graphics.fillStyle(0xf4c75d, 0.95);
+      graphics.fillCircle(x + width / 2 + 15, y + height - 32, 3);
     } else if (object.kind === 'tent' || object.kind === 'party-tent') {
-      graphics.fillStyle(0x000000, 0.18);
-      graphics.fillTriangle(x + 8, y + height + 8, x + width / 2 + 8, y + 8, x + width + 8, y + height + 8);
+      graphics.fillStyle(0x112419, 0.24);
+      graphics.fillEllipse(x + width / 2 + 7, y + height + 7, width * 0.96, 28);
       graphics.fillStyle(color, 1);
       graphics.fillTriangle(x, y + height, x + width / 2, y, x + width, y + height);
       graphics.lineStyle(4, 0xf7e8bd, 0.45);
       graphics.lineBetween(x + width / 2, y + 7, x + width / 2, y + height);
+      graphics.fillStyle(0x172525, 0.38);
+      graphics.fillTriangle(
+        x + width * 0.31,
+        y + height,
+        x + width / 2,
+        y + height * 0.42,
+        x + width * 0.69,
+        y + height,
+      );
+      graphics.lineStyle(2, 0xffefc8, 0.38);
+      graphics.lineBetween(x - 12, y + height + 8, x + width / 2, y);
+      graphics.lineBetween(x + width + 12, y + height + 8, x + width / 2, y);
+      graphics.fillStyle(0xf4c75d, 0.75);
+      graphics.fillCircle(x - 12, y + height + 8, 3);
+      graphics.fillCircle(x + width + 12, y + height + 8, 3);
     } else if (object.kind === 'camper') {
-      graphics.fillStyle(0x000000, 0.18);
-      graphics.fillRoundedRect(x + 8, y + 9, width, height, 18);
+      graphics.fillStyle(0x102018, 0.25);
+      graphics.fillEllipse(x + width / 2 + 8, y + height + 7, width, 34);
       graphics.fillStyle(color, 1);
       graphics.fillRoundedRect(x, y, width, height, 18);
+      graphics.fillStyle(0xef685c, 0.8);
+      graphics.fillRect(x + 9, y + 66, width - 18, 12);
       graphics.fillStyle(0x78a9bd, 1);
       graphics.fillRoundedRect(x + 24, y + 20, 62, 38, 6);
       graphics.fillRoundedRect(x + width - 83, y + 20, 58, 38, 6);
+      graphics.lineStyle(2, 0xdff5f4, 0.7);
+      graphics.lineBetween(x + 55, y + 21, x + 55, y + 57);
+      graphics.fillStyle(0xb8a987, 1);
+      graphics.fillRoundedRect(x + width / 2 - 24, y + 20, 48, 74, 5);
+      graphics.fillStyle(0x5a4c3d, 1);
+      graphics.fillCircle(x + width / 2 + 13, y + 56, 3);
       graphics.fillStyle(0x272d2c, 1);
       graphics.fillCircle(x + 48, y + height, 17);
       graphics.fillCircle(x + width - 48, y + height, 17);
+      graphics.fillStyle(0xc4c8bd, 1);
+      graphics.fillCircle(x + 48, y + height, 7);
+      graphics.fillCircle(x + width - 48, y + height, 7);
     } else if (object.kind === 'tree') {
+      graphics.fillStyle(0x17351f, 0.22);
+      graphics.fillEllipse(x + width * 0.54, y + height * 0.91, width * 0.9, height * 0.3);
       graphics.fillStyle(0x493621, 1);
       graphics.fillRect(x + width * 0.4, y + height * 0.53, width * 0.2, height * 0.46);
-      graphics.fillStyle(0x315f37, 1);
+      graphics.fillStyle(0x2d613a, 1);
       graphics.fillCircle(x + width * 0.5, y + height * 0.38, width * 0.46);
       graphics.fillStyle(0x56824b, 1);
       graphics.fillCircle(x + width * 0.35, y + height * 0.32, width * 0.25);
+      graphics.fillStyle(0x76a35f, 0.9);
+      graphics.fillCircle(x + width * 0.58, y + height * 0.22, width * 0.24);
+      graphics.fillStyle(0xb6d27f, 0.45);
+      graphics.fillCircle(x + width * 0.41, y + height * 0.18, width * 0.1);
     } else if (object.kind === 'fence') {
       graphics.fillStyle(0x5f4a35, 1);
       graphics.fillRect(x, y, width, height);
       graphics.fillStyle(0xd5bf8f, 1);
       for (let post = x; post < x + width; post += 48) graphics.fillRect(post, y - 9, 9, height + 18);
     } else if (object.kind === 'table' || object.kind === 'bench') {
+      graphics.fillStyle(0x17301f, 0.24);
+      graphics.fillEllipse(x + width / 2 + 4, y + height + 10, width, 20);
+      graphics.fillStyle(0x48321f, 1);
+      graphics.fillRect(x + 12, y + height - 2, 8, 24);
+      graphics.fillRect(x + width - 20, y + height - 2, 8, 24);
       graphics.fillStyle(0x6f472b, 1);
       graphics.fillRoundedRect(x, y, width, height, 8);
       graphics.lineStyle(4, 0xc48a4f, 0.75);

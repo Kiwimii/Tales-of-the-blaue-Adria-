@@ -6,13 +6,13 @@ Ein schwarzhumoriges, storygetriebenes Camping-RPG für Smartphone und Desktop. 
 
 **Vollständige Legacy-Alpha:** [Build v29 starten](https://kiwimii.github.io/Tales-of-the-blaue-Adria-/?v=29)
 
-**Neue Next-Alpha:** [Sprints 34–43 starten](https://kiwimii.github.io/Tales-of-the-blaue-Adria-/next/?v=43)
+**Neue Next-Alpha:** [Sprint 44 starten](https://kiwimii.github.io/Tales-of-the-blaue-Adria-/next/?v=44)
 
 Inhaltlicher Stand: **Sprint 28 · v1.8.0 · Build v29**
 
 Die Alpha ist von Freitagmorgen bis zum Sonntagsfinale spielbar. Spielstände, Export/Import, mobile Steuerung und Offline-Nutzung werden unterstützt.
 
-Die Zielarchitektur enthält die **Gameplay-Sprints 29–43** und wird parallel unter `/next/` veröffentlicht. Neu sind unter anderem der Weltraum-Schriftcrawl, die ausgebaute Charaktererstellung, die Gundula-/Uli-Einlassquest mit physischem Tor, eine neue große Welt, betretbare Innenräume, 13 sichtbare Beziehungen sowie überarbeitetes Flip Cup, Beer Pong und Flunkyball.
+Die Zielarchitektur enthält die **Gameplay-Sprints 29–44** und wird parallel unter `/next/` veröffentlicht. Neu sind unter anderem der Weltraum-Schriftcrawl, die ausgebaute Charaktererstellung, die Gundula-/Uli-Einlassquest mit physischem Tor, eine neue große Welt, betretbare Innenräume, 13 sichtbare Beziehungen sowie überarbeitetes Flip Cup, Beer Pong und Flunkyball. Sprint 44 garantiert erreichbare Beer-Pong-Ziele und führt die neue visuelle Richtung über Oberfläche, Welt, Innenräume, Duell und Minispiele ein.
 
 ## Entwicklungsstatus
 
@@ -65,4 +65,4 @@ Der Befehl prüft:
 - automatisierte Store-, Persistenz- und Freitag-bis-Sonntag-Endgame-Szenarien
 - den vollständigen Vite-Produktionsbuild
 
-Die detaillierte Sprint-Historie liegt in [SPRINTS.md](docs/SPRINTS.md), [SPRINTS-21-28.md](docs/SPRINTS-21-28.md), [SPRINTS-29-33.md](docs/SPRINTS-29-33.md) und [SPRINTS-34-43.md](docs/SPRINTS-34-43.md).
+Die detaillierte Sprint-Historie liegt in [SPRINTS.md](docs/SPRINTS.md), [SPRINTS-21-28.md](docs/SPRINTS-21-28.md), [SPRINTS-29-33.md](docs/SPRINTS-29-33.md), [SPRINTS-34-43.md](docs/SPRINTS-34-43.md) und [SPRINTS-44.md](docs/SPRINTS-44.md).

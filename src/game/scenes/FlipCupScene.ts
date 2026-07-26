@@ -36,30 +36,48 @@ export class FlipCupScene extends Phaser.Scene {
     this.opponentInterval = Math.max(4200, 6500 + (this.flipWindow - 12) * 70);
 
     const bg = this.add.graphics();
-    bg.fillGradientStyle(0x173d36, 0x173d36, 0x6a412c, 0x6a412c, 1);
+    bg.fillGradientStyle(0x081b27, 0x153b3e, 0x42202a, 0x6f3229, 1);
     bg.fillRect(0, 0, 960, 640);
-    bg.fillStyle(0x8c5c35, 1);
+    this.drawPartyBackdrop(bg);
+    bg.fillStyle(0x110b0c, 0.32);
+    bg.fillRoundedRect(76, 382, 808, 132, 24);
+    bg.fillGradientStyle(0xa65a34, 0x8b482e, 0x68321f, 0x753820, 1);
     bg.fillRoundedRect(90, 390, 780, 110, 18);
+    bg.lineStyle(4, 0xefaf61, 0.55);
+    bg.strokeRoundedRect(90, 390, 780, 110, 18);
+    bg.lineStyle(2, 0xffd795, 0.16);
+    for (let y = 410; y < 490; y += 20) bg.lineBetween(106, y, 854, y);
     bg.fillStyle(0x4f2f1e, 1);
     bg.fillRect(120, 490, 38, 120);
     bg.fillRect(802, 490, 38, 120);
 
-    this.add.text(480, 42, 'FLIP CUP · BEST OF THREE', {
-      fontFamily: 'system-ui, sans-serif',
-      fontSize: '32px',
+    this.add.text(480, 26, 'NACHTPROGRAMM · PARTY-ZELT', {
+      fontFamily: 'Arial, system-ui, sans-serif',
+      fontSize: '11px',
+      fontStyle: 'bold',
+      letterSpacing: 3,
+      color: '#66dac6',
+    }).setOrigin(0.5);
+    this.add.text(480, 55, 'FLIP CUP', {
+      fontFamily: 'Arial Black, system-ui, sans-serif',
+      fontSize: '34px',
       fontStyle: 'bold',
       color: '#ffe6a7',
+      stroke: '#48171d',
+      strokeThickness: 5,
     }).setOrigin(0.5);
 
-    this.scoreLabel = this.add.text(480, 86, '', {
+    this.scoreLabel = this.add.text(480, 95, '', {
       fontFamily: 'system-ui, sans-serif',
       fontSize: '18px',
       fontStyle: 'bold',
       color: '#f8f0dd',
+      backgroundColor: '#07151fe0',
+      padding: { x: 16, y: 7 },
     }).setOrigin(0.5);
     this.updateScore();
 
-    this.message = this.add.text(480, 132, 'Leeren: Stoppe den Marker im goldenen Bereich.', {
+    this.message = this.add.text(480, 144, 'Leeren: Stoppe den Marker im goldenen Bereich.', {
       fontFamily: 'system-ui, sans-serif',
       fontSize: '18px',
       color: '#f8f0dd',
@@ -105,10 +123,13 @@ export class FlipCupScene extends Phaser.Scene {
   }
 
   private drawTimingBar(): void {
-    this.add.rectangle(480, 215, 520, 32, 0x0e1715, 0.9);
+    this.add.rectangle(480, 215, 536, 48, 0x061218, 0.72)
+      .setStrokeStyle(2, 0xffe5a5, 0.18);
+    this.add.rectangle(480, 215, 520, 32, 0x0e1715, 0.96);
     this.targetZone = this.add.rectangle(480, 215, 120, 28, 0xe4bd55, 0.95);
     this.perfectZone = this.add.rectangle(480, 215, 54, 28, 0x79d59d, 0.98);
-    this.marker = this.add.rectangle(230, 215, 8, 44, 0xffffff, 1);
+    this.marker = this.add.rectangle(230, 215, 8, 48, 0xffffff, 1)
+      .setStrokeStyle(3, 0x66dac6, 0.8);
     this.updateTargetZone(this.drinkWindow);
   }
 
@@ -124,14 +145,42 @@ export class FlipCupScene extends Phaser.Scene {
   }
 
   private makeCup(x: number, y: number): Phaser.GameObjects.Container {
+    const shadow = this.add.ellipse(0, 40, 76, 21, 0x13090b, 0.38);
     const body = this.add.graphics();
-    body.fillStyle(0xd94d45, 1);
+    body.fillGradientStyle(0xf26765, 0xd94754, 0xa62c3d, 0xbd3446, 1);
     body.fillRoundedRect(-30, -48, 60, 82, 8);
     body.fillStyle(0xffffff, 0.9);
     body.fillRect(-29, -35, 58, 8);
+    body.fillStyle(0xffffff, 0.16);
+    body.fillRoundedRect(-20, -26, 9, 46, 4);
     body.fillStyle(0x7d2925, 1);
     body.fillEllipse(0, 34, 48, 12);
-    return this.add.container(x, y, [body]);
+    return this.add.container(x, y, [shadow, body]);
+  }
+
+  private drawPartyBackdrop(graphics: Phaser.GameObjects.Graphics): void {
+    graphics.fillStyle(0x03090d, 0.38);
+    graphics.fillRect(0, 438, 960, 202);
+    graphics.lineStyle(2, 0xfff0ba, 0.3);
+    graphics.beginPath();
+    graphics.moveTo(0, 116);
+    for (let x = 0; x <= 960; x += 80) graphics.lineTo(x, 132 + ((x / 80) % 2) * 18);
+    graphics.strokePath();
+    for (let index = 0; index < 13; index += 1) {
+      const x = 30 + index * 77;
+      const y = 130 + (index % 2) * 18;
+      const color = index % 3 === 0 ? 0xf4c75d : index % 3 === 1 ? 0x66dac6 : 0xef685c;
+      graphics.fillStyle(color, 0.12);
+      graphics.fillCircle(x, y, 22);
+      graphics.fillStyle(color, 0.98);
+      graphics.fillCircle(x, y, 6);
+    }
+    for (let index = 0; index < 10; index += 1) {
+      const x = 24 + index * 104;
+      graphics.fillStyle(0x050b0f, 0.78);
+      graphics.fillCircle(x, 490, 27);
+      graphics.fillRoundedRect(x - 26, 511, 52, 120, 19);
+    }
   }
 
   private handleInput(): void {
