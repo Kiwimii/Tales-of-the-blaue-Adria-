@@ -15,6 +15,8 @@ export function createGame(parent: HTMLElement): Phaser.Game {
     height: 640,
     backgroundColor: '#10241f',
     antialias: true,
+    antialiasGL: true,
+    roundPixels: false,
     pixelArt: false,
     physics: {
       default: 'arcade',

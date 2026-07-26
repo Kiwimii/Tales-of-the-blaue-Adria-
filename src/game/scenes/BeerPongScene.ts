@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { beerPongReticlePosition, conditionModifier, totalTeamBonus } from '../mechanics';
 import { gameStore } from '../state/GameStore';
+import { addCinematicFrame } from '../visuals';
 
 export class BeerPongScene extends Phaser.Scene {
   private reticle!: Phaser.GameObjects.Container;
@@ -122,6 +123,7 @@ export class BeerPongScene extends Phaser.Scene {
       color: '#b9d8d4',
     }).setOrigin(0.5);
     this.updateScore();
+    addCinematicFrame(this, 0x66dac6);
   }
 
   update(_: number, delta: number): void {

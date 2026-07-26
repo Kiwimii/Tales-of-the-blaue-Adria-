@@ -497,12 +497,19 @@ function CharacterPreview({ profile, style }: { profile: PlayerProfile; style: C
     >
       <div className="preview-ear preview-ear-left" />
       <div className="preview-ear preview-ear-right" />
-      <div className="preview-head"><i className="preview-eye left-eye" /><i className="preview-eye right-eye" /></div>
+      <div className="preview-head">
+        <i className="preview-brow left-brow" />
+        <i className="preview-brow right-brow" />
+        <i className="preview-eye left-eye" />
+        <i className="preview-eye right-eye" />
+        <i className="preview-nose" />
+        <i className="preview-mouth" />
+      </div>
       <div className="preview-hair" />
       <div className="preview-accessory" />
-      <div className="preview-shirt" />
+      <div className="preview-shirt"><i className="preview-shirt-seam" /><i className="preview-pocket" /></div>
       <div className="preview-arms"><span /><span /></div>
-      <div className="preview-legs"><span /><span /></div>
+      <div className="preview-legs"><span><i /></span><span><i /></span></div>
     </div>
   );
 }
