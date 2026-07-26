@@ -68,11 +68,10 @@ export class ReservationPuzzleScene extends Phaser.Scene {
       'Buchungsumfang: 3 Personen, 2 Zelte, ausdrücklich kein Strom',
       'Gundulas Brett enthält mehrere frühere Aliasnamen der Gruppe.',
     ];
-    const clueBox = this.add.rectangle(480, 155, 820, 116, 0x0b1918, 0.9).setStrokeStyle(2, 0xf4c75d, 0.45);
+    this.add.rectangle(480, 155, 820, 116, 0x0b1918, 0.9).setStrokeStyle(2, 0xf4c75d, 0.45).setDepth(1);
     clues.forEach((clue, index) => this.add.text(95, 116 + index * 25, `• ${clue}`, {
       fontFamily: 'system-ui', fontSize: '15px', color: index === 3 ? '#d8b7ff' : '#e9eadb',
-    }));
-    clueBox.setDepth(-1);
+    }).setDepth(2));
 
     CHOICES.forEach((choice, index) => this.addChoice(choice, index));
     this.feedback = this.add.text(480, 580, 'Wähle die einzige Reservierung, zu der alle Hinweise passen.', {
