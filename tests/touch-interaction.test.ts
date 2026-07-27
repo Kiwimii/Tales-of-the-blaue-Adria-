@@ -6,6 +6,7 @@ import {
   canTriggerAction,
   isActionTap,
   isDialogInputReady,
+  shouldTriggerContextAction,
 } from '../src/game/touchInteraction';
 
 describe('touch interaction guards', () => {
@@ -20,6 +21,13 @@ describe('touch interaction guards', () => {
     const triggeredAt = 1_000;
     expect(canTriggerAction(triggeredAt, triggeredAt + ACTION_TAP_DEBOUNCE_MS - 1)).toBe(false);
     expect(canTriggerAction(triggeredAt, triggeredAt + ACTION_TAP_DEBOUNCE_MS)).toBe(true);
+  });
+
+  it('allows a short movement-zone tap only for a highlighted nearby interaction', () => {
+    expect(shouldTriggerContextAction(true, 4, -3, false)).toBe(true);
+    expect(shouldTriggerContextAction(false, 4, -3, false)).toBe(false);
+    expect(shouldTriggerContextAction(true, 4, -3, true)).toBe(false);
+    expect(shouldTriggerContextAction(true, ACTION_TAP_MAX_DISTANCE + 1, 0, false)).toBe(false);
   });
 
   it('keeps newly opened dialog options blocked through the triggering touch', () => {
