@@ -46,9 +46,7 @@ function drawGroundVariation(scene: Phaser.Scene, profile: VisualProfile): void 
 function drawArrivalDetails(scene: Phaser.Scene): void {
   const ground = scene.add.graphics().setDepth(3.2);
   ground.lineStyle(4, 0x4f5554, 0.48);
-  for (const x of [625, 735, 845, 955, 1065, 1175, 1285]) {
-    ground.lineBetween(x, 1515, x, 1680);
-  }
+  for (const x of [625, 735, 845, 955, 1065, 1175, 1285]) ground.lineBetween(x, 1515, x, 1680);
   ground.lineStyle(3, 0xd9d3b9, 0.58).lineBetween(740, 1330, 940, 1330);
   ground.lineStyle(8, 0x5e574a, 0.18).lineBetween(790, 1720, 790, 1305).lineBetween(885, 1720, 885, 1305);
   for (let y = 1360; y < 1710; y += 58) {
@@ -113,6 +111,14 @@ function drawCentralCampDetails(scene: Phaser.Scene): void {
     props.fillStyle(index % 2 ? 0xb8aa82 : 0x8e7f5d).fillCircle(946 + index * 8, 1066 + (index % 3) * 7, 5);
   }
 
+  const hedge = scene.add.graphics().setDepth(worldDepth(1295));
+  for (const [start, end] of [[245, 630], [1010, 1290]] as const) {
+    for (let x = start; x <= end; x += 20) {
+      hedge.fillStyle(x % 40 ? 0x315c3f : 0x426f46, 0.96).fillCircle(x, 1270 + (x % 3) * 3, 18)
+        .fillStyle(0x6f9957, 0.48).fillCircle(x - 5, 1261, 8);
+    }
+  }
+
   drawCampingChair(scene, 815, 1035, 0xef685c);
   drawCampingChair(scene, 1015, 1100, 0x66a7c7);
   drawCampingChair(scene, 760, 950, 0xd4a44e);
@@ -122,9 +128,7 @@ function drawCentralCampDetails(scene: Phaser.Scene): void {
     lines.lineStyle(2, 0xf0e4bd, 0.36)
       .lineBetween(x - 13, y + height + 8, x + width / 2, y + 8)
       .lineBetween(x + width + 13, y + height + 8, x + width / 2, y + 8);
-    for (const pegX of [x - 13, x + width + 13]) {
-      lines.fillStyle(0x5b4935).fillRect(pegX - 2, y + height + 5, 4, 10);
-    }
+    for (const pegX of [x - 13, x + width + 13]) lines.fillStyle(0x5b4935).fillRect(pegX - 2, y + height + 5, 4, 10);
   }
 }
 
@@ -148,9 +152,7 @@ function drawNorthCampDetails(scene: Phaser.Scene): void {
   }
   props.fillStyle(0x5d3f2d).fillRoundedRect(350, 500, 78, 35, 5)
     .fillStyle(0x315c3f).fillRoundedRect(357, 488, 64, 17, 6);
-  for (let index = 0; index < 5; index += 1) {
-    props.fillStyle(index % 2 ? 0xe8cf75 : 0xe98b8b).fillCircle(367 + index * 11, 489, 4);
-  }
+  for (let index = 0; index < 5; index += 1) props.fillStyle(index % 2 ? 0xe8cf75 : 0xe98b8b).fillCircle(367 + index * 11, 489, 4);
   drawCampingChair(scene, 650, 470, 0x537f9e);
   drawCampingChair(scene, 1050, 535, 0x9d5a4e);
 }
@@ -232,7 +234,7 @@ function drawWoodlandDetails(scene: Phaser.Scene): void {
     const x = 1400 + seededFraction('wood-leaf-x', index) * 540;
     const y = 1000 + seededFraction('wood-leaf-y', index) * 770;
     const color = index % 3 === 0 ? 0x9a703f : index % 2 ? 0x5f6939 : 0x784a32;
-    ground.fillStyle(color, 0.3).fillEllipse(x, y, 7, 3).setAngle?.(index * 17);
+    ground.fillStyle(color, 0.3).fillEllipse(x, y, 7 + (index % 3), 3 + (index % 2));
   }
   ground.lineStyle(2, 0x6c563c, 0.24);
   for (let index = 0; index < 20; index += 1) {
