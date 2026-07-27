@@ -1,7 +1,6 @@
 import type Phaser from 'phaser';
 import { applyCampgroundBlueprint } from './campgroundBlueprint';
-import { prepareCampgroundBlueprint } from './campgroundBlueprintBootstrap';
-import { drawCampgroundBlueprintLayer } from './campgroundBlueprintLayer';
+import { addAerialBoundaryObstacles, drawCampgroundBlueprintLayer } from './campgroundBlueprintLayer';
 import type { VisualProfile } from './visuals';
 import { applyRealisticWorldLayout } from './worldRealism';
 import {
@@ -14,8 +13,8 @@ export type { WorldVisualBuild };
 export function buildExpandedWorldVisuals(scene: Phaser.Scene, profile: VisualProfile): WorldVisualBuild {
   applyRealisticWorldLayout();
   applyCampgroundBlueprint();
-  prepareCampgroundBlueprint();
   const visual = buildLegacyWorldObjects(scene, profile);
+  addAerialBoundaryObstacles(scene, visual.obstacles);
   drawCampgroundBlueprintLayer(scene, profile);
   return visual;
 }
