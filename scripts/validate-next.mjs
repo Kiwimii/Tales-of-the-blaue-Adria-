@@ -18,16 +18,26 @@ for (const path of linkedAssets) {
   assert(statSync(resolve(output, relative)).isFile(), `Missing Next asset: ${relative}`);
 }
 
-const javascript = readdirSync(resolve(output, 'assets')).filter((file) => file.endsWith('.js'));
+const assetFiles = readdirSync(resolve(output, 'assets'));
+const javascript = assetFiles.filter((file) => file.endsWith('.js'));
 assert(javascript.length === 2, `Expected an initial and lazy game chunk, found ${javascript.length}.`);
 const sizes = javascript.map((file) => ({ file, bytes: statSync(resolve(output, 'assets', file)).size }));
 const initial = sizes.find(({ file }) => file.startsWith('index-'));
 const game = sizes.find(({ file }) => file.startsWith('createGame-'));
 assert(initial && initial.bytes < 300_000, 'Initial UI bundle must stay below 300 kB.');
 assert(game && game.bytes > initial.bytes, 'Phaser must remain in the lazy game chunk.');
-assert(!readdirSync(resolve(output, 'assets')).some((file) => file.endsWith('.map')), 'Production source maps must not be published.');
+assert(!assetFiles.some((file) => file.endsWith('.map')), 'Production source maps must not be published.');
+
+const stylesheet = assetFiles
+  .filter((file) => file.endsWith('.css'))
+  .map((file) => readFileSync(resolve(output, 'assets', file), 'utf8'))
+  .join('\n');
+assert(stylesheet.includes('.mobile-action-ready'), 'Sprint 85 mobile action feedback is missing from the production CSS.');
+assert(stylesheet.includes('.game-menu-title-block'), 'Sprint 85 menu hierarchy is missing from the production CSS.');
+assert(stylesheet.includes('.encounter-option-chance'), 'Sprint 85 encounter risk display is missing from the production CSS.');
+
 assert(manifest.start_url === './' && manifest.scope === './', 'Next PWA scope is invalid.');
-assert(worker.includes('tales-adria-next-s84'), 'Next service worker cache version is stale.');
+assert(worker.includes('tales-adria-next-s85'), 'Next service worker cache version is stale.');
 assert(worker.includes("destination === 'script'"), 'Game bundles must use the network-first mobile update path.');
 
 console.log(`Next validation passed: ${linkedAssets.length} linked files, ${Math.round(initial.bytes / 1024)} kB initial UI, lazy Phaser chunk.`);

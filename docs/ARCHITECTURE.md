@@ -78,6 +78,27 @@ Attackenfortschritt wird kompatibel über vorhandene Save-Flags gespeichert. Das
 
 Die älteren Berechnungen in `advancedCombat.ts` und `entryDebate.ts` bleiben vorerst als Migrationsreferenz und für bestehende Vergleichstests erhalten, gehören aber nicht mehr zum aktiven Gundula-/Uli- oder Ronny-Kampf.
 
+## Verbindliche UX- und UI-Architektur
+
+`src/game/uxPresentation.ts` ist die gemeinsame Präsentationslogik für verständliche Risikostufen, kurze Aktionsbeschriftungen und kompakte Zieltexte. React-Komponenten dürfen keine abweichenden Grenzwerte oder konkurrierenden Begriffe für dieselbe Spielsituation einführen.
+
+`src/components/PlayExperience.tsx` ist die verbindliche Spielhülle. Das HUD priorisiert in dieser Reihenfolge:
+
+1. aktuelle Aufgabe,
+2. Zeit und Phase,
+3. echte Körperwarnungen,
+4. Menüzugang.
+
+Neue HUD-Elemente dürfen die Spielfläche nicht dauerhaft überdecken und das aktuelle Ziel auf kleinen Displays nicht vor weniger wichtigen Informationen verdrängen.
+
+`src/components/MobileGameControls.tsx` ist die einzige React-basierte mobile Weltsteuerung. Hauptaktionen benötigen eine sichtbare Schaltfläche, eine konkrete Beschriftung, Safe-Area-Abstände und eine Mindestgröße von 44 Pixeln. Unsichtbare großflächige Aktionszonen sind nicht zulässig.
+
+`src/components/EncounterDialog.tsx` ist die verbindliche React-Darstellung für dialogbasierte Entscheidungen. Optionen verwenden gemeinsame Risikostufen, Prozentwerte, Balken, Voraussetzungen und Ergebnisdarstellung. Zusätzliche Dialogkomponenten müssen dasselbe Muster übernehmen.
+
+`src/components/GameMenu.tsx` ist die zentrale Informations- und Verwaltungsoberfläche. Desktop verwendet eine Seitennavigation; kleine Displays verwenden eine horizontal scrollbare Tab-Leiste. Neue Bereiche benötigen Tastatur-, Touch- und Fokusunterstützung.
+
+`src/uxRefresh.css` enthält die Sprint-85-Oberflächenregeln. Neue Animationen benötigen eine `prefers-reduced-motion`-Alternative. Fokuszustände dürfen nicht ausschließlich über Farbe erkennbar sein.
+
 ## Verbindliche mobile Runtime
 
 Der Phaser-Build wird weiterhin als lazy Chunk geladen. Fehler beim Laden dieses Chunks dürfen nicht zu einer leeren Spielfläche führen.
@@ -106,6 +127,12 @@ Der Phaser-Build wird weiterhin als lazy Chunk geladen. Fehler beim Laden dieses
 13. Neue Attacken werden ausschließlich in `combatMoves.ts` definiert und benötigen Lernweg, Kampfwerte, Statuslogik, Tests und eine Prüfung ihrer sozialen Anschlussfähigkeit.
 14. Kampf- und Flirtansichten müssen dasselbe ausgerüstete Vierer-Loadout lesen.
 15. Eine mobile Ladefehlermeldung darf niemals den Spielstand löschen.
+16. Neue HUD-Informationen dürfen das aktuelle Ziel nicht verdrängen.
+17. Mobile Hauptaktionen benötigen eine sichtbare, kontextbeschriftete Schaltfläche.
+18. Erfolgswahrscheinlichkeiten verwenden ausschließlich die gemeinsame UX-Risikologik.
+19. Neue Menü- oder Dialogoberflächen benötigen Touch-, Tastatur- und Fokusunterstützung.
+20. Touchziele der Hauptbedienung dürfen nicht kleiner als 44 Pixel sein.
+21. Neue Animationen benötigen eine Reduced-Motion-Alternative.
 
 ## Reihenfolge der Migration
 

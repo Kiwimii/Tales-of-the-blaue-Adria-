@@ -32,13 +32,13 @@ const moneyFormatter = new Intl.NumberFormat('de-DE', {
   maximumFractionDigits: 0,
 });
 
-const tabs: Array<{ id: MenuTab; label: string; short: string }> = [
-  { id: 'overview', label: 'Übersicht', short: 'Status' },
-  { id: 'inventory', label: 'Inventar', short: 'Rucksack' },
-  { id: 'team', label: 'Charakter', short: 'Team' },
-  { id: 'attacks', label: 'Attacken', short: 'Kampf' },
-  { id: 'people', label: 'Beziehungen', short: 'Leute' },
-  { id: 'system', label: 'Spiel', short: 'Mehr' },
+const tabs: Array<{ id: MenuTab; label: string; short: string; icon: string }> = [
+  { id: 'overview', label: 'Übersicht', short: 'Status', icon: '◎' },
+  { id: 'inventory', label: 'Inventar', short: 'Rucksack', icon: '▣' },
+  { id: 'team', label: 'Charakter', short: 'Gruppe', icon: '♟' },
+  { id: 'attacks', label: 'Attacken', short: 'Kampfset', icon: '⚡' },
+  { id: 'people', label: 'Beziehungen', short: 'Kontakte', icon: '●' },
+  { id: 'system', label: 'Spiel', short: 'Optionen', icon: '⚙' },
 ];
 
 export function GameMenu({ snapshot, onClose }: GameMenuProps): ReactElement {
@@ -46,10 +46,26 @@ export function GameMenu({ snapshot, onClose }: GameMenuProps): ReactElement {
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent): void => {
-      if (event.key !== 'Escape') return;
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        onClose();
+        return;
+      }
+      const target = event.target;
+      if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement) return;
+      if (/^[1-6]$/.test(event.key)) {
+        event.preventDefault();
+        setTab(tabs[Number(event.key) - 1].id);
+        return;
+      }
+      if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
       event.preventDefault();
-      event.stopImmediatePropagation();
-      onClose();
+      setTab((current) => {
+        const index = tabs.findIndex((entry) => entry.id === current);
+        const direction = event.key === 'ArrowRight' ? 1 : -1;
+        return tabs[(index + direction + tabs.length) % tabs.length].id;
+      });
     };
     window.addEventListener('keydown', onKeyDown, true);
     return () => window.removeEventListener('keydown', onKeyDown, true);
@@ -59,26 +75,33 @@ export function GameMenu({ snapshot, onClose }: GameMenuProps): ReactElement {
     <div className="game-menu-overlay" role="dialog" aria-modal="true" aria-labelledby="game-menu-title">
       <section className="game-menu-panel">
         <header className="game-menu-header">
-          <div>
+          <div className="game-menu-title-block">
             <p className="eyebrow">Tag {snapshot.day} · {snapshot.phaseLabel} · {modeName(snapshot.mode)}</p>
             <h2 id="game-menu-title">{snapshot.clockLabel} Uhr</h2>
+            <span className={`game-menu-condition condition-${conditionTone(snapshot.conditionLabel)}`}>{snapshot.conditionLabel}</span>
           </div>
           <button className="dialog-x-button" type="button" aria-label="Spielmenü schließen" onClick={onClose}>×</button>
         </header>
 
         <nav className="game-menu-tabs" aria-label="Spielmenü Bereiche">
-          {tabs.map((entry) => (
-            <button
-              type="button"
-              key={entry.id}
-              className={tab === entry.id ? 'game-menu-tab game-menu-tab-active' : 'game-menu-tab'}
-              aria-pressed={tab === entry.id}
-              onClick={() => setTab(entry.id)}
-            >
-              <span>{entry.label}</span>
-              <small>{entry.short}</small>
-            </button>
-          ))}
+          {tabs.map((entry, index) => {
+            const badge = menuBadge(entry.id, snapshot);
+            return (
+              <button
+                type="button"
+                key={entry.id}
+                className={tab === entry.id ? 'game-menu-tab game-menu-tab-active' : 'game-menu-tab'}
+                aria-pressed={tab === entry.id}
+                aria-keyshortcuts={`${index + 1}`}
+                onClick={() => setTab(entry.id)}
+              >
+                <i aria-hidden="true">{entry.icon}</i>
+                <span>{entry.label}</span>
+                <small>{entry.short}</small>
+                {badge && <b>{badge}</b>}
+              </button>
+            );
+          })}
         </nav>
 
         <div className="game-menu-content">
@@ -97,9 +120,11 @@ export function GameMenu({ snapshot, onClose }: GameMenuProps): ReactElement {
 function OverviewTab({ snapshot }: { snapshot: GameSnapshot }): ReactElement {
   return (
     <div className="menu-stack">
-      <section className="menu-highlight-card">
-        <p className="eyebrow">Aktuelles Ziel</p>
-        <strong>{snapshot.currentObjective}</strong>
+      <section className="menu-highlight-card menu-objective-card">
+        <div>
+          <p className="eyebrow">Aktuelles Ziel</p>
+          <strong>{snapshot.currentObjective}</strong>
+        </div>
         <span className={`condition-chip condition-${conditionTone(snapshot.conditionLabel)}`}>{snapshot.conditionLabel}</span>
       </section>
 
@@ -166,7 +191,7 @@ function InventoryTab({ snapshot }: { snapshot: GameSnapshot }): ReactElement {
                 </button>
               </article>
             );
-          }) : <p>Der Rucksack ist leer. Das ist auf einem Campingplatz selten ein gutes Zeichen.</p>}
+          }) : <p className="menu-empty-state">Der Rucksack ist leer. Das ist auf einem Campingplatz selten ein gutes Zeichen.</p>}
         </div>
       </section>
     </div>
@@ -176,21 +201,20 @@ function InventoryTab({ snapshot }: { snapshot: GameSnapshot }): ReactElement {
 function TeamTab({ snapshot }: { snapshot: GameSnapshot }): ReactElement {
   return (
     <div className="menu-stack">
-      <section className="menu-highlight-card">
-        <p className="eyebrow">Spielfigur</p>
-        <strong>{snapshot.profile?.name ?? 'Unbekannt'}</strong>
-        <span>{snapshot.profile?.trait ?? 'ohne Merkmal'} · aktives Team {snapshot.team.length}/3</span>
+      <section className="menu-highlight-card menu-inline-summary">
+        <div><p className="eyebrow">Spielfigur</p><strong>{snapshot.profile?.name ?? 'Unbekannt'}</strong><small>{snapshot.profile?.trait ?? 'ohne Merkmal'}</small></div>
+        <div><p className="eyebrow">Aktives Team</p><strong>{snapshot.team.length}/3</strong><small>Begleiter</small></div>
       </section>
       <section>
         <h3>Aktive Begleiter</h3>
         <div className="menu-team-list">
           {snapshot.team.length ? snapshot.team.map((member) => (
             <article key={member.id}>
-              <div><strong>{member.name}</strong><small>{member.role}</small></div>
-              <span>Level {member.level} · Moral {Math.round(member.resolve)}/{Math.round(member.maxResolve)} · Loyalität {Math.round(member.loyalty)}</span>
-              <small>Kampf +{member.bonuses.battle} · Sozial +{member.bonuses.social} · Spiele +{member.bonuses.games} · Erholung +{member.bonuses.recovery}</small>
+              <div className="menu-team-heading"><div><strong>{member.name}</strong><small>{member.role}</small></div><b>Level {member.level}</b></div>
+              <div className="menu-team-stat"><span>Moral</span><strong>{Math.round(member.resolve)}/{Math.round(member.maxResolve)}</strong><i><em style={{ width: `${Math.min(100, member.resolve / member.maxResolve * 100)}%` }} /></i></div>
+              <div className="menu-team-bonuses"><span>Kampf +{member.bonuses.battle}</span><span>Sozial +{member.bonuses.social}</span><span>Spiele +{member.bonuses.games}</span><span>Erholung +{member.bonuses.recovery}</span></div>
             </article>
-          )) : <p>Noch keine Begleiter aktiv. Freunde lassen sich über Gespräche in die Gruppe holen.</p>}
+          )) : <p className="menu-empty-state">Noch keine Begleiter aktiv. Freunde lassen sich über Gespräche in die Gruppe holen.</p>}
         </div>
       </section>
     </div>
@@ -218,10 +242,10 @@ function AttacksTab({ snapshot }: { snapshot: GameSnapshot }): ReactElement {
         <span>Im Kampf steigen Frustpunkte. Wer sein Maximum erreicht, verliert.</span>
         <div className="menu-attack-slots">
           {Array.from({ length: MAX_EQUIPPED_ATTACKS }, (_, index) => (
-            <span key={index}>{equipped[index] ? `${index + 1}. ${moves.find((move) => move.id === equipped[index])?.shortLabel}` : `${index + 1}. FREI`}</span>
+            <span className={equipped[index] ? 'menu-attack-slot-filled' : ''} key={index}>{equipped[index] ? `${index + 1}. ${moves.find((move) => move.id === equipped[index])?.shortLabel}` : `${index + 1}. FREI`}</span>
           ))}
         </div>
-        {feedback && <small className="menu-attack-feedback">{feedback}</small>}
+        {feedback && <small className="menu-attack-feedback" role="status">{feedback}</small>}
       </section>
 
       <section>
@@ -231,10 +255,11 @@ function AttacksTab({ snapshot }: { snapshot: GameSnapshot }): ReactElement {
             const active = equipped.includes(move.id);
             return (
               <article className={active ? 'menu-attack-card menu-attack-card-active' : 'menu-attack-card'} key={move.id}>
-                <div><strong>{move.label}</strong><small>{move.tag.toUpperCase()} · Genauigkeit {move.accuracy}% · Basisfrust {move.baseFrustration}</small></div>
+                <div><strong>{move.label}</strong><small>{move.tag.toUpperCase()}</small></div>
+                <div className="menu-attack-stats"><span>Treffer {move.accuracy}%</span><span>Frust {move.baseFrustration}</span></div>
                 <p>{move.description}</p>
                 <small>Flirtoption: {move.flirtOption}</small>
-                <button type="button" onClick={() => toggle(move.id)}>{active ? 'Ablegen' : 'Ausrüsten'}</button>
+                <button type="button" aria-pressed={active} onClick={() => toggle(move.id)}>{active ? 'Ablegen' : 'Ausrüsten'}</button>
               </article>
             );
           })}
@@ -306,18 +331,26 @@ function SystemTab({ onClose }: { onClose: () => void }): ReactElement {
       <section>
         <h3>Ansicht</h3>
         <div className="menu-action-list">
-          <button type="button" onClick={toggleMap}><strong>Platzplan umschalten</strong><small>Öffnet oder schließt die Minikarte in der Weltansicht.</small></button>
+          <button type="button" onClick={toggleMap}><span aria-hidden="true">⌖</span><div><strong>Platzplan umschalten</strong><small>Öffnet oder schließt die Minikarte in der Weltansicht.</small></div></button>
         </div>
       </section>
       <section>
         <h3>Spiel</h3>
         <div className="menu-action-list">
-          <button type="button" onClick={replayIntro}><strong>Intro erneut ansehen</strong><small>Der Spielstand bleibt erhalten.</small></button>
-          <button className="menu-danger-action" type="button" onClick={restart}><strong>Neustart</strong><small>Löscht den lokalen Spielstand nach einer Sicherheitsabfrage.</small></button>
+          <button type="button" onClick={replayIntro}><span aria-hidden="true">▶</span><div><strong>Intro erneut ansehen</strong><small>Der Spielstand bleibt erhalten.</small></div></button>
+          <button className="menu-danger-action" type="button" onClick={restart}><span aria-hidden="true">↺</span><div><strong>Neustart</strong><small>Löscht den lokalen Spielstand nach einer Sicherheitsabfrage.</small></div></button>
         </div>
       </section>
     </div>
   );
+}
+
+function menuBadge(tab: MenuTab, snapshot: GameSnapshot): string | null {
+  if (tab === 'inventory') return String(carriedItemIds(snapshot).length);
+  if (tab === 'team') return `${snapshot.team.length}/3`;
+  if (tab === 'attacks') return `${equippedAttackIds(snapshot).length}/${MAX_EQUIPPED_ATTACKS}`;
+  if (tab === 'people') return String(knownRelationshipCount(snapshot));
+  return null;
 }
 
 function MenuMetric({ label, value, signed = false }: { label: string; value: number; signed?: boolean }): ReactElement {
