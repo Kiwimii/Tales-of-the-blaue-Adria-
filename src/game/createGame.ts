@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { installAdvancedSystemsRuntime } from './advancedRuntime';
 import { installArrivalQuestRuntime } from './arrivalQuestRuntime';
+import { RETURN_TO_WORLD_EVENT } from './events';
 import { AdvancedBattleScene } from './scenes/AdvancedBattleScene';
 import { AdvancedEntryDebateScene } from './scenes/AdvancedEntryDebateScene';
 import { BeerPongScene } from './scenes/BeerPongScene';
@@ -17,7 +18,7 @@ import { gameStore } from './state/GameStore';
 export function createGame(parent: HTMLElement): Phaser.Game {
   installArrivalQuestRuntime(gameStore);
   installAdvancedSystemsRuntime(gameStore);
-  return new Phaser.Game({
+  const game = new Phaser.Game({
     type: Phaser.AUTO,
     parent,
     width: 960,
@@ -54,4 +55,29 @@ export function createGame(parent: HTMLElement): Phaser.Game {
       FlunkyballScene,
     ],
   });
+
+  const returnToWorld = (): void => {
+    const snapshot = gameStore.snapshot();
+    if (snapshot.encounter) gameStore.closeEncounter();
+    if (snapshot.currentInterior) gameStore.leaveInterior();
+    else if (gameStore.snapshot().mode !== 'world') gameStore.setMode('world');
+
+    for (const scene of game.scene.getScenes(true)) {
+      if (scene.scene.key !== 'world') game.scene.stop(scene.scene.key);
+    }
+    if (!game.scene.isActive('world')) game.scene.start('world');
+  };
+
+  const onEscape = (event: KeyboardEvent): void => {
+    if (event.key === 'Escape' && gameStore.snapshot().mode !== 'world') returnToWorld();
+  };
+
+  window.addEventListener(RETURN_TO_WORLD_EVENT, returnToWorld);
+  window.addEventListener('keydown', onEscape);
+  game.events.once(Phaser.Core.Events.DESTROY, () => {
+    window.removeEventListener(RETURN_TO_WORLD_EVENT, returnToWorld);
+    window.removeEventListener('keydown', onEscape);
+  });
+
+  return game;
 }
