@@ -1,4 +1,6 @@
 import Phaser from 'phaser';
+import { currentVisualProfile } from '../visuals';
+import { drawWorldDetailLayer } from '../worldDetailLayer';
 import { applyRealisticWorldLayout, worldDepth } from '../worldRealism';
 import { ExpandedWorldScene } from './ExpandedWorldScene';
 
@@ -19,6 +21,7 @@ export class RealisticWorldScene extends ExpandedWorldScene {
   create(): void {
     applyRealisticWorldLayout();
     super.create();
+    drawWorldDetailLayer(this, currentVisualProfile());
     this.normalizeStaticDepths();
     this.refreshPlayerDepth();
   }
