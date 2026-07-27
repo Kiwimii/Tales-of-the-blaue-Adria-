@@ -84,10 +84,11 @@ describe('frustration effectiveness', () => {
   it('applies statuses and reduces counter frustration for a strong social interruption', () => {
     const state = createFrustrationCombatState(snapshot(), 'entry-authority');
     const highFive = resolveFrustrationRound(state, 'classic-high-five', snapshot(), () => 0);
-    const logic = resolveFrustrationRound(state, 'logical-argument', snapshot(), () => 0);
+    const aldi = resolveFrustrationRound(state, 'aldi-shirt-show', snapshot(), () => 0);
 
     expect(highFive.state.enemyStatuses.map((status) => status.id)).toContain('ueberrumpelt');
-    expect(highFive.receivedFrustration).toBeLessThan(logic.receivedFrustration);
+    expect(aldi.state.enemyStatuses.map((status) => status.id)).toContain('fremdschaemen');
+    expect(highFive.receivedFrustration).toBeLessThan(aldi.receivedFrustration);
   });
 });
 
