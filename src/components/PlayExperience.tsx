@@ -5,6 +5,7 @@ import { QUESTS } from '../game/content';
 import { RECOVER_WORLD_CONTROL_EVENT, sendDirection } from '../game/events';
 import type { Direction, GameSnapshot } from '../game/types';
 import { conditionTone, importantNeedAlerts, modeName } from '../game/uiState';
+import { compactObjective } from '../game/uxPresentation';
 import { encounterJustClosed, WORLD_RECOVERY_DELAYS_MS } from '../game/worldControlRecovery';
 import { EncounterDialog } from './EncounterDialog';
 import { GameMenu } from './GameMenu';
@@ -12,6 +13,7 @@ import { MobileGameControls, SceneCloseButton } from './MobileGameControls';
 import '../playExperience.css';
 import '../combatMenu.css';
 import '../responsiveGame.css';
+import '../uxRefresh.css';
 
 interface PlayExperienceProps {
   snapshot: GameSnapshot;
@@ -22,7 +24,7 @@ interface RecoverableWorldScene extends Phaser.Scene {
 }
 
 const ALL_DIRECTIONS: Direction[] = ['up', 'down', 'left', 'right'];
-const MOBILE_REPAIR_KEY = 'tales-adria-mobile-repair-s83';
+const MOBILE_REPAIR_KEY = 'tales-adria-mobile-repair-s85';
 
 export function PlayExperience({ snapshot }: PlayExperienceProps): ReactElement {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -149,6 +151,7 @@ export function PlayExperience({ snapshot }: PlayExperienceProps): ReactElement 
     || (snapshot.mode === 'interior' && Boolean(snapshot.currentInterior));
   const phaserWindowOpen = snapshot.mode !== 'world' && snapshot.mode !== 'shop' && !snapshot.encounter;
   const questTitle = snapshot.activeQuest ? QUESTS[snapshot.activeQuest]?.title : 'Freies Spiel';
+  const objective = compactObjective(snapshot.currentObjective);
 
   return (
     <main className="play-screen">
@@ -173,21 +176,31 @@ export function PlayExperience({ snapshot }: PlayExperienceProps): ReactElement 
             <small>Tag {snapshot.day} · {snapshot.phaseLabel}</small>
             <strong>{snapshot.clockLabel}</strong>
           </div>
-          <div className="play-objective-card">
-            <small>{questTitle}</small>
-            <strong>{snapshot.currentObjective}</strong>
-          </div>
-          <div className="play-hud-actions">
-            {alerts.map((alert) => (
-              <span className={alert.critical ? 'play-alert play-alert-critical' : 'play-alert'} key={alert.key}>
-                {alert.icon} {alert.label} {Math.round(alert.value)}
-              </span>
-            ))}
-            {!alerts.length && (
-              <span className={`play-condition condition-${conditionTone(snapshot.conditionLabel)}`}>
-                {snapshot.conditionLabel}
-              </span>
-            )}
+          <button
+            className="play-objective-card"
+            type="button"
+            aria-label={`Aktuelles Ziel öffnen: ${snapshot.currentObjective}`}
+            onClick={() => setMenuOpen(true)}
+          >
+            <span>
+              <small>{questTitle}</small>
+              <strong>{objective}</strong>
+            </span>
+            <i aria-hidden="true">›</i>
+          </button>
+          <div className="play-hud-actions" aria-live="polite">
+            <div className="play-status-stack">
+              {alerts.map((alert) => (
+                <span className={alert.critical ? 'play-alert play-alert-critical' : 'play-alert'} key={alert.key}>
+                  {alert.icon} {alert.label} {Math.round(alert.value)}
+                </span>
+              ))}
+              {!alerts.length && (
+                <span className={`play-condition condition-${conditionTone(snapshot.conditionLabel)}`}>
+                  {snapshot.conditionLabel}
+                </span>
+              )}
+            </div>
             <button
               className={phaserWindowOpen ? 'hud-menu-button hud-menu-button-shifted' : 'hud-menu-button'}
               type="button"
@@ -200,6 +213,12 @@ export function PlayExperience({ snapshot }: PlayExperienceProps): ReactElement 
             </button>
           </div>
         </header>
+
+        <div className="desktop-control-hint" aria-hidden="true">
+          <span><kbd>WASD</kbd> / Pfeile · Laufen</span>
+          <span><kbd>E</kbd> / Leertaste · Aktion</span>
+          <span><kbd>M</kbd> · Karte</span>
+        </div>
 
         <span className="play-mode-label">{modeName(snapshot.mode)}</span>
 
