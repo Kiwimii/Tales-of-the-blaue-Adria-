@@ -3,6 +3,7 @@ import { ARRIVAL_POSITIONS } from '../src/game/arrivalQuest';
 import {
   QUEST_MARKER_VERTICAL_OFFSET,
   RESERVATION_BOARD_INTERACTION_RADIUS,
+  RESERVATION_BOARD_TAP_RADIUS,
   activeArrivalInteractionId,
   questMarkerAnchor,
   reservationBoardPosition,
@@ -49,13 +50,14 @@ describe('arrival quest navigation reliability', () => {
     expect(questMarkerAnchor(gundula)).toEqual({ x: ARRIVAL_POSITIONS.gundula.x, y: ARRIVAL_POSITIONS.gundula.y - QUEST_MARKER_VERTICAL_OFFSET });
   });
 
-  it('uses the blackboard as the active interaction after the documents are found', () => {
+  it('uses a generous blackboard interaction and direct-tap range', () => {
     const documents = state({ arrivalDocumentsFound: true });
     expect(activeArrivalInteractionId(documents)).toBe('arrival-board');
-    expect(RESERVATION_BOARD_INTERACTION_RADIUS).toBeGreaterThan(100);
+    expect(RESERVATION_BOARD_INTERACTION_RADIUS).toBeGreaterThanOrEqual(140);
+    expect(RESERVATION_BOARD_TAP_RADIUS).toBeGreaterThan(RESERVATION_BOARD_INTERACTION_RADIUS);
   });
 
-  it('opens the reservation puzzle only in the correct quest state', () => {
+  it('provides a visible board presentation for every quest state', () => {
     expect(reservationBoardState(state())).toBe('needs-documents');
     expect(reservationBoardState(state({ arrivalDocumentsFound: true }))).toBe('available');
     expect(reservationBoardState(state({ arrivalDocumentsFound: true, reservationSolved: true }))).toBe('solved');

@@ -1,4 +1,8 @@
 import Phaser from 'phaser';
+import {
+  reservationBoardState,
+  type ReservationBoardState,
+} from '../questNavigation';
 import { gameStore } from '../state/GameStore';
 import { addCinematicFrame } from '../visuals';
 
@@ -43,6 +47,7 @@ const CHOICES: ReservationChoice[] = [
 
 export class ReservationPuzzleScene extends Phaser.Scene {
   private feedback!: Phaser.GameObjects.Text;
+  private boardState: ReservationBoardState = 'available';
   private solved = false;
 
   constructor() {
@@ -50,32 +55,29 @@ export class ReservationPuzzleScene extends Phaser.Scene {
   }
 
   create(): void {
+    this.boardState = reservationBoardState(gameStore.snapshot());
+    this.solved = this.boardState === 'solved' || this.boardState === 'archive';
     gameStore.setMode('battle');
     this.cameras.main.setBackgroundColor('#0b1717');
     const background = this.add.graphics();
     background.fillGradientStyle(0x102b2a, 0x183d39, 0x3f2c25, 0x171c1d, 1).fillRect(0, 0, 960, 640);
 
-    this.add.text(480, 38, 'ANKUNFT · RESERVIERUNGSARCHÄOLOGIE', {
+    this.add.text(480, 38, 'ANKUNFT · SCHWARZES BRETT', {
       fontFamily: 'Arial Black, system-ui', fontSize: '13px', color: '#66dac6', letterSpacing: 2,
     }).setOrigin(0.5);
-    this.add.text(480, 77, 'Unter welchem Namen wurde diesmal reserviert?', {
+    this.add.text(480, 77, boardTitle(this.boardState), {
       fontFamily: 'Arial Black, system-ui', fontSize: '28px', color: '#fff2c4', stroke: '#173027', strokeThickness: 5,
     }).setOrigin(0.5);
 
-    const clues = [
-      'Zerknitterter Zettel im Kofferraum: Initialen „T.T.“',
-      'Handschriftlicher Zusatz: „Wieder Taucherplatz – da ist am meisten Platz.“',
-      'Buchungsumfang: 3 Personen, 2 Zelte, ausdrücklich kein Strom',
-      'Gundulas Brett enthält mehrere frühere Aliasnamen der Gruppe.',
-    ];
+    const clues = boardClues(this.boardState);
     this.add.rectangle(480, 155, 820, 116, 0x0b1918, 0.9).setStrokeStyle(2, 0xf4c75d, 0.45).setDepth(1);
     clues.forEach((clue, index) => this.add.text(95, 116 + index * 25, `• ${clue}`, {
-      fontFamily: 'system-ui', fontSize: '15px', color: index === 3 ? '#d8b7ff' : '#e9eadb',
+      fontFamily: 'system-ui', fontSize: '15px', color: index === clues.length - 1 ? '#d8b7ff' : '#e9eadb',
     }).setDepth(2));
 
     CHOICES.forEach((choice, index) => this.addChoice(choice, index));
-    this.feedback = this.add.text(480, 580, 'Wähle die einzige Reservierung, zu der alle Hinweise passen.', {
-      fontFamily: 'system-ui', fontSize: '16px', color: '#f4d47b', align: 'center', wordWrap: { width: 780 },
+    this.feedback = this.add.text(480, 580, boardFeedback(this.boardState), {
+      fontFamily: 'system-ui', fontSize: '16px', color: feedbackColor(this.boardState), align: 'center', wordWrap: { width: 780 },
       backgroundColor: '#101923e8', padding: { x: 14, y: 9 },
     }).setOrigin(0.5);
     addCinematicFrame(this, 0x66dac6);
@@ -87,8 +89,7 @@ export class ReservationPuzzleScene extends Phaser.Scene {
     const x = column ? 705 : 255;
     const y = 320 + row * 145;
     const card = this.add.rectangle(x, y, 400, 112, 0x173027, 0.95)
-      .setStrokeStyle(2, 0xf4d47b, 0.42)
-      .setInteractive({ useHandCursor: true });
+      .setStrokeStyle(2, 0xf4d47b, 0.42);
     const title = this.add.text(x, y - 23, choice.title, {
       fontFamily: 'Arial Black, system-ui', fontSize: '18px', color: '#fff3c8', align: 'center',
     }).setOrigin(0.5);
@@ -96,13 +97,23 @@ export class ReservationPuzzleScene extends Phaser.Scene {
       fontFamily: 'system-ui', fontSize: '14px', color: '#bcd6c9', align: 'center', wordWrap: { width: 350 },
     }).setOrigin(0.5);
 
-    card.on('pointerover', () => [card, title, detail].forEach((item) => item.setScale(1.025)));
-    card.on('pointerout', () => [card, title, detail].forEach((item) => item.setScale(1)));
-    card.on('pointerdown', () => this.choose(choice, card));
+    if (this.boardState === 'available') {
+      card.setInteractive({ useHandCursor: true });
+      card.on('pointerover', () => [card, title, detail].forEach((item) => item.setScale(1.025)));
+      card.on('pointerout', () => [card, title, detail].forEach((item) => item.setScale(1)));
+      card.on('pointerup', () => this.choose(choice, card));
+      return;
+    }
+
+    if (choice.correct && this.solved) {
+      card.setFillStyle(0x285d46, 1).setStrokeStyle(4, 0x79d39a, 0.95);
+      return;
+    }
+    [card, title, detail].forEach((item) => item.setAlpha(this.boardState === 'needs-documents' ? 0.58 : 0.42));
   }
 
   private choose(choice: ReservationChoice, card: Phaser.GameObjects.Rectangle): void {
-    if (this.solved) return;
+    if (this.solved || this.boardState !== 'available') return;
     if (!choice.correct) {
       card.setFillStyle(0x6b2f32, 0.96).setStrokeStyle(3, 0xef765f, 0.8);
       const wrongFlag = `reservationWrong-${choice.id}`;
@@ -129,4 +140,39 @@ export class ReservationPuzzleScene extends Phaser.Scene {
     gameStore.setMode('world');
     this.scene.start('world');
   }
+}
+
+function boardTitle(state: ReservationBoardState): string {
+  if (state === 'needs-documents') return 'Welche Buchung gehört zu euch?';
+  if (state === 'available') return 'Unter welchem Namen wurde diesmal reserviert?';
+  if (state === 'archive') return 'Eure Buchung und Gundulas Nachberechnung';
+  return 'Die gefundene Reservierung';
+}
+
+function boardClues(state: ReservationBoardState): string[] {
+  if (state === 'needs-documents') return [
+    'Mehrere Aliasnamen der Gruppe hängen am Brett.',
+    'Ohne den Buchungszettel fehlen Initialen und Platzangabe.',
+    'Der Kofferraum ist als nächster sinnvoller Suchort markiert.',
+    'Schließe das Brett mit X und durchsuche zuerst den Wagen.',
+  ];
+  return [
+    'Zerknitterter Zettel im Kofferraum: Initialen „T.T.“',
+    'Handschriftlicher Zusatz: „Wieder Taucherplatz – da ist am meisten Platz.“',
+    'Buchungsumfang: 3 Personen, 2 Zelte, ausdrücklich kein Strom',
+    'Gundulas Brett enthält mehrere frühere Aliasnamen der Gruppe.',
+  ];
+}
+
+function boardFeedback(state: ReservationBoardState): string {
+  if (state === 'needs-documents') return 'Das Brett ist geöffnet, aber ohne die Unterlagen lässt sich die richtige Reservierung noch nicht sicher bestimmen.';
+  if (state === 'archive') return 'Archiviert: Tauchgruppe Tiefenrausch. Personen, zusätzliche Zelte und Strom bleiben für Sonntag vorgemerkt.';
+  if (state === 'solved') return 'Die passende Reservierung ist bereits markiert. Als Nächstes musst du mit Gundula sprechen.';
+  return 'Wähle die einzige Reservierung, zu der alle Hinweise passen.';
+}
+
+function feedbackColor(state: ReservationBoardState): string {
+  if (state === 'needs-documents') return '#ffcf83';
+  if (state === 'available') return '#f4d47b';
+  return '#a9f0bd';
 }

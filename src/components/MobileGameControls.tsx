@@ -4,9 +4,20 @@ import type {
   PointerEvent as ReactPointerEvent,
   ReactElement,
 } from 'react';
-import { sendAction, sendDirection, sendReturnToWorld } from '../game/events';
+import {
+  INTERACTION_STATE_EVENT,
+  requestInteractionState,
+  sendAction,
+  sendDirection,
+  sendReturnToWorld,
+  type InteractionStateDetail,
+} from '../game/events';
 import { clampSwipeVector, directionsForSwipe } from '../game/mobileInput';
-import { canTriggerAction, isActionTap } from '../game/touchInteraction';
+import {
+  canTriggerAction,
+  isActionTap,
+  shouldTriggerContextAction,
+} from '../game/touchInteraction';
 import type { Direction } from '../game/types';
 import '../mobileControls.css';
 
@@ -18,16 +29,34 @@ interface Point {
 export function MobileGameControls(): ReactElement {
   const pointerId = useRef<number | null>(null);
   const origin = useRef<Point | null>(null);
+  const moveExceededTapThreshold = useRef(false);
   const activeDirections = useRef(new Set<Direction>());
   const actionPointerId = useRef<number | null>(null);
   const actionOrigin = useRef<Point | null>(null);
   const lastActionAt = useRef(Number.NEGATIVE_INFINITY);
+  const [nearbyInteraction, setNearbyInteraction] = useState<InteractionStateDetail | null>(null);
   const [joystick, setJoystick] = useState<{ origin: Point; offset: Point } | null>(null);
   const [actionActive, setActionActive] = useState(false);
 
-  useEffect(() => () => {
-    releaseDirections(activeDirections.current);
+  useEffect(() => {
+    const onInteractionState = (event: Event): void => {
+      const detail = (event as CustomEvent<InteractionStateDetail>).detail;
+      setNearbyInteraction(detail.id ? detail : null);
+    };
+    window.addEventListener(INTERACTION_STATE_EVENT, onInteractionState);
+    requestInteractionState();
+    return () => {
+      window.removeEventListener(INTERACTION_STATE_EVENT, onInteractionState);
+      releaseDirections(activeDirections.current);
+    };
   }, []);
+
+  const triggerAction = (): void => {
+    const now = performance.now();
+    if (!canTriggerAction(lastActionAt.current, now)) return;
+    lastActionAt.current = now;
+    sendAction();
+  };
 
   const updateDirections = (x: number, y: number): void => {
     const next = new Set(directionsForSwipe(x, y));
@@ -52,6 +81,7 @@ export function MobileGameControls(): ReactElement {
     const point = relativePoint(event);
     pointerId.current = event.pointerId;
     origin.current = point;
+    moveExceededTapThreshold.current = false;
     updateDirections(0, 0);
     setJoystick({ origin: point, offset: { x: 0, y: 0 } });
   };
@@ -61,20 +91,37 @@ export function MobileGameControls(): ReactElement {
     event.preventDefault();
     const point = relativePoint(event);
     const raw = { x: point.x - origin.current.x, y: point.y - origin.current.y };
+    if (!isActionTap(raw.x, raw.y)) moveExceededTapThreshold.current = true;
     const offset = clampSwipeVector(raw.x, raw.y);
     updateDirections(raw.x, raw.y);
     setJoystick({ origin: origin.current, offset });
   };
 
-  const endMove = (event: ReactPointerEvent<HTMLDivElement>): void => {
-    if (pointerId.current !== event.pointerId) return;
+  const finishMove = (event: ReactPointerEvent<HTMLDivElement>, allowContextAction: boolean): void => {
+    if (pointerId.current !== event.pointerId || !origin.current) return;
     event.preventDefault();
+    const point = relativePoint(event);
+    const deltaX = point.x - origin.current.x;
+    const deltaY = point.y - origin.current.y;
+    const movedBeyondTap = moveExceededTapThreshold.current;
+
     releaseDirections(activeDirections.current);
     activeDirections.current = new Set();
     pointerId.current = null;
     origin.current = null;
+    moveExceededTapThreshold.current = false;
     setJoystick(null);
+
+    if (allowContextAction && shouldTriggerContextAction(
+      Boolean(nearbyInteraction?.id),
+      deltaX,
+      deltaY,
+      movedBeyondTap,
+    )) triggerAction();
   };
+
+  const endMove = (event: ReactPointerEvent<HTMLDivElement>): void => finishMove(event, true);
+  const cancelMove = (event: ReactPointerEvent<HTMLDivElement>): void => finishMove(event, false);
 
   const beginAction = (event: ReactPointerEvent<HTMLButtonElement>): void => {
     if (actionPointerId.current !== null) return;
@@ -97,11 +144,7 @@ export function MobileGameControls(): ReactElement {
     actionOrigin.current = null;
     setActionActive(false);
 
-    if (!isActionTap(deltaX, deltaY)) return;
-    const now = performance.now();
-    if (!canTriggerAction(lastActionAt.current, now)) return;
-    lastActionAt.current = now;
-    sendAction();
+    if (isActionTap(deltaX, deltaY)) triggerAction();
   };
 
   const cancelAction = (event: ReactPointerEvent<HTMLButtonElement>): void => {
@@ -126,7 +169,7 @@ export function MobileGameControls(): ReactElement {
         onPointerDown={beginMove}
         onPointerMove={move}
         onPointerUp={endMove}
-        onPointerCancel={endMove}
+        onPointerCancel={cancelMove}
       >
         {!joystick && <span className="mobile-move-hint">LINKS WISCHEN · LAUFEN</span>}
         {joystick && (
@@ -140,8 +183,8 @@ export function MobileGameControls(): ReactElement {
       </div>
       <button
         type="button"
-        className={`mobile-action-zone${actionActive ? ' mobile-action-active' : ''}`}
-        aria-label="Aktion ausführen"
+        className={`mobile-action-zone${actionActive ? ' mobile-action-active' : ''}${nearbyInteraction ? ' mobile-action-ready' : ''}`}
+        aria-label={nearbyInteraction?.prompt ? `Aktion ausführen: ${nearbyInteraction.prompt}` : 'Aktion ausführen'}
         onPointerDown={beginAction}
         onPointerUp={endAction}
         onPointerCancel={cancelAction}

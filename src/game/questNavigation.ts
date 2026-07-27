@@ -6,8 +6,8 @@ export type ReservationBoardState = 'needs-documents' | 'available' | 'solved' |
 
 export const QUEST_MARKER_VERTICAL_OFFSET = 38;
 export const QUEST_MARKER_BOB_DISTANCE = 8;
-export const RESERVATION_BOARD_INTERACTION_RADIUS = 112;
-export const RESERVATION_BOARD_TAP_RADIUS = 145;
+export const RESERVATION_BOARD_INTERACTION_RADIUS = 148;
+export const RESERVATION_BOARD_TAP_RADIUS = 190;
 
 export function questMarkerAnchor(state: QuestNavigationState): { x: number; y: number } {
   const target = arrivalTarget(state);

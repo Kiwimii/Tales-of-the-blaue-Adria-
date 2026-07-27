@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tales-adria-next-s76';
+const CACHE_NAME = 'tales-adria-next-s77';
 const APP_SHELL = ['./', './index.html', './manifest.webmanifest', './icon.svg'];
 
 self.addEventListener('install', (event) => {
