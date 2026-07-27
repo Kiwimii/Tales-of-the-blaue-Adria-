@@ -30,6 +30,7 @@ export const AERIAL_NODES = {
   gate: { x: 900, y: 1400 }, receptionJunction: { x: 1130, y: 1400 }, receptionDoor: { x: 1130, y: 1420 }, mainSouth: { x: 900, y: 1300 },
   middleHub: { x: 900, y: 950 }, upperHub: { x: 900, y: 650 }, northHub: { x: 900, y: 300 },
   middleWest: { x: 200, y: 950 }, middleEast: { x: 1350, y: 950 }, upperWest: { x: 200, y: 650 }, upperEast: { x: 1350, y: 650 }, northWest: { x: 200, y: 300 }, northEast: { x: 1350, y: 300 },
+  tentAccessTurn: { x: 40, y: 950 }, homeApproach: { x: 40, y: 1160 }, homeDoorNode: { x: 152, y: 1160 },
   festivalWest: { x: 1450, y: 650 }, festivalCenter: { x: 1750, y: 650 }, festivalSouth: { x: 1750, y: 950 },
   beachGateInside: { x: 1900, y: 650 }, beachGateOutside: { x: 2000, y: 650 }, beachPromenadeNorth: { x: 2000, y: 400 }, beachNorth: { x: 2100, y: 400 },
   beachPromenadeSouth: { x: 2000, y: 900 }, beachSouth: { x: 2100, y: 900 }, dockTurn: { x: 2100, y: 500 }, mainDock: { x: 2200, y: 500 },
@@ -41,12 +42,12 @@ export const AERIAL_ROADS: PlanRoad[] = [
   ['arrival-drive', 'entrance', 'parkingSouth', 110, 'asphalt'], ['parking-row-west', 'parkingWest', 'parkingSouth', 100, 'asphalt'], ['parking-row-east', 'parkingSouth', 'parkingEast', 100, 'asphalt'],
   ['gate-approach', 'parkingSouth', 'gate', 90, 'asphalt'], ['reception-court', 'gate', 'receptionJunction', 70, 'gravel'], ['reception-walk', 'receptionJunction', 'receptionDoor', 48, 'gravel'],
   ['main-entry', 'gate', 'mainSouth', 76, 'gravel'], ['south-spine', 'mainSouth', 'middleHub', 72, 'gravel'], ['central-spine', 'middleHub', 'upperHub', 70, 'gravel'], ['north-spine', 'upperHub', 'northHub', 66, 'gravel'],
-  ['middle-row-west', 'middleWest', 'middleHub', 66, 'gravel'], ['middle-row-east', 'middleHub', 'middleEast', 66, 'gravel'], ['upper-row-west', 'upperWest', 'upperHub', 64, 'gravel'], ['upper-row-east', 'upperHub', 'upperEast', 64, 'gravel'],
-  ['north-row-west', 'northWest', 'northHub', 62, 'gravel'], ['north-row-east', 'northHub', 'northEast', 62, 'gravel'], ['festival-entry', 'upperEast', 'festivalWest', 60, 'gravel'], ['festival-cross', 'festivalWest', 'festivalCenter', 64, 'gravel'],
-  ['festival-side', 'festivalCenter', 'festivalSouth', 60, 'gravel'], ['festival-return', 'festivalSouth', 'middleEast', 64, 'gravel'], ['beach-approach', 'festivalCenter', 'beachGateInside', 58, 'gravel'], ['beach-crossing', 'beachGateInside', 'beachGateOutside', 52, 'sand'],
-  ['beach-north-spur', 'beachGateOutside', 'beachPromenadeNorth', 52, 'sand'], ['beach-north-front', 'beachPromenadeNorth', 'beachNorth', 50, 'sand'], ['dock-vertical', 'beachNorth', 'dockTurn', 48, 'sand'], ['dock-approach', 'dockTurn', 'mainDock', 48, 'sand'],
-  ['beach-south-spur', 'beachGateOutside', 'beachPromenadeSouth', 52, 'sand'], ['beach-south-front', 'beachPromenadeSouth', 'beachSouth', 50, 'sand'], ['service-entry', 'mainSouth', 'serviceWest', 64, 'gravel'], ['service-cross', 'serviceWest', 'serviceEast', 64, 'gravel'],
-  ['service-side', 'serviceEast', 'serviceSouth', 60, 'gravel'], ['cove-approach', 'serviceSouth', 'coveGate', 54, 'gravel'], ['cove-dock-path', 'coveGate', 'coveDock', 50, 'sand'],
+  ['middle-row-west', 'middleWest', 'middleHub', 66, 'gravel'], ['middle-row-east', 'middleHub', 'middleEast', 66, 'gravel'], ['tent-row-link', 'middleWest', 'tentAccessTurn', 48, 'gravel'], ['tent-side-path', 'tentAccessTurn', 'homeApproach', 48, 'gravel'], ['home-door-walk', 'homeApproach', 'homeDoorNode', 42, 'gravel'],
+  ['upper-row-west', 'upperWest', 'upperHub', 64, 'gravel'], ['upper-row-east', 'upperHub', 'upperEast', 64, 'gravel'], ['north-row-west', 'northWest', 'northHub', 62, 'gravel'], ['north-row-east', 'northHub', 'northEast', 62, 'gravel'],
+  ['festival-entry', 'upperEast', 'festivalWest', 60, 'gravel'], ['festival-cross', 'festivalWest', 'festivalCenter', 64, 'gravel'], ['festival-side', 'festivalCenter', 'festivalSouth', 60, 'gravel'], ['festival-return', 'festivalSouth', 'middleEast', 64, 'gravel'],
+  ['beach-approach', 'festivalCenter', 'beachGateInside', 58, 'gravel'], ['beach-crossing', 'beachGateInside', 'beachGateOutside', 52, 'sand'], ['beach-north-spur', 'beachGateOutside', 'beachPromenadeNorth', 52, 'sand'], ['beach-north-front', 'beachPromenadeNorth', 'beachNorth', 50, 'sand'],
+  ['dock-vertical', 'beachNorth', 'dockTurn', 48, 'sand'], ['dock-approach', 'dockTurn', 'mainDock', 48, 'sand'], ['beach-south-spur', 'beachGateOutside', 'beachPromenadeSouth', 52, 'sand'], ['beach-south-front', 'beachPromenadeSouth', 'beachSouth', 50, 'sand'],
+  ['service-entry', 'mainSouth', 'serviceWest', 64, 'gravel'], ['service-cross', 'serviceWest', 'serviceEast', 64, 'gravel'], ['service-side', 'serviceEast', 'serviceSouth', 60, 'gravel'], ['cove-approach', 'serviceSouth', 'coveGate', 54, 'gravel'], ['cove-dock-path', 'coveGate', 'coveDock', 50, 'sand'],
 ].map(([id, from, to, width, surface]) => ({ id, from, to, width, surface } as PlanRoad));
 
 export const AERIAL_FENCE_SEGMENTS: PlanFence[] = [
@@ -63,7 +64,7 @@ export const ARRIVAL_CAR_POSITION: PlanPoint = { x: 900, y: 1600 };
 export const TAUCHER_CAR_POSITION: PlanPoint = { x: 1280, y: 1190 };
 
 export const AERIAL_FUNCTIONAL_AREAS = {
-  parking: { id: 'parking', label: 'PARKPLATZ UND ANKUNFT', regionId: 'arrival', x: 450, y: 1480, width: 520, height: 300, fill: 0x7d8179, border: 0xc9c0a0 },
+  parking: { id: 'parking', label: 'PARKPLATZ UND ANKUNFT', regionId: 'arrival', x: 450, y: 1480, width: 540, height: 300, fill: 0x7d8179, border: 0xc9c0a0 },
   reception: { id: 'reception', label: 'REZEPTION UND SCHRANKENHOF', regionId: 'arrival', x: 980, y: 1320, width: 400, height: 290, fill: 0x788a72, border: 0xd5c689 },
   'north-pitches': { id: 'north-pitches', label: 'OBERE STELLPLATZREIHE', regionId: 'north', x: 40, y: 40, width: 1320, height: 260, fill: 0x6f965f, border: 0xa8c782 },
   'north-social': { id: 'north-social', label: 'ADRIA-KLAUSE UND SITZBEREICH', regionId: 'north', x: 40, y: 340, width: 1320, height: 370, fill: 0x739861, border: 0xb3ca8d },
@@ -79,7 +80,7 @@ export const AERIAL_FUNCTIONAL_AREAS = {
 export type FunctionalAreaId = keyof typeof AERIAL_FUNCTIONAL_AREAS;
 
 export const OBJECT_PLACEMENTS: Record<string, Placement> = {
-  reception: { x: 1000, y: 1430, width: 260, height: 155 }, 'arrival-sign': { x: 650, y: 1690, width: 115, height: 70 }, 'parking-fence-left': { x: 500, y: 1500, width: 22, height: 230 }, 'parking-fence-right': { x: 950, y: 1500, width: 22, height: 230 },
+  reception: { x: 1000, y: 1430, width: 260, height: 155 }, 'arrival-sign': { x: 650, y: 1690, width: 115, height: 70 }, 'parking-fence-left': { x: 500, y: 1500, width: 22, height: 230 }, 'parking-fence-right': { x: 970, y: 1500, width: 22, height: 230 },
   'arrival-flowerbed': { x: 1280, y: 1460, width: 90, height: 70 }, 'arrival-lantern-1': { x: 850, y: 1530, width: 24, height: 70 }, 'arrival-lantern-2': { x: 1300, y: 1390, width: 24, height: 70 }, 'lunch-sign': { x: 1240, y: 1340, width: 105, height: 65 },
   sanitary: { x: 80, y: 720, width: 255, height: 170 }, 'central-camper': { x: 400, y: 720, width: 220, height: 108 },
   'home-tent': { x: 80, y: 1030, width: 145, height: 120 }, 'tent-andre': { x: 235, y: 1030, width: 135, height: 105 }, 'tent-rene': { x: 380, y: 1030, width: 135, height: 105 }, 'tent-lars': { x: 525, y: 1030, width: 135, height: 110 }, 'tent-danny': { x: 670, y: 1030, width: 135, height: 105 },
@@ -88,19 +89,20 @@ export const OBJECT_PLACEMENTS: Record<string, Placement> = {
   'tent-hedge-west': { x: 80, y: 990, width: 370, height: 24 }, 'tent-hedge-east': { x: 560, y: 990, width: 280, height: 24 },
   clubhouse: { x: 50, y: 50, width: 320, height: 190 }, 'north-camper-1': { x: 430, y: 90, width: 220, height: 110 }, 'north-camper-2': { x: 980, y: 90, width: 220, height: 110 }, 'north-camper-3': { x: 1050, y: 420, width: 220, height: 108 },
   'north-table-1': { x: 100, y: 400, width: 140, height: 68 }, 'north-table-2': { x: 350, y: 420, width: 140, height: 68 }, 'north-bench-1': { x: 600, y: 500, width: 115, height: 40 }, 'north-sign': { x: 50, y: 560, width: 96, height: 64 },
-  'north-tree-1': { x: 10, y: 20, width: 102, height: 116 }, 'north-tree-2': { x: 1260, y: 20, width: 112, height: 125 }, 'north-tree-3': { x: 1280, y: 520, width: 92, height: 108 }, 'north-tree-4': { x: 10, y: 520, width: 100, height: 115 }, 'north-fence': { x: 0, y: 680, width: 600, height: 22 },
+  'north-tree-1': { x: 10, y: 20, width: 102, height: 116 }, 'north-tree-2': { x: 1260, y: 20, width: 112, height: 125 }, 'north-tree-3': { x: 1280, y: 480, width: 92, height: 108 }, 'north-tree-4': { x: 10, y: 520, width: 100, height: 115 }, 'north-fence': { x: 0, y: 600, width: 600, height: 16 },
   'festival-stage': { x: 1450, y: 60, width: 390, height: 150 }, party: { x: 1600, y: 400, width: 300, height: 210 }, 'festival-kiosk': { x: 1450, y: 760, width: 180, height: 115 },
-  'festival-table-1': { x: 1650, y: 730, width: 145, height: 70 }, 'festival-table-2': { x: 1750, y: 830, width: 145, height: 70 }, 'festival-lantern-1': { x: 1450, y: 620, width: 24, height: 78 }, 'festival-lantern-2': { x: 1900, y: 620, width: 24, height: 78 }, 'festival-sign': { x: 1830, y: 900, width: 100, height: 66 },
+  'festival-table-1': { x: 1450, y: 640, width: 145, height: 70 }, 'festival-table-2': { x: 1450, y: 890, width: 145, height: 70 }, 'festival-lantern-1': { x: 1450, y: 620, width: 24, height: 78 }, 'festival-lantern-2': { x: 1900, y: 620, width: 24, height: 78 }, 'festival-sign': { x: 1830, y: 900, width: 100, height: 66 },
   lifeguard: { x: 2050, y: 180, width: 160, height: 125 }, 'main-dock': { x: 2200, y: 460, width: 300, height: 72 }, 'beach-bench-1': { x: 2050, y: 520, width: 115, height: 40 },
   'beach-kiosk': { x: 2050, y: 720, width: 185, height: 120 }, 'beach-bench-2': { x: 2050, y: 850, width: 115, height: 40 }, 'beach-table': { x: 2050, y: 950, width: 150, height: 72 }, 'beach-sign': { x: 1960, y: 650, width: 92, height: 62 }, 'beach-rock-1': { x: 1980, y: 1000, width: 80, height: 58 }, 'beach-rock-2': { x: 2140, y: 1020, width: 62, height: 48 },
-  workshop: { x: 1450, y: 1520, width: 280, height: 170 }, 'wood-shed': { x: 1750, y: 1550, width: 160, height: 105 }, 'woodland-bench': { x: 1500, y: 1650, width: 120, height: 42 }, 'woodland-sign': { x: 1800, y: 1150, width: 104, height: 68 },
+  workshop: { x: 1450, y: 1520, width: 280, height: 170 }, 'wood-shed': { x: 1750, y: 1550, width: 160, height: 105 }, 'woodland-bench': { x: 1500, y: 1400, width: 120, height: 42 }, 'woodland-sign': { x: 1800, y: 1150, width: 104, height: 68 },
   'woodland-tree-1': { x: 1400, y: 1020, width: 118, height: 132 }, 'woodland-tree-2': { x: 1840, y: 1020, width: 120, height: 138 }, 'woodland-tree-3': { x: 1400, y: 1660, width: 125, height: 140 }, 'woodland-tree-4': { x: 1830, y: 1660, width: 120, height: 136 }, 'woodland-tree-5': { x: 1600, y: 1660, width: 108, height: 125 },
   'cove-shelter': { x: 1980, y: 1180, width: 190, height: 120 }, 'cove-dock': { x: 2200, y: 1420, width: 300, height: 65 }, 'cove-bench': { x: 2000, y: 1650, width: 125, height: 42 }, 'cove-sign': { x: 1960, y: 1380, width: 108, height: 70 },
   'cove-rock-1': { x: 1980, y: 1500, width: 95, height: 68 }, 'cove-rock-2': { x: 2120, y: 1600, width: 115, height: 80 }, 'cove-tree-1': { x: 1960, y: 1700, width: 118, height: 100 }, 'cove-tree-2': { x: 2120, y: 1700, width: 120, height: 100 },
 };
 
 export const NPC_PLACEMENTS: Record<string, PlanPoint> = {
-  gundula: { x: 1040, y: 1360 }, uli: { x: 1200, y: 1360 }, manni: { x: 1080, y: 1180 }, ronny: { x: 1040, y: 880 }, andre: { x: 150, y: 1190 }, rene: { x: 310, y: 1190 }, lars: { x: 470, y: 1190 }, danny: { x: 630, y: 1190 },
+  gundula: { x: 1040, y: 1330 }, uli: { x: 1200, y: 1360 }, manni: { x: 1080, y: 1180 }, ronny: { x: 1040, y: 880 },
+  andre: { x: 302, y: 1190 }, rene: { x: 447, y: 1190 }, lars: { x: 592, y: 1190 }, danny: { x: 737, y: 1190 },
   gregor: { x: 600, y: 520 }, masl: { x: 1830, y: 720 }, felix: { x: 2170, y: 940 }, schubert: { x: 1600, y: 1220 }, schima: { x: 2080, y: 1550 }, susi: { x: 1650, y: 850 }, jule: { x: 2170, y: 360 }, kira: { x: 300, y: 500 },
 };
 export const ENTRANCE_PLACEMENTS: Record<string, PlanPoint> = { 'reception-door': { x: 1130, y: 1420 }, 'sanitary-door': { x: 208, y: 905 }, 'home-door': { x: 152, y: 1160 }, 'party-door': { x: 1750, y: 625 } };
@@ -127,7 +129,7 @@ export const NPC_AREA_ASSIGNMENTS: Record<string, FunctionalAreaId> = {
 };
 
 export const ARRIVAL_STORY_PLACEMENTS = {
-  trunk: { x: 900, y: 1600 }, reservationBoard: { x: 1280, y: 1360 }, gundula: { x: 1040, y: 1360 }, uli: { x: 1200, y: 1360 }, gateDebate: { x: 900, y: 1400 }, taucherplatz: { x: 1120, y: 1180 },
+  trunk: { x: 900, y: 1600 }, reservationBoard: { x: 1280, y: 1360 }, gundula: { x: 1040, y: 1330 }, uli: { x: 1200, y: 1360 }, gateDebate: { x: 900, y: 1400 }, taucherplatz: { x: 1120, y: 1180 },
   powerBox: { x: 1300, y: 1160 }, drinks: { x: 150, y: 1180 }, tents: { x: 470, y: 1120 }, cable: { x: 780, y: 1180 }, firstBeer: { x: 1120, y: 1080 }, homeDoor: { x: 152, y: 1160 },
 } as const;
 
