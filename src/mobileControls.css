@@ -1,0 +1,187 @@
+.mobile-touch-controls {
+  position: absolute;
+  z-index: 18;
+  inset: 0;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.mobile-move-zone,
+.mobile-action-zone {
+  position: absolute;
+  pointer-events: auto;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-move-zone {
+  left: 0;
+  bottom: 0;
+  width: 50%;
+  height: 68%;
+}
+
+.mobile-action-zone {
+  top: 0;
+  right: 0;
+  width: 50%;
+  height: 100%;
+  border: 0;
+  color: transparent;
+  background: transparent;
+}
+
+.mobile-action-zone::after {
+  content: "RECHTS TIPPEN · AKTION";
+  position: absolute;
+  right: max(18px, env(safe-area-inset-right));
+  bottom: max(18px, env(safe-area-inset-bottom));
+  padding: 7px 10px;
+  border: 1px solid rgba(255, 243, 209, 0.18);
+  border-radius: 999px;
+  color: rgba(255, 243, 209, 0.72);
+  background: rgba(5, 18, 23, 0.5);
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  transition: transform 100ms ease, background 100ms ease, color 100ms ease;
+  pointer-events: none;
+}
+
+.mobile-action-zone.mobile-action-active::after {
+  color: #fff0ba;
+  background: rgba(239, 104, 92, 0.72);
+  transform: scale(0.96);
+}
+
+.mobile-joystick {
+  position: absolute;
+  width: 112px;
+  height: 112px;
+  margin: -56px 0 0 -56px;
+  border: 2px solid rgba(255, 243, 209, 0.28);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(102, 218, 198, 0.13), rgba(5, 18, 23, 0.48));
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.28), inset 0 1px rgba(255, 255, 255, 0.12);
+  pointer-events: none;
+}
+
+.mobile-joystick::before,
+.mobile-joystick::after {
+  content: "";
+  position: absolute;
+  background: rgba(255, 243, 209, 0.12);
+}
+
+.mobile-joystick::before {
+  top: 12px;
+  bottom: 12px;
+  left: 50%;
+  width: 1px;
+}
+
+.mobile-joystick::after {
+  top: 50%;
+  right: 12px;
+  left: 12px;
+  height: 1px;
+}
+
+.mobile-joystick-thumb {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 48px;
+  height: 48px;
+  margin: -24px 0 0 -24px;
+  border: 2px solid rgba(255, 228, 154, 0.66);
+  border-radius: 50%;
+  background: linear-gradient(145deg, rgba(244, 199, 93, 0.94), rgba(102, 218, 198, 0.78));
+  box-shadow: 0 7px 20px rgba(0, 0, 0, 0.3), inset 0 1px rgba(255, 255, 255, 0.55);
+}
+
+.mobile-move-hint {
+  position: absolute;
+  left: max(18px, env(safe-area-inset-left));
+  bottom: max(18px, env(safe-area-inset-bottom));
+  padding: 7px 10px;
+  border: 1px solid rgba(255, 243, 209, 0.14);
+  border-radius: 999px;
+  color: rgba(255, 243, 209, 0.62);
+  background: rgba(5, 18, 23, 0.42);
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  pointer-events: none;
+}
+
+.scene-close-button,
+.dialog-x-button {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border: 1px solid rgba(255, 243, 209, 0.42);
+  border-radius: 50%;
+  color: #fff3c8;
+  background: rgba(5, 18, 23, 0.9);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.38), inset 0 1px rgba(255, 255, 255, 0.12);
+  font-size: 1.65rem;
+  font-weight: 500;
+  line-height: 1;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.scene-close-button {
+  position: absolute;
+  z-index: 40;
+  top: max(14px, env(safe-area-inset-top));
+  right: max(14px, env(safe-area-inset-right));
+}
+
+.scene-close-button:hover,
+.dialog-x-button:hover,
+.scene-close-button:active,
+.dialog-x-button:active {
+  color: #142a2d;
+  background: #f4c75d;
+  transform: scale(0.96);
+}
+
+.encounter-card,
+.relationship-panel {
+  position: relative;
+}
+
+.dialog-x-button {
+  position: absolute;
+  z-index: 3;
+  top: 12px;
+  right: 12px;
+}
+
+.relationship-panel > header {
+  padding-right: 58px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .mobile-touch-controls {
+    display: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .scene-close-button,
+  .dialog-x-button {
+    width: 42px;
+    height: 42px;
+    font-size: 1.45rem;
+  }
+
+  .mobile-action-zone::after,
+  .mobile-move-hint {
+    font-size: 0.52rem;
+  }
+}
