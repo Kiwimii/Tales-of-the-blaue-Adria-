@@ -10,6 +10,8 @@ import { EncounterDialog } from './EncounterDialog';
 import { GameMenu } from './GameMenu';
 import { MobileGameControls, SceneCloseButton } from './MobileGameControls';
 import '../playExperience.css';
+import '../combatMenu.css';
+import '../responsiveGame.css';
 
 interface PlayExperienceProps {
   snapshot: GameSnapshot;
@@ -45,6 +47,36 @@ export function PlayExperience({ snapshot }: PlayExperienceProps): ReactElement 
       gameRef.current = null;
     };
   }, []);
+
+  useEffect(() => {
+    const game = gameRef.current;
+    const host = gameHostRef.current;
+    if (!gameReady || !game || !host) return;
+
+    let frame = 0;
+    const refreshScale = (): void => {
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(() => {
+        game.scale.refresh();
+        game.canvas.style.aspectRatio = '3 / 2';
+        game.canvas.style.objectFit = 'contain';
+      });
+    };
+    const observer = new ResizeObserver(refreshScale);
+    observer.observe(host);
+    window.addEventListener('orientationchange', refreshScale);
+    window.addEventListener('resize', refreshScale);
+    window.visualViewport?.addEventListener('resize', refreshScale);
+    refreshScale();
+
+    return () => {
+      observer.disconnect();
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener('orientationchange', refreshScale);
+      window.removeEventListener('resize', refreshScale);
+      window.visualViewport?.removeEventListener('resize', refreshScale);
+    };
+  }, [gameReady]);
 
   useEffect(() => {
     releaseAllDirections();

@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { installAdvancedSystemsRuntime } from './advancedRuntime';
 import { installArrivalQuestRuntime } from './arrivalQuestRuntime';
+import { installCombatProgressRuntime } from './combatProgress';
 import { RETURN_TO_WORLD_EVENT } from './events';
 import { AdvancedBattleScene } from './scenes/AdvancedBattleScene';
 import { AdvancedEntryDebateScene } from './scenes/AdvancedEntryDebateScene';
@@ -18,6 +19,7 @@ import { gameStore } from './state/GameStore';
 export function createGame(parent: HTMLElement): Phaser.Game {
   installArrivalQuestRuntime(gameStore);
   installAdvancedSystemsRuntime(gameStore);
+  const unsubscribeCombatProgress = installCombatProgressRuntime(gameStore);
   const game = new Phaser.Game({
     type: Phaser.AUTO,
     parent,
@@ -75,6 +77,7 @@ export function createGame(parent: HTMLElement): Phaser.Game {
   window.addEventListener(RETURN_TO_WORLD_EVENT, returnToWorld);
   window.addEventListener('keydown', onEscape);
   game.events.once(Phaser.Core.Events.DESTROY, () => {
+    unsubscribeCombatProgress();
     window.removeEventListener(RETURN_TO_WORLD_EVENT, returnToWorld);
     window.removeEventListener('keydown', onEscape);
   });

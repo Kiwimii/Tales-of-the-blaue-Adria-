@@ -1,5 +1,12 @@
 import { useEffect, useState } from 'react';
 import type { ReactElement } from 'react';
+import {
+  MAX_EQUIPPED_ATTACKS,
+  combatMoveList,
+  equippedAttackIds,
+  learnedAttackIds,
+} from '../game/combatMoves';
+import { toggleEquippedAttack } from '../game/combatProgress';
 import { ITEMS, RELATIONSHIP_CHARACTERS } from '../game/content';
 import { sendToggleMap } from '../game/events';
 import { gameStore } from '../game/state/GameStore';
@@ -12,7 +19,7 @@ import {
   modeName,
 } from '../game/uiState';
 
-type MenuTab = 'overview' | 'inventory' | 'team' | 'people' | 'system';
+type MenuTab = 'overview' | 'inventory' | 'team' | 'attacks' | 'people' | 'system';
 
 interface GameMenuProps {
   snapshot: GameSnapshot;
@@ -28,7 +35,8 @@ const moneyFormatter = new Intl.NumberFormat('de-DE', {
 const tabs: Array<{ id: MenuTab; label: string; short: string }> = [
   { id: 'overview', label: 'Übersicht', short: 'Status' },
   { id: 'inventory', label: 'Inventar', short: 'Rucksack' },
-  { id: 'team', label: 'Gruppe', short: 'Team' },
+  { id: 'team', label: 'Charakter', short: 'Team' },
+  { id: 'attacks', label: 'Attacken', short: 'Kampf' },
   { id: 'people', label: 'Beziehungen', short: 'Leute' },
   { id: 'system', label: 'Spiel', short: 'Mehr' },
 ];
@@ -77,6 +85,7 @@ export function GameMenu({ snapshot, onClose }: GameMenuProps): ReactElement {
           {tab === 'overview' && <OverviewTab snapshot={snapshot} />}
           {tab === 'inventory' && <InventoryTab snapshot={snapshot} />}
           {tab === 'team' && <TeamTab snapshot={snapshot} />}
+          {tab === 'attacks' && <AttacksTab snapshot={snapshot} />}
           {tab === 'people' && <PeopleTab snapshot={snapshot} />}
           {tab === 'system' && <SystemTab onClose={onClose} />}
         </div>
@@ -182,6 +191,65 @@ function TeamTab({ snapshot }: { snapshot: GameSnapshot }): ReactElement {
               <small>Kampf +{member.bonuses.battle} · Sozial +{member.bonuses.social} · Spiele +{member.bonuses.games} · Erholung +{member.bonuses.recovery}</small>
             </article>
           )) : <p>Noch keine Begleiter aktiv. Freunde lassen sich über Gespräche in die Gruppe holen.</p>}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function AttacksTab({ snapshot }: { snapshot: GameSnapshot }): ReactElement {
+  const [feedback, setFeedback] = useState('');
+  const learned = learnedAttackIds(snapshot);
+  const equipped = equippedAttackIds(snapshot);
+  const moves = combatMoveList();
+
+  const toggle = (id: typeof moves[number]['id']): void => {
+    const result = toggleEquippedAttack(gameStore, id);
+    setFeedback(result.ok
+      ? result.equipped ? 'Attacke ausgerüstet.' : 'Attacke abgelegt.'
+      : result.reason ?? 'Änderung nicht möglich.');
+  };
+
+  return (
+    <div className="menu-stack">
+      <section className="menu-highlight-card">
+        <p className="eyebrow">Kampfset</p>
+        <strong>{equipped.length}/{MAX_EQUIPPED_ATTACKS} Attacken ausgerüstet</strong>
+        <span>Im Kampf steigen Frustpunkte. Wer sein Maximum erreicht, verliert.</span>
+        <div className="menu-attack-slots">
+          {Array.from({ length: MAX_EQUIPPED_ATTACKS }, (_, index) => (
+            <span key={index}>{equipped[index] ? `${index + 1}. ${moves.find((move) => move.id === equipped[index])?.shortLabel}` : `${index + 1}. FREI`}</span>
+          ))}
+        </div>
+        {feedback && <small className="menu-attack-feedback">{feedback}</small>}
+      </section>
+
+      <section>
+        <h3>Gelernte Attacken</h3>
+        <div className="menu-attack-grid">
+          {moves.filter((move) => learned.includes(move.id)).map((move) => {
+            const active = equipped.includes(move.id);
+            return (
+              <article className={active ? 'menu-attack-card menu-attack-card-active' : 'menu-attack-card'} key={move.id}>
+                <div><strong>{move.label}</strong><small>{move.tag.toUpperCase()} · Genauigkeit {move.accuracy}% · Basisfrust {move.baseFrustration}</small></div>
+                <p>{move.description}</p>
+                <small>Flirtoption: {move.flirtOption}</small>
+                <button type="button" onClick={() => toggle(move.id)}>{active ? 'Ablegen' : 'Ausrüsten'}</button>
+              </article>
+            );
+          })}
+        </div>
+      </section>
+
+      <section>
+        <h3>Noch zu lernen</h3>
+        <div className="menu-attack-grid">
+          {moves.filter((move) => !learned.includes(move.id)).map((move) => (
+            <article className="menu-attack-card menu-attack-card-locked" key={move.id}>
+              <div><strong>{move.label}</strong><small>{move.unlockTitle}</small></div>
+              <p>{move.unlockDetail}</p>
+            </article>
+          ))}
         </div>
       </section>
     </div>

@@ -27,6 +27,30 @@ export type QuestStatus = 'locked' | 'active' | 'completed' | 'failed';
 
 export type ChronicleTone = 'neutral' | 'good' | 'warn' | 'bad';
 
+export type ConversationTopicId = 'weekend' | 'personal' | 'plan';
+
+export type CombatMoveId =
+  | 'classic-high-five'
+  | 'aldi-shirt-show'
+  | 'agree-anyway'
+  | 'logical-argument'
+  | 'dry-counter'
+  | 'camping-chair-block'
+  | 'beer-offer'
+  | 'synchronised-cheer'
+  | 'cup-eye-contact'
+  | 'total-exaggeration';
+
+export type FrustrationStatusId =
+  | 'ueberrumpelt'
+  | 'fremdschaemen'
+  | 'leerlauf'
+  | 'unterbrochen'
+  | 'abgesichert'
+  | 'verwirrt'
+  | 'fokussiert'
+  | 'fixiert';
+
 export interface PlayerProfile {
   name: string;
   skinTone: string;
