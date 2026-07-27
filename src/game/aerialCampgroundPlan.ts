@@ -140,10 +140,10 @@ export const AERIAL_NODES = {
   beachGateOutside: { x: 780, y: 1170 },
   kiosk: { x: 650, y: 1280 },
   lowerEast: { x: 1770, y: 1120 },
-  lowerHub: { x: 1470, y: 1190 },
-  taucherEntry: { x: 1540, y: 1190 },
-  taucherCenter: { x: 1540, y: 1070 },
-  lowerSouth: { x: 1490, y: 1450 },
+  lowerHub: { x: 1570, y: 1190 },
+  taucherEntry: { x: 1570, y: 1190 },
+  taucherCenter: { x: 1570, y: 1070 },
+  lowerSouth: { x: 1570, y: 1450 },
   serviceEast: { x: 1920, y: 1510 },
   coveGate: { x: 790, y: 1450 },
   coveDock: { x: 420, y: 1540 },
@@ -195,13 +195,13 @@ export const AERIAL_PITCHES: PlanPitch[] = [
   { id: 'middle-3', x: 1480, y: 700, width: 190, height: 150 },
   { id: 'south-1', x: 930, y: 880, width: 240, height: 150 },
   { id: 'south-2', x: 1200, y: 900, width: 230, height: 140 },
-  { id: 'taucher', x: 900, y: 1000, width: 650, height: 380, label: 'TAUCHERPLATZ' },
+  { id: 'taucher', x: 900, y: 1000, width: 680, height: 380, label: 'TAUCHERPLATZ' },
   { id: 'festival', x: 1680, y: 890, width: 420, height: 360, label: 'FESTWIESE' },
 ];
 
-export const TAUCHER_PITCH_BOUNDS: Bounds = { x: 900, y: 1000, width: 650, height: 380 };
+export const TAUCHER_PITCH_BOUNDS: Bounds = { x: 900, y: 1000, width: 680, height: 380 };
 export const ARRIVAL_CAR_POSITION: PlanPoint = { x: 2220, y: 450 };
-export const TAUCHER_CAR_POSITION: PlanPoint = { x: 1420, y: 1080 };
+export const TAUCHER_CAR_POSITION: PlanPoint = { x: 1450, y: 1080 };
 
 export const OBJECT_PLACEMENTS: Record<string, Placement> = {
   reception: { x: 1655, y: 545 },
@@ -218,7 +218,7 @@ export const OBJECT_PLACEMENTS: Record<string, Placement> = {
   'tent-rene': { x: 1075, y: 1230 },
   'tent-lars': { x: 1220, y: 1230 },
   'tent-danny': { x: 1365, y: 1230 },
-  'central-camper': { x: 1360, y: 760 },
+  'central-camper': { x: 1100, y: 750, width: 220 },
   'central-table': { x: 1220, y: 900 },
   'central-bench': { x: 1375, y: 920 },
   'central-sign': { x: 920, y: 970 },
@@ -267,7 +267,7 @@ export const OBJECT_PLACEMENTS: Record<string, Placement> = {
   'woodland-bench': { x: 1450, y: 1690 },
   'woodland-sign': { x: 2040, y: 1480 },
   'woodland-tree-1': { x: 900, y: 1580 },
-  'woodland-tree-2': { x: 2100, y: 1500 },
+  'woodland-tree-2': { x: 2020, y: 1500 },
   'woodland-tree-3': { x: 1080, y: 1660 },
   'woodland-tree-4': { x: 2050, y: 1680 },
   'woodland-tree-5': { x: 1320, y: 1650 },
@@ -287,26 +287,26 @@ export const NPC_PLACEMENTS: Record<string, PlanPoint> = {
   gundula: { x: 1765, y: 720 },
   uli: { x: 1840, y: 720 },
   manni: { x: 1510, y: 970 },
-  ronny: { x: 1580, y: 820 },
+  ronny: { x: 1570, y: 780 },
   andre: { x: 970, y: 1190 },
   rene: { x: 1115, y: 1190 },
   lars: { x: 1260, y: 1190 },
   danny: { x: 1405, y: 1190 },
   gregor: { x: 1270, y: 620 },
-  masl: { x: 1800, y: 1140 },
+  masl: { x: 2050, y: 900 },
   felix: { x: 540, y: 910 },
   schubert: { x: 1790, y: 1570 },
   schima: { x: 550, y: 1570 },
   susi: { x: 1940, y: 1040 },
   jule: { x: 480, y: 820 },
-  kira: { x: 1450, y: 600 },
+  kira: { x: 1050, y: 620 },
 };
 
 export const ENTRANCE_PLACEMENTS: Record<string, PlanPoint> = {
   'reception-door': { x: 1760, y: 705 },
   'sanitary-door': { x: 985, y: 950 },
   'home-door': { x: 1005, y: 1170 },
-  'party-door': { x: 1970, y: 1110 },
+  'party-door': { x: 1810, y: 1110 },
 };
 
 export const LANDMARK_PLACEMENTS: Record<string, PlanPoint> = {
@@ -326,11 +326,11 @@ export const ARRIVAL_STORY_PLACEMENTS = {
   uli: NPC_PLACEMENTS.uli,
   gateDebate: AERIAL_NODES.gate,
   taucherplatz: AERIAL_NODES.taucherCenter,
-  powerBox: { x: 1470, y: 1130 },
+  powerBox: { x: 1510, y: 1130 },
   drinks: { x: 1000, y: 1150 },
   tents: { x: 1160, y: 1150 },
   cable: { x: 1320, y: 1150 },
-  firstBeer: { x: 1480, y: 1280 },
+  firstBeer: { x: 1500, y: 1280 },
   homeDoor: ENTRANCE_PLACEMENTS['home-door'],
 } as const;
 
