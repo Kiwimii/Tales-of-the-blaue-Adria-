@@ -117,7 +117,7 @@ export class SocialScene extends Phaser.Scene {
       false,
       false,
       430,
-      48,
+      8,
     ));
     buttons.push(this.button(690, 515, 'Zurück', () => this.buildOptions(), false, true, 220));
     this.optionContainer.add(buttons);
