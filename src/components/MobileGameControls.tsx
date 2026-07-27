@@ -19,6 +19,7 @@ import {
   shouldTriggerContextAction,
 } from '../game/touchInteraction';
 import type { Direction } from '../game/types';
+import { interactionActionLabel } from '../game/uxPresentation';
 import '../mobileControls.css';
 
 interface Point {
@@ -161,6 +162,8 @@ export function MobileGameControls(): ReactElement {
     event.stopPropagation();
   };
 
+  const actionLabel = interactionActionLabel(nearbyInteraction?.prompt);
+
   return (
     <div className="mobile-touch-controls" aria-label="Mobile Spielsteuerung">
       <div
@@ -171,7 +174,7 @@ export function MobileGameControls(): ReactElement {
         onPointerUp={endMove}
         onPointerCancel={cancelMove}
       >
-        {!joystick && <span className="mobile-move-hint">LINKS WISCHEN · LAUFEN</span>}
+        {!joystick && <span className="mobile-move-hint"><b>WISCHEN</b><small>Figur bewegen</small></span>}
         {joystick && (
           <span className="mobile-joystick" style={{ left: joystick.origin.x, top: joystick.origin.y }}>
             <span
@@ -181,6 +184,12 @@ export function MobileGameControls(): ReactElement {
           </span>
         )}
       </div>
+      {nearbyInteraction && (
+        <div className="mobile-context-prompt" role="status" aria-live="polite">
+          <span aria-hidden="true">◆</span>
+          <strong>{actionLabel}</strong>
+        </div>
+      )}
       <button
         type="button"
         className={`mobile-action-zone${actionActive ? ' mobile-action-active' : ''}${nearbyInteraction ? ' mobile-action-ready' : ''}`}
@@ -191,7 +200,11 @@ export function MobileGameControls(): ReactElement {
         onClick={clickGuard}
         onContextMenu={clickGuard}
       >
-        Aktion
+        <span className="mobile-action-glyph" aria-hidden="true">A</span>
+        <span className="mobile-action-copy">
+          <strong>{nearbyInteraction ? 'AKTION BEREIT' : 'AKTION'}</strong>
+          <small>{actionLabel}</small>
+        </span>
       </button>
     </div>
   );
