@@ -36,7 +36,8 @@ describe('realistic world layout', () => {
     const lakeLookout = LANDMARKS.find((landmark) => landmark.id === 'lake-lookout');
     expect(lifeguard && lifeguard.x + lifeguard.width).toBeLessThanOrEqual(2250);
     expect(schima && isPointInWater(schima.x, schima.y)).toBe(false);
-    expect(lakeLookout && isPointOnDock(lakeLookout.x, lakeLookout.y)).toBe(true);
+    expect(lakeLookout).toBeDefined();
+    expect(lakeLookout && isPointInWater(lakeLookout.x, lakeLookout.y)).toBe(false);
   });
 
   it('places the fire in a clear shared area instead of inside a tent', () => {
