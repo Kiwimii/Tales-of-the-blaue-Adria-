@@ -1,0 +1,125 @@
+.graphics-options-panel {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid rgba(244, 212, 123, 0.26);
+  border-radius: 17px;
+  background: linear-gradient(145deg, rgba(244, 212, 123, 0.08), rgba(119, 218, 197, 0.05));
+}
+
+.graphics-options-panel h3 {
+  margin: 0;
+}
+
+.graphics-options-intro,
+.graphics-options-status {
+  margin: 0;
+  color: var(--ui-muted, #b9c9c0);
+  font-size: 0.76rem;
+  line-height: 1.45;
+}
+
+.graphics-options-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.graphics-option {
+  min-height: 112px;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  align-items: start;
+  gap: 9px;
+  padding: 12px;
+  border: 1px solid rgba(255, 246, 218, 0.14);
+  border-radius: 14px;
+  color: var(--ui-text, #fff8e7);
+  background: rgba(255, 255, 255, 0.045);
+  text-align: left;
+  cursor: pointer;
+  transition: transform 120ms ease, border-color 140ms ease, background 140ms ease;
+}
+
+.graphics-option:hover,
+.graphics-option:focus-visible {
+  border-color: rgba(244, 212, 123, 0.58);
+  background: rgba(244, 212, 123, 0.1);
+  outline: 3px solid rgba(119, 218, 197, 0.18);
+  outline-offset: 2px;
+}
+
+.graphics-option:active {
+  transform: translateY(1px) scale(0.992);
+}
+
+.graphics-option-active {
+  border-color: rgba(119, 218, 197, 0.78);
+  background: rgba(30, 91, 75, 0.42);
+  box-shadow: inset 0 0 0 1px rgba(119, 218, 197, 0.18);
+}
+
+.graphics-option-icon {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  color: #173027;
+  background: var(--ui-accent, #f4d47b);
+  font-size: 1.3rem;
+  font-weight: 900;
+}
+
+.graphics-option > div {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+}
+
+.graphics-option strong {
+  font-size: 0.82rem;
+}
+
+.graphics-option small {
+  color: var(--ui-muted, #b9c9c0);
+  font-size: 0.65rem;
+  line-height: 1.35;
+}
+
+.graphics-option b {
+  grid-column: 1 / -1;
+  justify-self: start;
+  padding: 3px 7px;
+  border-radius: 999px;
+  color: var(--ui-accent, #f4d47b);
+  background: rgba(244, 212, 123, 0.1);
+  font-size: 0.54rem;
+  letter-spacing: 0.08em;
+}
+
+.graphics-option-active b {
+  color: var(--ui-teal, #77dac5);
+  background: rgba(119, 218, 197, 0.12);
+}
+
+.graphics-options-status {
+  color: var(--ui-teal, #77dac5);
+  font-weight: 800;
+}
+
+@media (max-width: 760px) {
+  .graphics-options-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .graphics-option {
+    min-height: 88px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .graphics-option {
+    transition: none;
+  }
+}
