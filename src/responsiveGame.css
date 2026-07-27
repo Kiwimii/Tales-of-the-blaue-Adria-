@@ -23,6 +23,56 @@
   object-fit: contain;
 }
 
+.game-load-panel {
+  position: absolute;
+  z-index: 90;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 10px;
+  padding: 28px;
+  color: #fff3d1;
+  text-align: center;
+  background: radial-gradient(circle at center, rgba(25, 63, 52, 0.97), rgba(5, 18, 23, 0.99));
+}
+
+.game-load-panel strong {
+  font-size: clamp(1.05rem, 3vw, 1.5rem);
+}
+
+.game-load-panel p {
+  max-width: 540px;
+  margin: 0;
+  color: #c6d8cf;
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.game-load-panel > div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 5px;
+}
+
+.game-load-panel button {
+  min-height: 46px;
+  padding: 9px 15px;
+  border: 1px solid rgba(255, 228, 154, 0.48);
+  border-radius: 12px;
+  color: #173027;
+  font-weight: 900;
+  background: #f4d47b;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.game-load-error {
+  background: radial-gradient(circle at center, rgba(83, 37, 34, 0.98), rgba(15, 13, 17, 0.99));
+}
+
 @media (orientation: landscape) {
   .focused-game-frame {
     width: min(100vw, calc(100dvh * 1.5));
