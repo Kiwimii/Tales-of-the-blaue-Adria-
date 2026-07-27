@@ -5,6 +5,7 @@ import { calculateChallengeChance } from '../game/mechanics';
 import { gameStore } from '../game/state/GameStore';
 import { DIALOG_TOUCH_GUARD_MS } from '../game/touchInteraction';
 import type { ChallengeOutcome, GameSnapshot } from '../game/types';
+import '../dialogGuard.css';
 
 export function EncounterDialog({ snapshot }: { snapshot: GameSnapshot }): ReactElement | null {
   const active = snapshot.encounter;
