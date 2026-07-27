@@ -1,17 +1,25 @@
 import { describe, expect, it } from 'vitest';
 import {
+  ACTION_TAP_DEBOUNCE_MS,
   ACTION_TAP_MAX_DISTANCE,
   DIALOG_TOUCH_GUARD_MS,
+  canTriggerAction,
   isActionTap,
   isDialogInputReady,
 } from '../src/game/touchInteraction';
 
 describe('touch interaction guards', () => {
-  it('accepts a completed short tap but rejects a swipe as an action', () => {
+  it('accepts a completed finger tap with normal drift but rejects a swipe as an action', () => {
     expect(isActionTap(0, 0)).toBe(true);
-    expect(isActionTap(12, -8)).toBe(true);
+    expect(isActionTap(20, 20)).toBe(true);
     expect(isActionTap(ACTION_TAP_MAX_DISTANCE + 1, 0)).toBe(false);
-    expect(isActionTap(20, 20)).toBe(false);
+    expect(isActionTap(50, 30)).toBe(false);
+  });
+
+  it('debounces accidental duplicate action taps', () => {
+    const triggeredAt = 1_000;
+    expect(canTriggerAction(triggeredAt, triggeredAt + ACTION_TAP_DEBOUNCE_MS - 1)).toBe(false);
+    expect(canTriggerAction(triggeredAt, triggeredAt + ACTION_TAP_DEBOUNCE_MS)).toBe(true);
   });
 
   it('keeps newly opened dialog options blocked through the triggering touch', () => {
