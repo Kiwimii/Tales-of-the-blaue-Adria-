@@ -1,7 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import type { PointerEvent as ReactPointerEvent, ReactElement } from 'react';
+import type {
+  MouseEvent as ReactMouseEvent,
+  PointerEvent as ReactPointerEvent,
+  ReactElement,
+} from 'react';
 import { sendAction, sendDirection, sendReturnToWorld } from '../game/events';
 import { clampSwipeVector, directionsForSwipe } from '../game/mobileInput';
+import { isActionTap } from '../game/touchInteraction';
 import type { Direction } from '../game/types';
 import '../mobileControls.css';
 
@@ -14,13 +19,15 @@ export function MobileGameControls(): ReactElement {
   const pointerId = useRef<number | null>(null);
   const origin = useRef<Point | null>(null);
   const activeDirections = useRef(new Set<Direction>());
-  const actionTimer = useRef<number | null>(null);
+  const actionPointerId = useRef<number | null>(null);
+  const actionOrigin = useRef<Point | null>(null);
+  const scheduledAction = useRef<number | null>(null);
   const [joystick, setJoystick] = useState<{ origin: Point; offset: Point } | null>(null);
   const [actionActive, setActionActive] = useState(false);
 
   useEffect(() => () => {
     releaseDirections(activeDirections.current);
-    if (actionTimer.current !== null) window.clearTimeout(actionTimer.current);
+    if (scheduledAction.current !== null) window.clearTimeout(scheduledAction.current);
   }, []);
 
   const updateDirections = (x: number, y: number): void => {
@@ -34,7 +41,7 @@ export function MobileGameControls(): ReactElement {
     activeDirections.current = next;
   };
 
-  const relativePoint = (event: ReactPointerEvent<HTMLDivElement>): Point => {
+  const relativePoint = (event: ReactPointerEvent<HTMLElement>): Point => {
     const rect = event.currentTarget.getBoundingClientRect();
     return { x: event.clientX - rect.left, y: event.clientY - rect.top };
   };
@@ -70,13 +77,47 @@ export function MobileGameControls(): ReactElement {
     setJoystick(null);
   };
 
-  const triggerAction = (event: ReactPointerEvent<HTMLButtonElement>): void => {
+  const beginAction = (event: ReactPointerEvent<HTMLButtonElement>): void => {
+    if (actionPointerId.current !== null) return;
     event.preventDefault();
     event.stopPropagation();
-    sendAction();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    actionPointerId.current = event.pointerId;
+    actionOrigin.current = relativePoint(event);
     setActionActive(true);
-    if (actionTimer.current !== null) window.clearTimeout(actionTimer.current);
-    actionTimer.current = window.setTimeout(() => setActionActive(false), 160);
+  };
+
+  const endAction = (event: ReactPointerEvent<HTMLButtonElement>): void => {
+    if (actionPointerId.current !== event.pointerId || !actionOrigin.current) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const point = relativePoint(event);
+    const deltaX = point.x - actionOrigin.current.x;
+    const deltaY = point.y - actionOrigin.current.y;
+    actionPointerId.current = null;
+    actionOrigin.current = null;
+    setActionActive(false);
+
+    if (!isActionTap(deltaX, deltaY)) return;
+    if (scheduledAction.current !== null) window.clearTimeout(scheduledAction.current);
+    scheduledAction.current = window.setTimeout(() => {
+      scheduledAction.current = null;
+      sendAction();
+    }, 0);
+  };
+
+  const cancelAction = (event: ReactPointerEvent<HTMLButtonElement>): void => {
+    if (actionPointerId.current !== event.pointerId) return;
+    event.preventDefault();
+    event.stopPropagation();
+    actionPointerId.current = null;
+    actionOrigin.current = null;
+    setActionActive(false);
+  };
+
+  const clickGuard = (event: ReactMouseEvent<HTMLButtonElement>): void => {
+    event.preventDefault();
+    event.stopPropagation();
   };
 
   return (
@@ -103,7 +144,11 @@ export function MobileGameControls(): ReactElement {
         type="button"
         className={`mobile-action-zone${actionActive ? ' mobile-action-active' : ''}`}
         aria-label="Aktion ausführen"
-        onPointerDown={triggerAction}
+        onPointerDown={beginAction}
+        onPointerUp={endAction}
+        onPointerCancel={cancelAction}
+        onClick={clickGuard}
+        onContextMenu={clickGuard}
       >
         Aktion
       </button>
