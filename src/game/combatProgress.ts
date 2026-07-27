@@ -1,4 +1,5 @@
 import {
+  COMBAT_MOVES,
   MAX_EQUIPPED_ATTACKS,
   STARTER_ATTACK,
   equippedAttackFlag,
@@ -24,17 +25,15 @@ export function learnAttack(store: GameStore, id: CombatMoveId, source?: string)
     state.flags[key] = true;
     learned = true;
 
-    const snapshot = store.snapshot();
-    if (equippedAttackIds(snapshot).length < MAX_EQUIPPED_ATTACKS) {
-      state.flags[equippedAttackFlag(id)] = true;
-    }
+    const active = equippedAttackIds({ flags: state.flags });
+    if (active.length < MAX_EQUIPPED_ATTACKS) state.flags[equippedAttackFlag(id)] = true;
 
     const previousId = state.chronicle.at(-1)?.id ?? 0;
     state.chronicle.push({
       id: previousId + 1,
       day: state.day,
       minutes: state.minutes,
-      text: `Neue Attacke gelernt: ${source ?? id}.`,
+      text: `Neue Attacke gelernt: ${source ?? COMBAT_MOVES[id].label}.`,
       tone: 'good',
     });
   });
@@ -44,19 +43,18 @@ export function learnAttack(store: GameStore, id: CombatMoveId, source?: string)
 export function toggleEquippedAttack(store: GameStore, id: CombatMoveId): AttackToggleResult {
   let result: AttackToggleResult = { ok: false, equipped: false, reason: 'Attacke ist noch nicht gelernt.' };
   mutateStore(store, (state) => {
-    const snapshot = store.snapshot();
-    const learned = learnedAttackIds(snapshot);
+    const learned = learnedAttackIds({ flags: state.flags });
     if (!learned.includes(id)) return;
 
     const key = equippedAttackFlag(id);
-    const active = equippedAttackIds(snapshot);
-    if (state.flags[key] || (id === STARTER_ATTACK && active.includes(id) && !state.flags[key])) {
+    const active = equippedAttackIds({ flags: state.flags });
+    const isActive = active.includes(id);
+    if (isActive) {
       if (active.length <= 1) {
         result = { ok: false, equipped: true, reason: 'Mindestens eine Attacke muss ausgerüstet bleiben.' };
         return;
       }
       state.flags[key] = false;
-      if (id === STARTER_ATTACK) state.flags['attack-starter-explicitly-unequipped'] = true;
       result = { ok: true, equipped: false };
       return;
     }
@@ -66,7 +64,6 @@ export function toggleEquippedAttack(store: GameStore, id: CombatMoveId): Attack
       return;
     }
     state.flags[key] = true;
-    if (id === STARTER_ATTACK) state.flags['attack-starter-explicitly-unequipped'] = false;
     result = { ok: true, equipped: true };
   });
   return result;
@@ -76,6 +73,17 @@ export function installCombatProgressRuntime(store: GameStore): () => void {
   let syncing = false;
   return store.subscribe((snapshot) => {
     if (syncing) return;
+
+    if (!snapshot.flags['attack-loadout-initialized']) {
+      syncing = true;
+      mutateStore(store, (state) => {
+        state.flags['attack-loadout-initialized'] = true;
+        state.flags[equippedAttackFlag(STARTER_ATTACK)] = true;
+      });
+      syncing = false;
+      return;
+    }
+
     const automatic: Array<[boolean, CombatMoveId, string]> = [
       [Boolean(snapshot.flags.entryDebateWon), 'aldi-shirt-show', 'Aldi-T-Shirt präsentieren'],
       [Boolean(snapshot.flags.flipCupWon), 'synchronised-cheer', 'Synchroner Gruppen-Zuruf'],
