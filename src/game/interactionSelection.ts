@@ -5,8 +5,11 @@ export interface RankedInteractionCandidate {
 }
 
 export function interactionIdentity(id: string): string {
-  const npc = id.match(/^npc-(.+?)(?:-story)?$/);
-  if (npc) return `npc:${npc[1]}`;
+  if (id.startsWith('npc-')) {
+    const raw = id.slice(4);
+    const characterId = raw.endsWith('-story') ? raw.slice(0, -6) : raw;
+    return `npc:${characterId}`;
+  }
   if (id === 'home-door' || id === 'home-door-story') return 'door:home';
   if (id === 'arrival-board' || id === 'landmark-notice-board') return 'object:notice-board';
   return id;
