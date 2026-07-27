@@ -35,9 +35,16 @@ const stylesheet = assetFiles
 assert(stylesheet.includes('.mobile-action-ready'), 'Sprint 85 mobile action feedback is missing from the production CSS.');
 assert(stylesheet.includes('.game-menu-title-block'), 'Sprint 85 menu hierarchy is missing from the production CSS.');
 assert(stylesheet.includes('.encounter-option-chance'), 'Sprint 85 encounter risk display is missing from the production CSS.');
+assert(stylesheet.includes('.mobile-interaction-picker'), 'Sprint 86 interaction picker is missing from the production CSS.');
+
+const gameBundle = javascript
+  .map((file) => readFileSync(resolve(output, 'assets', file), 'utf8'))
+  .join('\n');
+assert(gameBundle.includes('hedge-pee'), 'Sprint 86 hedge minigame is missing from the production game bundle.');
+assert(gameBundle.includes('tales:cycle-interaction'), 'Sprint 86 interaction cycling is missing from the production game bundle.');
 
 assert(manifest.start_url === './' && manifest.scope === './', 'Next PWA scope is invalid.');
-assert(worker.includes('tales-adria-next-s85'), 'Next service worker cache version is stale.');
+assert(worker.includes('tales-adria-next-s86'), 'Next service worker cache version is stale.');
 assert(worker.includes("destination === 'script'"), 'Game bundles must use the network-first mobile update path.');
 
 console.log(`Next validation passed: ${linkedAssets.length} linked files, ${Math.round(initial.bytes / 1024)} kB initial UI, lazy Phaser chunk.`);
