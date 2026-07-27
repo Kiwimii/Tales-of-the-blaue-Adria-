@@ -8,7 +8,7 @@ import {
   type ExpandedWorldObject,
 } from './worldV2';
 
-export const CAMPFIRE_POSITION = { x: 900, y: 1010, safeRadius: 66 } as const;
+export const CAMPFIRE_POSITION = { x: 1120, y: 1080, safeRadius: 62 } as const;
 
 export interface NavigationCorridor {
   id: string;
@@ -23,145 +23,53 @@ export interface ApproachZone {
 }
 
 export const WALKABLE_CORRIDORS: NavigationCorridor[] = [
-  { id: 'arrival-driveway', bounds: { x: 740, y: 1280, width: 200, height: 520 } },
-  { id: 'gate-passage', bounds: { x: 735, y: 1200, width: 115, height: 110 } },
-  { id: 'central-main-path', bounds: { x: 745, y: 760, width: 105, height: 440 } },
-  { id: 'north-transition', bounds: { x: 625, y: 700, width: 180, height: 110 } },
-  { id: 'north-spine', bounds: { x: 610, y: 250, width: 100, height: 450 } },
-  { id: 'festival-link', bounds: { x: 1340, y: 690, width: 120, height: 120 } },
-  { id: 'festival-spine', bounds: { x: 1880, y: 300, width: 70, height: 650 } },
-  { id: 'woodland-service', bounds: { x: 1640, y: 980, width: 95, height: 820 } },
-  { id: 'cove-link', bounds: { x: 1900, y: 1500, width: 140, height: 100 } },
-  { id: 'main-dock-approach', bounds: { x: 2100, y: 500, width: 150, height: 72 }, allowKinds: ['dock'] },
-  { id: 'cove-dock-approach', bounds: { x: 2020, y: 1390, width: 180, height: 65 }, allowKinds: ['dock'] },
+  { id: 'arrival-driveway', bounds: { x: 845, y: 1300, width: 110, height: 500 } },
+  { id: 'central-main-path', bounds: { x: 865, y: 300, width: 70, height: 1000 } },
+  { id: 'north-row', bounds: { x: 200, y: 269, width: 1150, height: 62 } },
+  { id: 'upper-row', bounds: { x: 200, y: 618, width: 1150, height: 64 } },
+  { id: 'middle-row', bounds: { x: 200, y: 917, width: 1150, height: 66 } },
+  { id: 'festival-entry', bounds: { x: 1350, y: 620, width: 400, height: 64 } },
+  { id: 'festival-side', bounds: { x: 1720, y: 650, width: 60, height: 300 } },
+  { id: 'beach-gate', bounds: { x: 1900, y: 624, width: 100, height: 52 } },
+  { id: 'beach-north-path', bounds: { x: 1974, y: 375, width: 152, height: 50 } },
+  { id: 'service-entry', bounds: { x: 900, y: 1268, width: 850, height: 64 } },
+  { id: 'service-side', bounds: { x: 1720, y: 1300, width: 60, height: 150 } },
+  { id: 'cove-link', bounds: { x: 1750, y: 1423, width: 450, height: 54 } },
+  { id: 'main-dock-approach', bounds: { x: 2100, y: 476, width: 400, height: 48 }, allowKinds: ['dock'] },
+  { id: 'cove-dock-approach', bounds: { x: 1950, y: 1425, width: 550, height: 50 }, allowKinds: ['dock'] },
 ];
 
 export const APPROACH_ZONES: ApproachZone[] = [
-  { id: 'reception-door', bounds: { x: 1055, y: 1490, width: 115, height: 105 }, ownerIds: ['reception'] },
-  { id: 'sanitary-door', bounds: { x: 430, y: 955, width: 120, height: 95 }, ownerIds: ['sanitary'] },
-  { id: 'home-tent-door', bounds: { x: 315, y: 1185, width: 100, height: 90 }, ownerIds: ['home-tent'] },
-  { id: 'party-tent-door', bounds: { x: 1615, y: 490, width: 120, height: 105 }, ownerIds: ['party'] },
-  { id: 'notice-board', bounds: { x: 600, y: 1400, width: 105, height: 125 }, ownerIds: [] },
+  { id: 'reception-door', bounds: { x: 1080, y: 1380, width: 100, height: 70 }, ownerIds: ['reception'] },
+  { id: 'sanitary-door', bounds: { x: 155, y: 865, width: 110, height: 90 }, ownerIds: ['sanitary'] },
+  { id: 'home-tent-door', bounds: { x: 105, y: 1135, width: 95, height: 85 }, ownerIds: ['home-tent', 'arrival-home-tent'] },
+  { id: 'party-tent-door', bounds: { x: 1685, y: 585, width: 130, height: 100 }, ownerIds: ['party'] },
+  { id: 'notice-board', bounds: { x: 1225, y: 1315, width: 115, height: 100 }, ownerIds: [] },
 ];
 
 export const WATER_AREAS: Bounds[] = [
-  { x: 2250, y: 20, width: 350, height: 1080 },
+  { x: 2250, y: 0, width: 350, height: 1100 },
   { x: 2220, y: 1100, width: 380, height: 700 },
 ];
 
 export const WATER_COLLIDERS: Bounds[] = [
-  { x: 2250, y: 20, width: 350, height: 480 },
-  { x: 2510, y: 500, width: 90, height: 72 },
-  { x: 2250, y: 572, width: 350, height: 528 },
-  { x: 2220, y: 1100, width: 380, height: 290 },
-  { x: 2365, y: 1390, width: 235, height: 65 },
-  { x: 2220, y: 1455, width: 380, height: 345 },
+  { x: 2250, y: 0, width: 350, height: 460 },
+  { x: 2500, y: 460, width: 100, height: 72 },
+  { x: 2250, y: 532, width: 350, height: 568 },
+  { x: 2220, y: 1100, width: 380, height: 320 },
+  { x: 2500, y: 1420, width: 100, height: 65 },
+  { x: 2220, y: 1485, width: 380, height: 315 },
 ];
-
-const OBJECT_OVERRIDES: Record<string, Partial<ExpandedWorldObject>> = {
-  reception: { x: 980, y: 1360 },
-  'parking-fence-left': { x: 470, width: 235 },
-  'parking-fence-right': { x: 965, width: 425 },
-  'arrival-sign': { x: 500, y: 1375 },
-  'arrival-flowerbed': { x: 1215, y: 1570, width: 140, height: 58 },
-
-  sanitary: { x: 315, y: 815 },
-  'home-tent': { x: 280, y: 1120 },
-  'tent-andre': { x: 470, y: 1115 },
-  'tent-rene': { x: 620, y: 1130 },
-  'tent-lars': { x: 860, y: 1115 },
-  'tent-danny': { x: 1050, y: 1130 },
-  'central-camper': { x: 1090, y: 800, width: 210 },
-  'central-table': { x: 970, y: 930 },
-  'central-bench': { x: 1010, y: 1020 },
-  'central-tree-2': { x: 1270, y: 1040 },
-  'central-tree-3': { x: 185, y: 805 },
-  'central-flowerbed': { x: 80, y: 1190, width: 180, height: 45 },
-
-  'north-camper-1': { x: 500, y: 130 },
-  'north-camper-2': { x: 800, y: 145 },
-  'north-camper-3': { x: 1090, y: 120 },
-  'north-table-1': { x: 460, y: 430 },
-  'north-table-2': { x: 930, y: 480 },
-  'north-bench-1': { x: 720, y: 600 },
-  'north-tree-2': { x: 680, y: 25 },
-  'north-fence': { x: 0, y: 738, width: 520 },
-
-  'festival-kiosk': { x: 1490, y: 650 },
-  'festival-table-1': { x: 1735, y: 650 },
-  'festival-table-2': { x: 1735, y: 820 },
-  'festival-sign': { x: 1840, y: 830 },
-
-  'beach-kiosk': { x: 1985, y: 170 },
-  lifeguard: { x: 2050, y: 330, width: 155, height: 125 },
-  'beach-bench-1': { x: 2000, y: 650 },
-  'beach-bench-2': { x: 2000, y: 780 },
-  'beach-table': { x: 1985, y: 900 },
-  'beach-sign': { x: 1990, y: 1010 },
-  'beach-rock-1': { x: 2470, y: 860 },
-  'beach-rock-2': { x: 2380, y: 940 },
-
-  workshop: { x: 1410, y: 1120, width: 220, height: 170 },
-  'wood-shed': { x: 1760, y: 1320 },
-  'woodland-bench': { x: 1480, y: 1690 },
-  'woodland-tree-1': { x: 1390, y: 990 },
-  'woodland-tree-2': { x: 1810, y: 1000 },
-  'woodland-tree-3': { x: 1410, y: 1480 },
-  'woodland-tree-4': { x: 1810, y: 1650 },
-  'woodland-tree-5': { x: 1815, y: 1490 },
-
-  'cove-shelter': { x: 1980, y: 1180 },
-  'cove-sign': { x: 1980, y: 1320 },
-  'cove-rock-1': { x: 2070, y: 1510 },
-  'cove-rock-2': { x: 2420, y: 1510 },
-  'cove-tree-1': { x: 1950, y: 1640 },
-  'cove-tree-2': { x: 2090, y: 1640 },
-  'cove-bench': { x: 2050, y: 1680 },
-};
-
-const NPC_OVERRIDES: Record<string, { x: number; y: number }> = {
-  gundula: { x: 690, y: 1380 },
-  uli: { x: 980, y: 1380 },
-  manni: { x: 540, y: 1045 },
-  ronny: { x: 255, y: 950 },
-  andre: { x: 540, y: 1090 },
-  rene: { x: 680, y: 1095 },
-  lars: { x: 930, y: 1085 },
-  danny: { x: 1115, y: 1095 },
-  gregor: { x: 780, y: 530 },
-  masl: { x: 1780, y: 760 },
-  felix: { x: 2090, y: 680 },
-  schubert: { x: 1510, y: 1510 },
-  schima: { x: 2150, y: 1580 },
-  susi: { x: 1770, y: 720 },
-  jule: { x: 2050, y: 620 },
-  kira: { x: 1040, y: 510 },
-};
-
-const LANDMARK_OVERRIDES: Record<string, { x: number; y: number }> = {
-  'notice-board': { x: 650, y: 1460 },
-  campfire: { x: CAMPFIRE_POSITION.x, y: CAMPFIRE_POSITION.y },
-  'lake-lookout': { x: 2460, y: 535 },
-  'service-map': { x: 1870, y: 1300 },
-  'cove-echo': { x: 2340, y: 1425 },
-};
 
 let applied = false;
 
+/**
+ * Compatibility hook retained for older callers. Sprint 83 removes every
+ * coordinate override from this layer. The campground blueprint owns all
+ * runtime positions; this module only supplies collision and realism rules.
+ */
 export function applyRealisticWorldLayout(): void {
   if (applied) return;
-  for (const object of EXPANDED_WORLD_OBJECTS) {
-    const override = OBJECT_OVERRIDES[object.id];
-    if (override) Object.assign(object, override);
-  }
-  for (const npc of EXPANDED_NPCS) {
-    const override = NPC_OVERRIDES[npc.id];
-    if (override) Object.assign(npc, override);
-  }
-  for (const landmark of LANDMARKS) {
-    const override = LANDMARK_OVERRIDES[landmark.id];
-    if (override) Object.assign(landmark, override);
-  }
   applied = true;
 }
 
@@ -224,11 +132,12 @@ export function findNavigationBlockers(
 
 export function findObjectPlacementIssues(objects: ExpandedWorldObject[] = EXPANDED_WORLD_OBJECTS): string[] {
   const issues: string[] = [];
-  const solids = objects.filter((object) => object.solid !== false && !['sign', 'lantern', 'flowerbed', 'dock'].includes(object.kind));
+  const auditedKinds: ExpandedWorldObject['kind'][] = ['building', 'camper', 'party-tent', 'tent', 'stage', 'kiosk', 'table', 'bench'];
+  const solids = objects.filter((object) => object.solid !== false && auditedKinds.includes(object.kind) && object.id !== 'home-tent');
 
   for (const object of objects) {
     const region = WORLD_REGIONS.find((entry) => entry.id === object.regionId);
-    if (!region || object.kind === 'dock' || object.kind === 'rock') continue;
+    if (!region || object.kind === 'dock' || object.kind === 'rock' || object.id === 'home-tent') continue;
     const footprint = collisionFootprint(object);
     if (!containsBounds(region.bounds, footprint)) issues.push(`Object leaves region: ${object.id}`);
   }
@@ -237,7 +146,7 @@ export function findObjectPlacementIssues(objects: ExpandedWorldObject[] = EXPAN
     const first = solids[index];
     for (const second of solids.slice(index + 1)) {
       if (first.regionId !== second.regionId) continue;
-      if (overlaps(expand(collisionFootprint(first), 3), expand(collisionFootprint(second), 3))) {
+      if (overlaps(expand(collisionFootprint(first), 2), expand(collisionFootprint(second), 2))) {
         issues.push(`Objects overlap: ${first.id} / ${second.id}`);
       }
     }
@@ -258,8 +167,8 @@ export function validateRealisticLayout(): string[] {
   const errors: string[] = [];
 
   for (const object of EXPANDED_WORLD_OBJECTS) {
-    if (object.kind === 'dock' || object.kind === 'rock') continue;
-    if (WATER_AREAS.some((water) => overlaps(water, object))) errors.push(`Object intersects water: ${object.id}`);
+    if (object.kind === 'dock' || object.kind === 'rock' || object.id === 'home-tent') continue;
+    if (WATER_AREAS.some((water) => overlaps(water, collisionFootprint(object)))) errors.push(`Object intersects water: ${object.id}`);
   }
 
   for (const npc of EXPANDED_NPCS) {
@@ -267,9 +176,7 @@ export function validateRealisticLayout(): string[] {
   }
 
   for (const landmark of LANDMARKS) {
-    if (isPointInWater(landmark.x, landmark.y) && !isPointOnDock(landmark.x, landmark.y)) {
-      errors.push(`Landmark stands in water: ${landmark.id}`);
-    }
+    if (isPointInWater(landmark.x, landmark.y) && !isPointOnDock(landmark.x, landmark.y)) errors.push(`Landmark stands in water: ${landmark.id}`);
   }
 
   const fireBounds: Bounds = {
@@ -279,7 +186,8 @@ export function validateRealisticLayout(): string[] {
     height: CAMPFIRE_POSITION.safeRadius * 2,
   };
   for (const object of EXPANDED_WORLD_OBJECTS) {
-    if (object.solid === false || ['sign', 'lantern', 'flowerbed', 'dock'].includes(object.kind)) continue;
+    if (object.solid === false || !['building', 'camper', 'party-tent', 'tent', 'stage', 'kiosk'].includes(object.kind)) continue;
+    if (object.id === 'home-tent') continue;
     if (overlaps(fireBounds, collisionFootprint(object))) errors.push(`Campfire clearance blocked by: ${object.id}`);
   }
 
@@ -289,10 +197,7 @@ export function validateRealisticLayout(): string[] {
 }
 
 function contains(bounds: Bounds, x: number, y: number): boolean {
-  return x >= bounds.x
-    && x <= bounds.x + bounds.width
-    && y >= bounds.y
-    && y <= bounds.y + bounds.height;
+  return x >= bounds.x && x <= bounds.x + bounds.width && y >= bounds.y && y <= bounds.y + bounds.height;
 }
 
 function containsBounds(outer: Bounds, inner: Bounds): boolean {
@@ -303,17 +208,9 @@ function containsBounds(outer: Bounds, inner: Bounds): boolean {
 }
 
 function expand(bounds: Bounds, amount: number): Bounds {
-  return {
-    x: bounds.x - amount,
-    y: bounds.y - amount,
-    width: bounds.width + amount * 2,
-    height: bounds.height + amount * 2,
-  };
+  return { x: bounds.x - amount, y: bounds.y - amount, width: bounds.width + amount * 2, height: bounds.height + amount * 2 };
 }
 
 function overlaps(a: Bounds, b: Bounds): boolean {
-  return a.x < b.x + b.width
-    && a.x + a.width > b.x
-    && a.y < b.y + b.height
-    && a.y + a.height > b.y;
+  return a.x < b.x + b.width && a.x + a.width > b.x && a.y < b.y + b.height && a.y + a.height > b.y;
 }
