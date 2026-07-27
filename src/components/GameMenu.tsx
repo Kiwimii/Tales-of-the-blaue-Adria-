@@ -178,7 +178,8 @@ function TeamTab({ snapshot }: { snapshot: GameSnapshot }): ReactElement {
           {snapshot.team.length ? snapshot.team.map((member) => (
             <article key={member.id}>
               <div><strong>{member.name}</strong><small>{member.role}</small></div>
-              <span>Stärke {member.power} · Schutz {member.defense} · Tempo {member.speed}</span>
+              <span>Level {member.level} · Moral {Math.round(member.resolve)}/{Math.round(member.maxResolve)} · Loyalität {Math.round(member.loyalty)}</span>
+              <small>Kampf +{member.bonuses.battle} · Sozial +{member.bonuses.social} · Spiele +{member.bonuses.games} · Erholung +{member.bonuses.recovery}</small>
             </article>
           )) : <p>Noch keine Begleiter aktiv. Freunde lassen sich über Gespräche in die Gruppe holen.</p>}
         </div>
