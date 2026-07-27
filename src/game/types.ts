@@ -27,6 +27,8 @@ export type QuestStatus = 'locked' | 'active' | 'completed' | 'failed';
 
 export type ChronicleTone = 'neutral' | 'good' | 'warn' | 'bad';
 
+export type ConversationTopicId = 'weekend' | 'personal' | 'plan';
+
 export type CombatMoveId =
   | 'classic-high-five'
   | 'aldi-shirt-show'
@@ -182,8 +184,6 @@ export interface SessionState {
   inventory: Record<string, number>;
   team: TeamMember[];
   relationships: Record<string, number>;
-  learnedAttacks: CombatMoveId[];
-  equippedAttacks: CombatMoveId[];
   quests: Record<string, QuestProgress>;
   activeQuest: string | null;
   flags: Record<string, boolean>;
