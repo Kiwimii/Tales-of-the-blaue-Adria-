@@ -1,3 +1,7 @@
+.mobile-controls {
+  display: none !important;
+}
+
 .mobile-touch-controls {
   position: absolute;
   z-index: 18;
