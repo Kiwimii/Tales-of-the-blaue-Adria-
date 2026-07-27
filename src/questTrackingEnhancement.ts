@@ -1,11 +1,10 @@
-import { QUESTS } from './game/content';
 import {
   TRACKED_QUEST_CHANGED_EVENT,
   activeQuestIds,
   currentTrackedQuestId,
-  questTrackingTarget,
   setTrackedQuestId,
-} from './game/questTracking';
+  trackedQuestUi,
+} from './game/questTrackingUi';
 import { gameStore } from './game/state/GameStore';
 import type { GameSnapshot } from './game/types';
 
@@ -43,7 +42,7 @@ export function installQuestTrackingEnhancement(): () => void {
 }
 
 function updateQuestHud(snapshot: GameSnapshot): void {
-  const target = questTrackingTarget(snapshot);
+  const target = trackedQuestUi(snapshot);
   if (!target) return;
   const card = document.querySelector<HTMLElement>('.play-objective-card');
   if (!card) return;
@@ -95,9 +94,8 @@ function mountQuestPicker(snapshot: GameSnapshot): void {
   const list = document.createElement('div');
   list.className = 'quest-tracking-list';
   for (const id of ids) {
-    const definition = QUESTS[id];
-    const target = questTrackingTarget(snapshot, id);
-    if (!definition || !target) continue;
+    const target = trackedQuestUi(snapshot, id);
+    if (!target) continue;
     const button = document.createElement('button');
     const selected = id === tracked;
     button.type = 'button';
@@ -106,7 +104,7 @@ function mountQuestPicker(snapshot: GameSnapshot): void {
     button.innerHTML = `
       <span class="quest-tracking-icon" aria-hidden="true">${selected ? '⌖' : '○'}</span>
       <div>
-        <strong>${escapeHtml(definition.title)}</strong>
+        <strong>${escapeHtml(target.title)}</strong>
         <small>${escapeHtml(target.objective)}</small>
         <em>${escapeHtml(target.targetLabel)}</em>
       </div>
