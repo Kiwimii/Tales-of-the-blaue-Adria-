@@ -1,32 +1,37 @@
-import { describe, expect, it } from 'vitest';
-import { TENT_HEDGE_SEGMENTS } from '../src/game/advancedContent';
+import { beforeAll, describe, expect, it } from 'vitest';
+import { installAdvancedContent } from '../src/game/advancedContent';
 import { ARRIVAL_POSITIONS } from '../src/game/arrivalQuest';
+import { applyCampgroundBlueprint } from '../src/game/campgroundBlueprint';
 import {
   CAMPFIRE_POSITION,
   WALKABLE_CORRIDORS,
   applyRealisticWorldLayout,
   findNavigationBlockers,
 } from '../src/game/worldRealism';
-import { EXPANDED_NPCS, EXPANDED_WORLD_OBJECTS } from '../src/game/worldV2';
+import { EXPANDED_WORLD_OBJECTS } from '../src/game/worldV2';
+
+beforeAll(() => {
+  installAdvancedContent();
+  applyRealisticWorldLayout();
+  applyCampgroundBlueprint();
+});
 
 describe('logical world access', () => {
-  it('keeps the driveway, central route and service path free of static blockers', () => {
-    applyRealisticWorldLayout();
+  it('keeps the driveway, main rows and service paths free of static blockers', () => {
     expect(findNavigationBlockers()).toEqual([]);
-    expect(findNavigationBlockers([...EXPANDED_WORLD_OBJECTS, ...TENT_HEDGE_SEGMENTS], EXPANDED_NPCS)).toEqual([]);
+    expect(EXPANDED_WORLD_OBJECTS.filter((object) => object.id === 'tent-hedge-west' || object.id === 'tent-hedge-east')).toHaveLength(2);
   });
 
-  it('leaves a clearly wider opening around the barrier than the barrier itself', () => {
-    applyRealisticWorldLayout();
+  it('frames the arrival drive with fences instead of closing it', () => {
     const driveway = WALKABLE_CORRIDORS.find((corridor) => corridor.id === 'arrival-driveway')!.bounds;
     const left = EXPANDED_WORLD_OBJECTS.find((object) => object.id === 'parking-fence-left')!;
     const right = EXPANDED_WORLD_OBJECTS.find((object) => object.id === 'parking-fence-right')!;
     expect(left.x + left.width).toBeLessThanOrEqual(driveway.x);
     expect(right.x).toBeGreaterThanOrEqual(driveway.x + driveway.width);
-    expect(right.x - (left.x + left.width)).toBeGreaterThan(200);
+    expect(right.x - (left.x + left.width)).toBeGreaterThan(350);
   });
 
-  it('places Gundula and Uli beside the driveway instead of inside it', () => {
+  it('places Gundula and Uli in the reception court beside the drive', () => {
     const driveway = WALKABLE_CORRIDORS.find((corridor) => corridor.id === 'arrival-driveway')!.bounds;
     for (const position of [ARRIVAL_POSITIONS.gundula, ARRIVAL_POSITIONS.uli]) {
       const inside = position.x >= driveway.x
@@ -34,11 +39,14 @@ describe('logical world access', () => {
         && position.y >= driveway.y
         && position.y <= driveway.y + driveway.height;
       expect(inside).toBe(false);
+      expect(position.x).toBeGreaterThan(driveway.x + driveway.width);
     }
   });
 
-  it('moves the campfire away from the main north-south walking line', () => {
+  it('places the campfire beside the tent row and east of the main walking line', () => {
     const central = WALKABLE_CORRIDORS.find((corridor) => corridor.id === 'central-main-path')!.bounds;
     expect(CAMPFIRE_POSITION.x).toBeGreaterThan(central.x + central.width);
+    expect(CAMPFIRE_POSITION.y).toBeGreaterThan(980);
+    expect(CAMPFIRE_POSITION.y).toBeLessThan(1280);
   });
 });
