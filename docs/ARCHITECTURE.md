@@ -24,20 +24,25 @@ Ein sofortiger Austausch wäre trotzdem falsch: Die neue Fassung hat noch keine 
 
 ## Verbindliche Weltarchitektur
 
-`src/game/campgroundBlueprint.ts` ist die kanonische Quelle für den Campingplatz. Sie definiert gemeinsam:
+`src/game/aerialCampgroundPlan.ts` ist die kanonische geografische Quelle für den Campingplatz. Der Plan orientiert sich an der realen Geländeform und definiert gemeinsam:
 
-- die sieben Funktionszonen,
-- das Planraster,
-- alle Knoten und Straßenverbindungen,
-- Oberflächen und Wegbreiten,
+- unregelmäßige Campingplatz-, Strand-, Buchten- und Wasserflächen,
+- Zufahrt von Nordosten, Parkplatz, Schranke und Anmeldung,
+- alle Straßenknoten und Asphalt-, Kies- und Sandverbindungen,
+- den Zaun zwischen Campingplatz und Strand einschließlich mittigem Tor,
+- Stellplätze und den Taucherplatz,
 - Objekt-, NPC-, Eingangs- und Landmarkenpositionen,
 - Questanker der Ankunft.
 
-`src/game/campgroundBlueprintLayer.ts` rendert diese Planung. Laufzeitcode darf keine zweite unabhängige Straßen- oder Parzellengeometrie mehr zeichnen. Der historische Renderer wird nur noch für vorhandene Objektgrafiken verwendet.
+`src/game/campgroundBlueprint.ts` wendet diesen Plan auf die vorhandenen Weltobjekte an und validiert die geografischen Beziehungen, den verbundenen Straßengraphen, freie Wege, Regionszuordnungen und erreichbare Eingänge.
 
-`src/game/campgroundBlueprintBootstrap.ts` enthält ausschließlich abschließende Normalisierungen, die vor der Objektzeichnung angewendet und durch Blueprint-Tests abgesichert werden. Neue Platzänderungen sollen grundsätzlich im Blueprint entstehen; weitere nachträgliche Override-Schichten sind nicht zulässig.
+`src/game/campgroundBlueprintLayer.ts` rendert ausschließlich diese Planung. Laufzeitcode darf keine zweite unabhängige Straßen-, Strand-, Zaun- oder Parzellengeometrie zeichnen. Der historische Renderer wird nur noch für vorhandene Objektgrafiken verwendet.
+
+`src/game/campgroundBlueprintBootstrap.ts` ist nur noch ein Kompatibilitätseinstieg und darf keine Koordinaten nachträglich verändern. Neue Platzänderungen entstehen direkt in `aerialCampgroundPlan.ts`; weitere Override-Schichten sind nicht zulässig.
 
 Die älteren Dateien `campgroundPlan.ts`, `campgroundAccessPlan.ts` und `campgroundPlanLayer.ts` bleiben vorerst als Migrationshistorie und Testreferenz erhalten, gehören aber nicht mehr zum aktiven Weltaufbau.
+
+Gundula und Uli sind für die aktive Spielarchitektur an der Anmeldung verankert. Frühere Mittagspausen- oder Patrouillenpositionen dürfen ihre Anmeldefunktion nicht ersetzen.
 
 ## Verbindliche Kampfarchitektur
 
@@ -58,6 +63,17 @@ Attackenfortschritt wird kompatibel über vorhandene Save-Flags gespeichert. Das
 
 Die älteren Berechnungen in `advancedCombat.ts` und `entryDebate.ts` bleiben vorerst als Migrationsreferenz und für bestehende Vergleichstests erhalten, gehören aber nicht mehr zum aktiven Gundula-/Uli- oder Ronny-Kampf.
 
+## Verbindliche mobile Runtime
+
+Der Phaser-Build wird weiterhin als lazy Chunk geladen. Fehler beim Laden dieses Chunks dürfen nicht zu einer leeren Spielfläche führen.
+
+- Die React-Hülle zeigt einen Lade- beziehungsweise Reparaturzustand.
+- Veraltete Next-Caches dürfen einmal kontrolliert repariert werden, ohne den lokalen Spielstand zu löschen.
+- JavaScript- und CSS-Bundles verwenden im Service Worker network-first.
+- Die Service-Worker-Registrierung prüft Updates mit `updateViaCache: 'none'`.
+- Geräte- und Viewportänderungen müssen ohne zwingende `ResizeObserver`-Unterstützung funktionieren.
+- Alte Weltkoordinaten werden beim Laden auf eine freigeschaltete Position der aktuellen Karte migriert.
+
 ## Verbindliche Entwicklungsregeln
 
 1. Neue Spielfunktionen entstehen ausschließlich in `src/`.
@@ -66,12 +82,13 @@ Die älteren Berechnungen in `advancedCombat.ts` und `entryDebate.ts` bleiben vo
 4. Ein Abschnitt gilt nicht als migriert, wenn nur eine vereinfachte Demo vorhanden ist.
 5. Das Save-Format wird versioniert; vor dem Release muss ein Importpfad für bestehende v13-Spielstände vorhanden sein.
 6. Der neue Build wird erst veröffentlicht, wenn `npm run check` erfolgreich ist und der manuelle Release-Durchlauf bestanden wurde.
-7. Neue Weltbereiche müssen an den Blueprint-Straßengraphen angeschlossen werden.
-8. Neue feste Objekte dürfen keine Blueprint-Straße, keinen Eingang und keinen Questanker blockieren.
+7. Neue Weltbereiche müssen an den Luftbild-Straßengraphen angeschlossen werden.
+8. Neue feste Objekte dürfen keine Straße, keinen Eingang, kein Strandtor und keinen Questanker blockieren.
 9. Positionen dürfen nicht parallel in Renderer, Szene und Questcode gepflegt werden.
 10. Neue Frustkämpfe verwenden die gemeinsame Kampfengine und die gemeinsame Basisszene.
 11. Neue Attacken werden ausschließlich in `combatMoves.ts` definiert und benötigen Lernweg, Kampfwerte, Statuslogik, Tests und eine Prüfung ihrer sozialen Anschlussfähigkeit.
 12. Kampf- und Flirtansichten müssen dasselbe ausgerüstete Vierer-Loadout lesen.
+13. Eine mobile Ladefehlermeldung darf niemals den Spielstand löschen.
 
 ## Reihenfolge der Migration
 

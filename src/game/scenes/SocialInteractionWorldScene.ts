@@ -1,9 +1,18 @@
 import Phaser from 'phaser';
+import {
+  ARRIVAL_CAR_POSITION,
+  NPC_PLACEMENTS,
+  TAUCHER_CAR_POSITION,
+  TAUCHER_PITCH_BOUNDS,
+} from '../aerialCampgroundPlan';
 import { ARRIVAL_POSITIONS } from '../arrivalQuest';
+import { TAUCHER_TENT } from '../arrivalLayout';
+import { BLUEPRINT_NODES } from '../campgroundBlueprint';
 import { RELATIONSHIP_CHARACTERS } from '../content';
 import { gameStore } from '../state/GameStore';
 import type { GameSnapshot } from '../types';
 import type { RegionId } from '../worldV2';
+import { worldDepth } from '../worldRealism';
 import { QuestReliabilityWorldScene } from './QuestReliabilityWorldScene';
 
 interface WorldInteraction {
@@ -16,14 +25,31 @@ interface WorldInteraction {
   action: () => void;
 }
 
+interface ToggleObstacle {
+  zone: Phaser.GameObjects.Zone;
+  body: Phaser.Physics.Arcade.StaticBody;
+}
+
 interface WorldInternals {
   player?: Phaser.Physics.Arcade.Sprite;
   interactions?: WorldInteraction[];
   showMessage?: (text: string) => void;
+  gate?: Phaser.GameObjects.Container;
+  gateZone?: Phaser.GameObjects.Zone;
+  gateCollider?: Phaser.Physics.Arcade.Collider;
+  patrolGundula?: Phaser.Physics.Arcade.Sprite;
+  patrolUli?: Phaser.Physics.Arcade.Sprite;
+  patrolLabel?: Phaser.GameObjects.Text;
+  lunchLabel?: Phaser.GameObjects.Text;
+  initialCar?: Phaser.GameObjects.Container;
+  pitchCar?: Phaser.GameObjects.Container;
+  taucherTent?: Phaser.GameObjects.Container;
+  initialCarObstacle?: ToggleObstacle;
+  pitchCarObstacle?: ToggleObstacle;
+  tentObstacle?: ToggleObstacle;
 }
 
 type AuthorityVisual = Phaser.GameObjects.Sprite | Phaser.GameObjects.Text | Phaser.GameObjects.Ellipse;
-type AuthorityPhase = 'desk' | 'lunch' | 'patrol';
 
 export class SocialInteractionWorldScene extends QuestReliabilityWorldScene {
   private socialState!: GameSnapshot;
@@ -35,22 +61,111 @@ export class SocialInteractionWorldScene extends QuestReliabilityWorldScene {
     super.create();
     this.socialState = gameStore.snapshot();
     this.captureStaticAuthorityVisuals();
+    this.installAerialRuntimeAnchors();
     this.syncAllNpcInteractions();
     this.socialUnsubscribe = gameStore.subscribe((snapshot) => {
       this.socialState = snapshot;
       this.syncAllNpcInteractions();
-      this.syncAuthorityVisibility();
+      this.pinAuthorityAtReception();
     });
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.socialUnsubscribe?.());
   }
 
   update(time: number): void {
     super.update(time);
-    // Advanced authority scheduling can replace these actions and visibility during update.
-    // Re-apply only the two affected characters afterwards.
+    this.pinAuthorityAtReception();
     this.syncNpcInteraction('gundula');
     this.syncNpcInteraction('uli');
-    this.syncAuthorityVisibility();
+  }
+
+  private installAerialRuntimeAnchors(): void {
+    this.alignArrivalVisuals();
+    this.rebuildEntranceGate();
+    this.moveActivity('battle', 1530, 820, 'central', 'CAMPING-DUELL');
+    this.moveActivity('flunkyball', 540, 930, 'beach', 'FLUNKYBALL');
+    this.pinAuthorityAtReception();
+  }
+
+  private alignArrivalVisuals(): void {
+    const internals = this as unknown as WorldInternals;
+    internals.initialCar?.setPosition(ARRIVAL_CAR_POSITION.x, ARRIVAL_CAR_POSITION.y);
+    internals.pitchCar?.setPosition(TAUCHER_CAR_POSITION.x, TAUCHER_CAR_POSITION.y);
+
+    Object.assign(TAUCHER_TENT, { x: 930, y: 1040, width: 155, height: 120 });
+    internals.taucherTent?.setPosition(TAUCHER_TENT.x, TAUCHER_TENT.y);
+
+    moveStaticObstacle(internals.initialCarObstacle, ARRIVAL_CAR_POSITION.x, ARRIVAL_CAR_POSITION.y);
+    moveStaticObstacle(internals.pitchCarObstacle, TAUCHER_CAR_POSITION.x, TAUCHER_CAR_POSITION.y);
+    moveStaticObstacle(internals.tentObstacle, TAUCHER_TENT.x + 78, TAUCHER_TENT.y + 94);
+
+    const oldPitchLabel = this.children.list.find((child): child is Phaser.GameObjects.Text => (
+      child instanceof Phaser.GameObjects.Text && child.text === 'TAUCHERPLATZ · T-7'
+    ));
+    if (oldPitchLabel) {
+      const labelIndex = this.children.list.indexOf(oldPitchLabel);
+      const boundary = this.children.list[labelIndex - 1];
+      if (boundary instanceof Phaser.GameObjects.Graphics) {
+        boundary.setPosition(TAUCHER_PITCH_BOUNDS.x - 970, TAUCHER_PITCH_BOUNDS.y - 940);
+      }
+      oldPitchLabel.setPosition(
+        TAUCHER_PITCH_BOUNDS.x + TAUCHER_PITCH_BOUNDS.width / 2,
+        TAUCHER_PITCH_BOUNDS.y + 15,
+      );
+    }
+  }
+
+  private rebuildEntranceGate(): void {
+    const internals = this as unknown as WorldInternals;
+    internals.gateCollider?.destroy();
+    internals.gateZone?.destroy();
+    internals.gate?.destroy(true);
+
+    const gate = BLUEPRINT_NODES.gate;
+    const left = gate.x - 55;
+    const right = gate.x + 55;
+    const parts: Phaser.GameObjects.GameObject[] = [
+      this.add.rectangle(left, gate.y, 34, 58, 0xd4ba76).setStrokeStyle(3, 0x59472f, 0.8),
+      this.add.rectangle(right, gate.y, 34, 58, 0xd4ba76).setStrokeStyle(3, 0x59472f, 0.8),
+      this.add.circle(left, gate.y - 36, 8, 0xffdf82).setStrokeStyle(3, 0xfff3bd, 0.65),
+      this.add.circle(right, gate.y - 36, 8, 0xffdf82).setStrokeStyle(3, 0xfff3bd, 0.65),
+    ];
+    const barrier = this.add.rectangle(gate.x, gate.y, 112, 16, 0xd9584e).setStrokeStyle(2, 0x6f2827, 0.72);
+    const stripeA = this.add.rectangle(gate.x - 25, gate.y, 20, 16, 0xffffff, 0.92).setAngle(-18);
+    const stripeB = this.add.rectangle(gate.x + 25, gate.y, 20, 16, 0xffffff, 0.92).setAngle(-18);
+    const hinge = this.add.circle(left + 4, gate.y, 9, 0x27312e).setStrokeStyle(2, 0xe6cf90, 0.7);
+    parts.push(barrier, stripeA, stripeB, hinge);
+    internals.gate = this.add.container(0, 0, parts).setDepth(worldDepth(gate.y + 30));
+
+    if (this.socialState.flags.gateOpen) {
+      barrier.setAngle(-78).setPosition(left + 10, gate.y - 42);
+      stripeA.setVisible(false);
+      stripeB.setVisible(false);
+      return;
+    }
+
+    const player = internals.player;
+    if (!player) return;
+    const zone = this.add.zone(gate.x, gate.y, 150, 42);
+    this.physics.add.existing(zone, true);
+    internals.gateZone = zone;
+    internals.gateCollider = this.physics.add.collider(player, zone);
+  }
+
+  private moveActivity(id: string, x: number, y: number, regionId: RegionId, label: string): void {
+    const internals = this as unknown as WorldInternals;
+    const point = internals.interactions?.find((entry) => entry.id === id);
+    if (point) Object.assign(point, { x, y, regionId });
+
+    const text = this.children.list.find((child): child is Phaser.GameObjects.Text => child instanceof Phaser.GameObjects.Text && child.text === label);
+    if (!text) return;
+    const old = { x: text.x, y: text.y };
+    text.setPosition(x, y + 29).setDepth(worldDepth(y + 35));
+    const marker = this.children.list.find((child): child is Phaser.GameObjects.Image => (
+      child instanceof Phaser.GameObjects.Image
+      && child.texture.key === 'activity-marker'
+      && Phaser.Math.Distance.Between(child.x, child.y, old.x, old.y - 29) < 45
+    ));
+    marker?.setPosition(x, y).setDepth(worldDepth(y + 24));
   }
 
   private captureStaticAuthorityVisuals(): void {
@@ -65,9 +180,25 @@ export class SocialInteractionWorldScene extends QuestReliabilityWorldScene {
     });
   }
 
-  private syncAuthorityVisibility(): void {
-    const visible = !this.socialState.flags.firstBeerOpened || authorityPhase(this.socialState) === 'desk';
-    for (const visual of this.staticAuthorityVisuals) visual.setVisible(visible);
+  private pinAuthorityAtReception(): void {
+    const internals = this as unknown as WorldInternals;
+    internals.patrolGundula?.setVisible(false).setActive(false);
+    internals.patrolUli?.setVisible(false).setActive(false);
+    internals.patrolLabel?.setVisible(false);
+    internals.lunchLabel?.setVisible(false);
+    for (const visual of this.staticAuthorityVisuals) visual.setVisible(true);
+
+    const interactions = internals.interactions;
+    if (!interactions) return;
+    for (const id of ['gundula', 'uli']) {
+      const position = NPC_PLACEMENTS[id];
+      for (const point of interactions) {
+        if (characterIdFromInteraction(point.id) !== id) continue;
+        point.x = position.x;
+        point.y = position.y;
+        point.regionId = 'arrival';
+      }
+    }
   }
 
   private syncAllNpcInteractions(): void {
@@ -91,10 +222,6 @@ export class SocialInteractionWorldScene extends QuestReliabilityWorldScene {
   private syncPoint(point: WorldInteraction, characterId: string): void {
     if (!this.originalNpcActions.has(point.id)) this.originalNpcActions.set(point.id, point.action);
     if (!this.canOpenFullConversation(characterId)) {
-      if (isAuthority(characterId) && this.authorityStoryComplete(characterId)) {
-        this.applyUnavailableAuthorityAction(point, characterId);
-        return;
-      }
       const original = this.originalNpcActions.get(point.id);
       if (original) point.action = original;
       return;
@@ -108,9 +235,7 @@ export class SocialInteractionWorldScene extends QuestReliabilityWorldScene {
 
   private canOpenFullConversation(characterId: string): boolean {
     if (!RELATIONSHIP_CHARACTERS.some((entry) => entry.id === characterId)) return false;
-    if (characterId === 'gundula' || characterId === 'uli') {
-      return this.authorityStoryComplete(characterId) && authorityPhase(this.socialState) === 'desk';
-    }
+    if (characterId === 'gundula' || characterId === 'uli') return this.authorityStoryComplete(characterId);
     if (characterId === 'manni') return this.socialState.quests.paper?.status === 'completed';
     if (characterId === 'ronny') return Boolean(this.socialState.flags.firstBattleWon);
     return true;
@@ -121,24 +246,24 @@ export class SocialInteractionWorldScene extends QuestReliabilityWorldScene {
     return Boolean(this.socialState.flags.uliInspectionPassed || this.socialState.flags.uliConvinced);
   }
 
-  private applyUnavailableAuthorityAction(point: WorldInteraction, characterId: string): void {
-    const phase = authorityPhase(this.socialState);
-    point.prompt = phase === 'lunch' ? 'Mittagspause respektieren' : 'Kontrollgang ansprechen';
-    point.action = () => {
-      const showMessage = (this as unknown as WorldInternals).showMessage;
-      const text = phase === 'lunch'
-        ? 'Gundula und Uli befinden sich in einer internen Flüssigkeitsbesprechung. Ein normales Gespräch ist nach der Mittagspause wieder möglich.'
-        : `${characterId === 'gundula' ? 'Gundula' : 'Uli'} ist im Kontrollmodus. Für persönliche Themen ist das gerade der schlechteste denkbare Zeitpunkt.`;
-      showMessage?.call(this, text);
-    };
-  }
-
   private openConversation(characterId: string): void {
     const player = (this as unknown as WorldInternals).player;
-    if (player) gameStore.setWorldPosition(player.x, player.y);
+    const npc = NPC_PLACEMENTS[characterId];
+    if (player) {
+      const dx = player.x - (npc?.x ?? player.x - 1);
+      const dy = player.y - (npc?.y ?? player.y);
+      const length = Math.hypot(dx, dy) || 1;
+      gameStore.setWorldPosition(player.x + dx / length * 48, player.y + dy / length * 48);
+    }
     gameStore.socialize(characterId);
     this.scene.start('social', { characterId });
   }
+}
+
+function moveStaticObstacle(obstacle: ToggleObstacle | undefined, x: number, y: number): void {
+  if (!obstacle) return;
+  obstacle.zone.setPosition(x, y);
+  obstacle.body.updateFromGameObject();
 }
 
 function characterIdFromInteraction(interactionId: string): string | null {
@@ -149,18 +274,6 @@ function characterIdFromInteraction(interactionId: string): string | null {
 
 function isRomanceCharacter(characterId: string): boolean {
   return characterId === 'susi' || characterId === 'jule' || characterId === 'kira';
-}
-
-function isAuthority(characterId: string): boolean {
-  return characterId === 'gundula' || characterId === 'uli';
-}
-
-function authorityPhase(state: GameSnapshot): AuthorityPhase {
-  if (!state.flags.firstBeerOpened) return 'desk';
-  const minute = state.minutes % (24 * 60);
-  if (minute >= 12 * 60 && minute < 14 * 60) return 'lunch';
-  if (minute >= 18 * 60 && minute < 18 * 60 + 45) return 'patrol';
-  return 'desk';
 }
 
 function distanceToAuthorityPoint(x: number, y: number): number {

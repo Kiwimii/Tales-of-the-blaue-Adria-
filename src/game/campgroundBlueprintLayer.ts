@@ -1,68 +1,88 @@
 import Phaser from 'phaser';
 import {
+  BLUEPRINT_BEACH_GATE,
+  BLUEPRINT_FENCES,
   BLUEPRINT_NODES,
   BLUEPRINT_ROADS,
-  BLUEPRINT_ZONES,
+  BLUEPRINT_SITE_POLYGONS,
+  BLUEPRINT_WATER_POLYGONS,
   blueprintRoadBounds,
-  type BlueprintRoad,
-  type BlueprintZone,
 } from './campgroundBlueprint';
+import { AERIAL_PITCHES, pointInPolygon, type PlanPoint, type PlanRoad, type PlanPolygon } from './aerialCampgroundPlan';
 import { seededFraction, type VisualProfile } from './visuals';
 
-const ROAD_COLORS: Record<BlueprintRoad['surface'], { edge: number; fill: number; mark: number }> = {
-  asphalt: { edge: 0x4f5552, fill: 0x777d79, mark: 0xe5dec2 },
-  gravel: { edge: 0x786746, fill: 0xb7a477, mark: 0xe9d7a5 },
+const ROAD_COLORS: Record<PlanRoad['surface'], { edge: number; fill: number; mark: number }> = {
+  asphalt: { edge: 0x454b49, fill: 0x767c79, mark: 0xeee5c7 },
+  gravel: { edge: 0x786746, fill: 0xb5a275, mark: 0xead8a8 },
   sand: { edge: 0xb49a63, fill: 0xd8c487, mark: 0xf3e2b2 },
 };
 
 export function drawCampgroundBlueprintLayer(scene: Phaser.Scene, profile: VisualProfile): void {
-  drawUnifiedLand(scene);
-  drawZones(scene);
-  drawRoads(scene);
-  drawPitchGrid(scene);
+  drawWater(scene);
+  drawLand(scene);
+  drawPitchRows(scene);
+  drawRoadNetwork(scene);
+  drawCampgroundFence(scene);
   drawGroundDetail(scene, profile);
   drawAreaLabels(scene);
 }
 
-function drawUnifiedLand(scene: Phaser.Scene): void {
-  const base = scene.add.graphics().setDepth(4);
-  base.fillStyle(0x648858, 1).fillRect(0, 0, 1400, 1800)
-    .fillStyle(0x537650, 1).fillRect(1400, 0, 550, 1800)
-    .fillStyle(0xd4c184, 1).fillRect(1950, 0, 300, 1100)
-    .fillStyle(0x557b60, 1).fillRect(1950, 1100, 300, 700);
-
-  base.fillStyle(0x2d543c, 0.92).fillRect(0, 0, 34, 1800)
-    .fillRect(1368, 0, 32, 1800)
-    .fillRect(1918, 0, 32, 1800);
-
-  base.fillStyle(0x315c3f, 0.78).fillRect(2220, 0, 30, 1800);
-  for (let y = 20; y < 1780; y += 28) {
-    base.fillStyle(y % 56 ? 0x426f45 : 0x2f5c3c, 0.82)
-      .fillTriangle(2220, y + 24, 2244, y, 2248, y + 27);
+export function addAerialBoundaryObstacles(scene: Phaser.Scene, obstacles: Phaser.GameObjects.Zone[]): void {
+  for (const segment of BLUEPRINT_FENCES) {
+    const zone = scene.add.zone(segment.x + segment.width / 2, segment.y + segment.height / 2, segment.width, segment.height);
+    scene.physics.add.existing(zone, true);
+    obstacles.push(zone);
   }
 }
 
-function drawZones(scene: Phaser.Scene): void {
-  const graphics = scene.add.graphics().setDepth(4.08);
-  for (const zone of BLUEPRINT_ZONES) drawZone(graphics, zone);
+function drawWater(scene: Phaser.Scene): void {
+  const water = scene.add.graphics().setDepth(2.8);
+  water.fillStyle(0x244f69, 1).fillRect(0, 0, 2600, 1800);
+  for (const polygon of BLUEPRINT_WATER_POLYGONS) drawPolygon(water, polygon, 1);
+
+  water.lineStyle(3, 0x8ac4cd, 0.18);
+  for (let index = 0; index < 32; index += 1) {
+    const y = 80 + index * 48;
+    water.beginPath();
+    water.moveTo(20, y);
+    water.lineTo(120 + (index % 4) * 24, y + 9);
+    water.lineTo(240 + (index % 3) * 31, y - 5);
+    water.strokePath();
+  }
 }
 
-function drawZone(graphics: Phaser.GameObjects.Graphics, zone: BlueprintZone): void {
-  const { x, y, width, height } = zone.bounds;
-  graphics.fillStyle(zone.ground, 0.96).fillRect(x, y, width, height)
-    .lineStyle(3, zone.border, 0.28).strokeRect(x + 2, y + 2, width - 4, height - 4);
+function drawLand(scene: Phaser.Scene): void {
+  const land = scene.add.graphics().setDepth(4);
+  for (const polygon of BLUEPRINT_SITE_POLYGONS) drawPolygon(land, polygon, 0.98);
+
+  const treeLine = scene.add.graphics().setDepth(4.12);
+  treeLine.lineStyle(24, 0x315b3e, 0.82);
+  treeLine.beginPath();
+  treeLine.moveTo(850, 260);
+  treeLine.lineTo(855, 690);
+  treeLine.lineTo(825, 1020);
+  treeLine.moveTo(850, 1470);
+  treeLine.lineTo(920, 1580);
+  treeLine.lineTo(1900, 1610);
+  treeLine.strokePath();
 }
 
-function drawRoads(scene: Phaser.Scene): void {
-  const roads = scene.add.graphics().setDepth(4.45);
+function drawPolygon(graphics: Phaser.GameObjects.Graphics, polygon: PlanPolygon, alpha: number): void {
+  const points = polygon.points.map(({ x, y }) => new Phaser.Math.Vector2(x, y));
+  graphics.fillStyle(polygon.fill, alpha).fillPoints(points, true)
+    .lineStyle(4, polygon.border, 0.5).strokePoints(points, true);
+}
+
+function drawRoadNetwork(scene: Phaser.Scene): void {
+  const roads = scene.add.graphics().setDepth(4.5);
   for (const road of BLUEPRINT_ROADS) {
-    const bounds = blueprintRoadBounds(road);
+    const from = BLUEPRINT_NODES[road.from];
+    const to = BLUEPRINT_NODES[road.to];
     const colors = ROAD_COLORS[road.surface];
-    roads.fillStyle(colors.edge, 1).fillRect(bounds.x - 7, bounds.y - 7, bounds.width + 14, bounds.height + 14)
-      .fillStyle(colors.fill, 1).fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
+    roads.lineStyle(road.width + 14, colors.edge, 1).lineBetween(from.x, from.y, to.x, to.y)
+      .lineStyle(road.width, colors.fill, 1).lineBetween(from.x, from.y, to.x, to.y);
   }
 
-  const hubs = scene.add.graphics().setDepth(4.47);
   for (const [id, node] of Object.entries(BLUEPRINT_NODES)) {
     const connected = BLUEPRINT_ROADS.filter((road) => road.from === id || road.to === id);
     if (connected.length < 2) continue;
@@ -70,98 +90,136 @@ function drawRoads(scene: Phaser.Scene): void {
     const surface = connected.some((road) => road.surface === 'asphalt') ? 'asphalt'
       : connected.some((road) => road.surface === 'gravel') ? 'gravel' : 'sand';
     const colors = ROAD_COLORS[surface];
-    hubs.fillStyle(colors.edge, 1).fillRect(node.x - width * 0.58, node.y - width * 0.58, width * 1.16, width * 1.16)
-      .fillStyle(colors.fill, 1).fillRect(node.x - width * 0.5, node.y - width * 0.5, width, width);
+    roads.fillStyle(colors.edge, 1).fillCircle(node.x, node.y, width * 0.58)
+      .fillStyle(colors.fill, 1).fillCircle(node.x, node.y, width * 0.5);
   }
 
-  const markings = scene.add.graphics().setDepth(4.5);
-  markings.lineStyle(3, ROAD_COLORS.asphalt.mark, 0.6);
-  for (let y = 1540; y < 1730; y += 52) markings.lineBetween(825, y, 825, y + 25);
+  const markings = scene.add.graphics().setDepth(4.54);
+  for (const road of BLUEPRINT_ROADS) drawRoadMarks(markings, road);
 
-  for (const road of BLUEPRINT_ROADS.filter((entry) => entry.surface !== 'asphalt')) {
-    const from = BLUEPRINT_NODES[road.from];
-    const to = BLUEPRINT_NODES[road.to];
-    const horizontal = from.y === to.y;
-    const distance = horizontal ? Math.abs(to.x - from.x) : Math.abs(to.y - from.y);
-    for (let step = 35; step < distance; step += 62) {
-      const progress = step / distance;
-      const x = Phaser.Math.Linear(from.x, to.x, progress);
-      const y = Phaser.Math.Linear(from.y, to.y, progress);
-      markings.fillStyle(ROAD_COLORS[road.surface].mark, 0.18).fillEllipse(x, y, 8, 4);
+  const parking = scene.add.graphics().setDepth(4.56);
+  parking.lineStyle(4, 0xece4c7, 0.56);
+  for (let index = 0; index < 7; index += 1) {
+    const y = 335 + index * 55;
+    parking.lineBetween(2175, y, 2295, y + 26);
+  }
+}
+
+function drawRoadMarks(graphics: Phaser.GameObjects.Graphics, road: PlanRoad): void {
+  const from = BLUEPRINT_NODES[road.from];
+  const to = BLUEPRINT_NODES[road.to];
+  const distance = Phaser.Math.Distance.Between(from.x, from.y, to.x, to.y);
+  const colors = ROAD_COLORS[road.surface];
+  if (distance < 80) return;
+
+  for (let step = 38; step < distance - 20; step += road.surface === 'asphalt' ? 68 : 58) {
+    const progress = step / distance;
+    const x = Phaser.Math.Linear(from.x, to.x, progress);
+    const y = Phaser.Math.Linear(from.y, to.y, progress);
+    if (road.surface === 'asphalt') {
+      const angle = Phaser.Math.Angle.Between(from.x, from.y, to.x, to.y);
+      const dx = Math.cos(angle) * 22;
+      const dy = Math.sin(angle) * 22;
+      graphics.lineStyle(3, colors.mark, 0.58).lineBetween(x - dx / 2, y - dy / 2, x + dx / 2, y + dy / 2);
+    } else {
+      graphics.fillStyle(colors.mark, 0.2).fillEllipse(x, y, 9, 5);
     }
   }
 }
 
-function drawPitchGrid(scene: Phaser.Scene): void {
-  const pitch = scene.add.graphics().setDepth(4.28);
-  pitch.lineStyle(2, 0xe7d8a5, 0.26);
+function drawPitchRows(scene: Phaser.Scene): void {
+  const pitch = scene.add.graphics().setDepth(4.3);
+  for (const entry of AERIAL_PITCHES) {
+    pitch.fillStyle(entry.id === 'taucher' ? 0x8fb56d : entry.id === 'festival' ? 0x8d9b5b : 0x73935f, entry.id === 'taucher' ? 0.3 : 0.18)
+      .fillRoundedRect(entry.x, entry.y, entry.width, entry.height, 18)
+      .lineStyle(entry.id === 'taucher' ? 4 : 2, entry.id === 'taucher' ? 0xf4d47b : 0xe7d8a5, entry.id === 'taucher' ? 0.55 : 0.28)
+      .strokeRoundedRect(entry.x, entry.y, entry.width, entry.height, 18);
 
-  for (const x of [100, 300, 500, 700, 950, 1150, 1300]) pitch.lineBetween(x, 760, x, 1240);
-  pitch.lineBetween(50, 1025, 750, 1025).lineBetween(900, 1025, 1350, 1025);
+    if (entry.label) {
+      scene.add.text(entry.x + 14, entry.y + 12, entry.label, {
+        fontFamily: 'Arial Black, system-ui', fontSize: '11px', color: '#fff0ba', stroke: '#294433', strokeThickness: 4,
+      }).setDepth(4.66).setAlpha(0.78);
+    }
+  }
+}
 
-  for (const x of [100, 350, 600, 950, 1150, 1300]) pitch.lineBetween(x, 60, x, 690);
-  pitch.lineBetween(50, 375, 750, 375).lineBetween(900, 375, 1350, 375);
+function drawCampgroundFence(scene: Phaser.Scene): void {
+  const fence = scene.add.graphics().setDepth(4.72);
+  for (const segment of BLUEPRINT_FENCES) {
+    fence.fillStyle(0x324f37, 0.96).fillRect(segment.x, segment.y, segment.width, segment.height)
+      .lineStyle(2, 0xb3c08e, 0.5).strokeRect(segment.x, segment.y, segment.width, segment.height);
+    for (let y = segment.y + 10; y < segment.y + segment.height; y += 34) {
+      fence.fillStyle(0xc3b27b, 0.82).fillRect(segment.x - 4, y, segment.width + 8, 5);
+    }
+  }
 
-  pitch.lineStyle(3, 0xdad3b6, 0.5);
-  for (const x of [550, 650, 750, 900, 1000, 1100, 1200, 1300]) pitch.lineBetween(x, 1540, x, 1710);
+  const gate = BLUEPRINT_BEACH_GATE;
+  fence.fillStyle(0xd7c17c, 0.95).fillRect(gate.x - 9, gate.y, 12, gate.height)
+    .fillRect(gate.x + gate.width - 3, gate.y, 12, gate.height)
+    .lineStyle(5, 0xe7d095, 0.9).lineBetween(gate.x + 3, gate.y + 14, gate.x + gate.width - 3, gate.y + 14);
 
-  pitch.lineStyle(3, 0x3f633f, 0.34)
-    .strokeRect(1415, 70, 470, 810)
-    .strokeRect(1415, 970, 470, 760)
-    .strokeRect(1970, 70, 240, 960)
-    .strokeRect(1970, 1120, 240, 610);
+  scene.add.text(gate.x - 5, gate.y + gate.height / 2, 'TOR ZUM STRAND', {
+    fontFamily: 'Arial Black, system-ui', fontSize: '10px', color: '#fff3c8', backgroundColor: '#173027dd', padding: { x: 6, y: 3 },
+  }).setOrigin(1, 0.5).setDepth(4.78);
 }
 
 function drawGroundDetail(scene: Phaser.Scene, profile: VisualProfile): void {
-  const detail = scene.add.graphics().setDepth(4.2);
-  const grassCount = profile.tier === 'cinematic' ? 540 : 330;
+  const detail = scene.add.graphics().setDepth(4.18);
+  const landPolygons = BLUEPRINT_SITE_POLYGONS.map((polygon) => polygon.points);
+  const grassCount = profile.tier === 'cinematic' ? 620 : 380;
   for (let index = 0; index < grassCount; index += 1) {
-    const x = seededFraction('blueprint-grass-x', index) * 1940;
-    const y = seededFraction('blueprint-grass-y', index) * 1800;
-    if (isOnRoad(x, y)) continue;
-    const color = index % 3 === 0 ? 0x315c3c : index % 2 ? 0x83a85d : 0x436f43;
-    detail.lineStyle(1.2, color, 0.28).lineBetween(x, y + 5, x + (index % 2 ? 3 : -2), y);
+    const point = {
+      x: seededFraction('aerial-grass-x', index) * 2300,
+      y: seededFraction('aerial-grass-y', index) * 1760,
+    };
+    if (!landPolygons.some((polygon) => pointInPolygon(point, polygon)) || isOnRoad(point)) continue;
+    const color = index % 3 === 0 ? 0x315c3c : index % 2 ? 0x89a961 : 0x436f43;
+    detail.lineStyle(1.2, color, 0.28).lineBetween(point.x, point.y + 5, point.x + (index % 2 ? 3 : -2), point.y);
   }
 
-  for (let index = 0; index < 80; index += 1) {
-    const x = 1970 + seededFraction('blueprint-sand-x', index) * 240;
-    const y = 70 + seededFraction('blueprint-sand-y', index) * 960;
-    detail.fillStyle(index % 2 ? 0xb89d67 : 0xe7d39b, 0.32).fillEllipse(x, y, 5 + index % 4, 3);
-  }
-
-  detail.fillStyle(0x9c865a, 0.28);
-  for (let index = 0; index < 18; index += 1) {
-    const x = 1990 + seededFraction('blueprint-foot-x', index) * 180;
-    const y = 690 + seededFraction('blueprint-foot-y', index) * 300;
-    detail.fillEllipse(x, y, 7, 3).fillEllipse(x + 7, y + 10, 7, 3);
+  const beach = BLUEPRINT_SITE_POLYGONS.find((polygon) => polygon.id === 'main-beach')?.points ?? [];
+  for (let index = 0; index < 120; index += 1) {
+    const point = {
+      x: 180 + seededFraction('aerial-sand-x', index) * 650,
+      y: 270 + seededFraction('aerial-sand-y', index) * 1170,
+    };
+    if (!pointInPolygon(point, beach)) continue;
+    detail.fillStyle(index % 2 ? 0xb89d67 : 0xe7d39b, 0.34).fillEllipse(point.x, point.y, 5 + index % 4, 3);
   }
 }
 
 function drawAreaLabels(scene: Phaser.Scene): void {
   const labels: Array<[number, number, string]> = [
-    [90, 735, 'NORDLAGER'],
-    [90, 1265, 'TAUCHERPLATZ'],
-    [470, 1770, 'ANKUNFT'],
-    [1425, 920, 'FESTWIESE'],
-    [1425, 1770, 'WALDPFAD'],
-    [1975, 1070, 'STRAND'],
-    [1975, 1770, 'BUCHT'],
+    [2160, 160, 'ZUFAHRT VON DER ADRIASTRASSE'],
+    [1680, 500, 'ANMELDUNG'],
+    [950, 230, 'CAMPINGPLATZ'],
+    [935, 1365, 'TAUCHERPLATZ'],
+    [560, 1370, 'KIOSK AM STRANDTOR'],
+    [260, 320, 'STRAND'],
+    [1700, 1760, 'SERVICEWEG'],
   ];
   for (const [x, y, label] of labels) {
     scene.add.text(x, y, label, {
-      fontFamily: 'Arial Black, system-ui',
-      fontSize: '11px',
-      color: '#fff0bf',
-      stroke: '#294433',
-      strokeThickness: 4,
-      letterSpacing: 1,
-    }).setDepth(4.65).setAlpha(0.74);
+      fontFamily: 'Arial Black, system-ui', fontSize: '11px', color: '#fff0bf', stroke: '#294433', strokeThickness: 4, letterSpacing: 1,
+    }).setDepth(4.82).setAlpha(0.76);
   }
 }
 
-function isOnRoad(x: number, y: number): boolean {
+function isOnRoad(point: PlanPoint): boolean {
   return BLUEPRINT_ROADS.some((road) => {
     const bounds = blueprintRoadBounds(road);
-    return x >= bounds.x && x <= bounds.x + bounds.width && y >= bounds.y && y <= bounds.y + bounds.height;
+    if (point.x < bounds.x || point.x > bounds.x + bounds.width || point.y < bounds.y || point.y > bounds.y + bounds.height) return false;
+    const from = BLUEPRINT_NODES[road.from];
+    const to = BLUEPRINT_NODES[road.to];
+    return distanceToSegment(point, from, to) <= road.width / 2 + 8;
   });
+}
+
+function distanceToSegment(point: PlanPoint, from: PlanPoint, to: PlanPoint): number {
+  const dx = to.x - from.x;
+  const dy = to.y - from.y;
+  const lengthSquared = dx * dx + dy * dy;
+  if (!lengthSquared) return Phaser.Math.Distance.Between(point.x, point.y, from.x, from.y);
+  const t = Math.max(0, Math.min(1, ((point.x - from.x) * dx + (point.y - from.y) * dy) / lengthSquared));
+  return Phaser.Math.Distance.Between(point.x, point.y, from.x + t * dx, from.y + t * dy);
 }

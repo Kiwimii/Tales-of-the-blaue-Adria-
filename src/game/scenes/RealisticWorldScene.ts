@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
+import { gameStore } from '../state/GameStore';
+import { recoveryPointOutsideNpcCluster } from '../worldRecoveryPosition';
 import { worldDepth } from '../worldRealism';
-import { WORLD_REGIONS } from '../worldV2';
+import { isRegionUnlocked, regionAt, WORLD_REGIONS } from '../worldV2';
 import { ExpandedWorldScene } from './ExpandedWorldScene';
 
 interface RegionLockInternals {
@@ -20,6 +22,7 @@ interface SceneInternals {
 export class RealisticWorldScene extends ExpandedWorldScene {
   create(): void {
     super.create();
+    this.repairLegacySpawn();
     this.hideLegacyRegionLabels();
     this.normalizeStaticDepths();
     this.refreshPlayerDepth();
@@ -44,14 +47,41 @@ export class RealisticWorldScene extends ExpandedWorldScene {
 
     const player = internals.player;
     if (!player) return;
-    player.setActive(true).setVisible(true).setVelocity(0, 0).setAcceleration(0, 0);
+
+    const safePoint = recoveryPointOutsideNpcCluster(player.x, player.y);
+    this.resetPlayerPosition(safePoint.x, safePoint.y);
+  }
+
+  private repairLegacySpawn(): void {
+    const internals = this as unknown as SceneInternals;
+    const player = internals.player;
+    if (!player) return;
+
+    const snapshot = gameStore.snapshot();
+    const currentRegion = regionAt(player.x, player.y);
+    if (isRegionUnlocked(currentRegion.id, snapshot)) return;
+
+    const safe = snapshot.flags.gateOpen
+      ? { x: 1480, y: 980 }
+      : { x: 2150, y: 520 };
+    this.resetPlayerPosition(safe.x, safe.y);
+    gameStore.setWorldPosition(safe.x, safe.y);
+  }
+
+  private resetPlayerPosition(x: number, y: number): void {
+    const internals = this as unknown as SceneInternals;
+    const player = internals.player;
+    if (!player) return;
+
+    player.setActive(true).setVisible(true).setVelocity(0, 0).setAcceleration(0, 0).setPosition(x, y);
     const body = player.body as Phaser.Physics.Arcade.Body | null;
     if (body) {
       body.enable = true;
       body.moves = true;
       body.stop();
-      body.reset(player.x, player.y);
+      body.reset(x, y);
     }
+    internals.shadow?.setPosition(x + 2, y + 25);
   }
 
   private refreshPlayerDepth(): void {
@@ -72,7 +102,7 @@ export class RealisticWorldScene extends ExpandedWorldScene {
 
   private normalizeStaticDepths(): void {
     const internals = this as unknown as SceneInternals;
-    internals.gate?.setDepth(worldDepth(1300));
+    internals.gate?.setDepth(worldDepth(650));
     internals.locks?.forEach((lock) => {
       lock.overlay.setDepth(76);
       lock.border.setDepth(77);
