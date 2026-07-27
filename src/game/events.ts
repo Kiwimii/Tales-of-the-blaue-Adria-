@@ -8,6 +8,7 @@ export const TOGGLE_MAP_EVENT = 'tales:toggle-map';
 export const INTERACTION_STATE_EVENT = 'tales:interaction-state';
 export const REQUEST_INTERACTION_STATE_EVENT = 'tales:request-interaction-state';
 export const CYCLE_INTERACTION_EVENT = 'tales:cycle-interaction';
+export const SELECT_INTERACTION_EVENT = 'tales:select-interaction';
 
 export interface InputEventDetail {
   direction: Direction;
@@ -28,6 +29,10 @@ export interface InteractionStateDetail {
 
 export interface CycleInteractionDetail {
   direction: 1 | -1;
+}
+
+export interface SelectInteractionDetail {
+  id: string;
 }
 
 export function sendDirection(direction: Direction, active: boolean): void {
@@ -67,4 +72,8 @@ export function requestInteractionState(): void {
 
 export function sendCycleInteraction(direction: 1 | -1 = 1): void {
   window.dispatchEvent(new CustomEvent<CycleInteractionDetail>(CYCLE_INTERACTION_EVENT, { detail: { direction } }));
+}
+
+export function sendSelectInteraction(id: string): void {
+  window.dispatchEvent(new CustomEvent<SelectInteractionDetail>(SELECT_INTERACTION_EVENT, { detail: { id } }));
 }
