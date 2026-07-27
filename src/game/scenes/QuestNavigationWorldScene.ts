@@ -17,8 +17,8 @@ interface WorldRuntimeInternals {
 export class QuestNavigationWorldScene extends InteractionAuditWorldScene {
   private navigationState!: GameSnapshot;
   private navigationTarget: QuestTrackingTarget | null = null;
-  private targetMarker?: Phaser.GameObjects.Container;
-  private targetMarkerLabel?: Phaser.GameObjects.Text;
+  private questMarker?: Phaser.GameObjects.Container;
+  private questMarkerLabel?: Phaser.GameObjects.Text;
   private edgeCompass?: Phaser.GameObjects.Container;
   private edgeArrow?: Phaser.GameObjects.Triangle;
   private edgeTitle?: Phaser.GameObjects.Text;
@@ -52,11 +52,11 @@ export class QuestNavigationWorldScene extends InteractionAuditWorldScene {
     const icon = this.add.text(0, -1, '!', {
       fontFamily: 'Arial Black, system-ui', fontSize: '15px', color: '#173027',
     }).setOrigin(0.5);
-    this.targetMarkerLabel = this.add.text(0, 50, '', {
+    this.questMarkerLabel = this.add.text(0, 50, '', {
       fontFamily: 'Arial Black, system-ui', fontSize: '11px', color: '#fff3c1',
       backgroundColor: '#173027e8', padding: { x: 8, y: 5 }, stroke: '#173027', strokeThickness: 2,
     }).setOrigin(0.5, 0);
-    this.targetMarker = this.add.container(0, 0, [ring, pin, inner, icon, this.targetMarkerLabel]).setVisible(false);
+    this.questMarker = this.add.container(0, 0, [ring, pin, inner, icon, this.questMarkerLabel]).setVisible(false);
     this.tweens.add({ targets: ring, scale: { from: 0.85, to: 1.35 }, alpha: { from: 0.36, to: 0.03 }, duration: 1150, repeat: -1 });
     this.tweens.add({ targets: inner, y: { from: -3, to: 3 }, duration: 850, yoyo: true, repeat: -1, ease: 'Sine.InOut' });
 
@@ -80,27 +80,27 @@ export class QuestNavigationWorldScene extends InteractionAuditWorldScene {
     this.navigationTarget = next;
 
     if (!next) {
-      this.targetMarker?.setVisible(false);
+      this.questMarker?.setVisible(false);
       this.edgeCompass?.setVisible(false);
       return;
     }
 
-    this.targetMarker?.setPosition(next.x, next.y - 42).setDepth(worldDepth(next.y + 75) + 2).setVisible(true);
-    this.targetMarkerLabel?.setText(`${next.title.toUpperCase()}\n${next.targetLabel}`);
+    this.questMarker?.setPosition(next.x, next.y - 42).setDepth(worldDepth(next.y + 75) + 2).setVisible(true);
+    this.questMarkerLabel?.setText(`${next.title.toUpperCase()}\n${next.targetLabel}`);
     this.edgeTitle?.setText(next.targetLabel.toUpperCase());
   }
 
   private updateQuestNavigation(time: number): void {
     const target = this.navigationTarget;
     const player = (this as unknown as WorldRuntimeInternals).player;
-    if (!target || !player || !this.targetMarker || !this.edgeCompass || !this.edgeArrow || !this.edgeDistance) return;
+    if (!target || !player || !this.questMarker || !this.edgeCompass || !this.edgeArrow || !this.edgeDistance) return;
 
     const distance = questDistanceMetres(player, target);
     const camera = this.cameras.main;
     const visible = camera.worldView.contains(target.x, target.y);
     this.edgeCompass.setVisible(!visible && distance > 8);
-    this.targetMarker.setVisible(distance > 4);
-    this.targetMarker.setScale(1 + Math.sin(time * 0.004) * 0.03);
+    this.questMarker.setVisible(distance > 4);
+    this.questMarker.setScale(1 + Math.sin(time * 0.004) * 0.03);
     if (visible || distance <= 8) return;
 
     const center = camera.getWorldPoint(480, 320);
