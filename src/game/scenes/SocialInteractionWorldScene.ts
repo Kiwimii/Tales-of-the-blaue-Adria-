@@ -1,7 +1,13 @@
 import Phaser from 'phaser';
+import {
+  ARRIVAL_CAR_POSITION,
+  NPC_PLACEMENTS,
+  TAUCHER_CAR_POSITION,
+  TAUCHER_PITCH_BOUNDS,
+} from '../aerialCampgroundPlan';
 import { ARRIVAL_POSITIONS } from '../arrivalQuest';
+import { TAUCHER_TENT } from '../arrivalLayout';
 import { BLUEPRINT_NODES } from '../campgroundBlueprint';
-import { NPC_PLACEMENTS } from '../aerialCampgroundPlan';
 import { RELATIONSHIP_CHARACTERS } from '../content';
 import { gameStore } from '../state/GameStore';
 import type { GameSnapshot } from '../types';
@@ -19,6 +25,11 @@ interface WorldInteraction {
   action: () => void;
 }
 
+interface ToggleObstacle {
+  zone: Phaser.GameObjects.Zone;
+  body: Phaser.Physics.Arcade.StaticBody;
+}
+
 interface WorldInternals {
   player?: Phaser.Physics.Arcade.Sprite;
   interactions?: WorldInteraction[];
@@ -30,6 +41,12 @@ interface WorldInternals {
   patrolUli?: Phaser.Physics.Arcade.Sprite;
   patrolLabel?: Phaser.GameObjects.Text;
   lunchLabel?: Phaser.GameObjects.Text;
+  initialCar?: Phaser.GameObjects.Container;
+  pitchCar?: Phaser.GameObjects.Container;
+  taucherTent?: Phaser.GameObjects.Container;
+  initialCarObstacle?: ToggleObstacle;
+  pitchCarObstacle?: ToggleObstacle;
+  tentObstacle?: ToggleObstacle;
 }
 
 type AuthorityVisual = Phaser.GameObjects.Sprite | Phaser.GameObjects.Text | Phaser.GameObjects.Ellipse;
@@ -62,10 +79,39 @@ export class SocialInteractionWorldScene extends QuestReliabilityWorldScene {
   }
 
   private installAerialRuntimeAnchors(): void {
+    this.alignArrivalVisuals();
     this.rebuildEntranceGate();
     this.moveActivity('battle', 1530, 820, 'central', 'CAMPING-DUELL');
     this.moveActivity('flunkyball', 540, 930, 'beach', 'FLUNKYBALL');
     this.pinAuthorityAtReception();
+  }
+
+  private alignArrivalVisuals(): void {
+    const internals = this as unknown as WorldInternals;
+    internals.initialCar?.setPosition(ARRIVAL_CAR_POSITION.x, ARRIVAL_CAR_POSITION.y);
+    internals.pitchCar?.setPosition(TAUCHER_CAR_POSITION.x, TAUCHER_CAR_POSITION.y);
+
+    Object.assign(TAUCHER_TENT, { x: 930, y: 1040, width: 155, height: 120 });
+    internals.taucherTent?.setPosition(TAUCHER_TENT.x, TAUCHER_TENT.y);
+
+    moveStaticObstacle(internals.initialCarObstacle, ARRIVAL_CAR_POSITION.x, ARRIVAL_CAR_POSITION.y);
+    moveStaticObstacle(internals.pitchCarObstacle, TAUCHER_CAR_POSITION.x, TAUCHER_CAR_POSITION.y);
+    moveStaticObstacle(internals.tentObstacle, TAUCHER_TENT.x + 78, TAUCHER_TENT.y + 94);
+
+    const oldPitchLabel = this.children.list.find((child): child is Phaser.GameObjects.Text => (
+      child instanceof Phaser.GameObjects.Text && child.text === 'TAUCHERPLATZ · T-7'
+    ));
+    if (oldPitchLabel) {
+      const labelIndex = this.children.list.indexOf(oldPitchLabel);
+      const boundary = this.children.list[labelIndex - 1];
+      if (boundary instanceof Phaser.GameObjects.Graphics) {
+        boundary.setPosition(TAUCHER_PITCH_BOUNDS.x - 970, TAUCHER_PITCH_BOUNDS.y - 940);
+      }
+      oldPitchLabel.setPosition(
+        TAUCHER_PITCH_BOUNDS.x + TAUCHER_PITCH_BOUNDS.width / 2,
+        TAUCHER_PITCH_BOUNDS.y + 15,
+      );
+    }
   }
 
   private rebuildEntranceGate(): void {
@@ -212,6 +258,12 @@ export class SocialInteractionWorldScene extends QuestReliabilityWorldScene {
     gameStore.socialize(characterId);
     this.scene.start('social', { characterId });
   }
+}
+
+function moveStaticObstacle(obstacle: ToggleObstacle | undefined, x: number, y: number): void {
+  if (!obstacle) return;
+  obstacle.zone.setPosition(x, y);
+  obstacle.body.updateFromGameObject();
 }
 
 function characterIdFromInteraction(interactionId: string): string | null {
