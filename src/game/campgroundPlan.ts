@@ -16,14 +16,6 @@ export interface PlanPoint {
   y: number;
 }
 
-export interface PlanRoad {
-  id: string;
-  from: keyof typeof CAMP_ROAD_NODES;
-  to: keyof typeof CAMP_ROAD_NODES;
-  width: number;
-  surface: 'asphalt' | 'gravel' | 'sand';
-}
-
 export interface PlanDistrict {
   id: string;
   regionId: RegionId;
@@ -50,6 +42,7 @@ export const CAMP_ROAD_NODES = {
   westCamp: { x: 420, y: 930 },
   eastCamp: { x: 1290, y: 930 },
   festivalEntry: { x: 1400, y: 930 },
+  festivalTurn: { x: 1400, y: 720 },
   festivalHub: { x: 1700, y: 720 },
   beachHub: { x: 2150, y: 720 },
   beachDock: { x: 2150, y: 535 },
@@ -58,6 +51,16 @@ export const CAMP_ROAD_NODES = {
   coveHub: { x: 2140, y: 1530 },
   coveDock: { x: 2140, y: 1425 },
 } as const satisfies Record<string, PlanPoint>;
+
+export type CampRoadNodeId = keyof typeof CAMP_ROAD_NODES;
+
+export interface PlanRoad {
+  id: string;
+  from: CampRoadNodeId;
+  to: CampRoadNodeId;
+  width: number;
+  surface: 'asphalt' | 'gravel' | 'sand';
+}
 
 export const CAMP_ROADS: PlanRoad[] = [
   { id: 'arrival-driveway', from: 'entrance', to: 'parking', width: 132, surface: 'asphalt' },
@@ -68,7 +71,8 @@ export const CAMP_ROADS: PlanRoad[] = [
   { id: 'south-west-loop', from: 'southHub', to: 'westCamp', width: 72, surface: 'gravel' },
   { id: 'south-east-loop', from: 'southHub', to: 'eastCamp', width: 72, surface: 'gravel' },
   { id: 'east-artery', from: 'eastCamp', to: 'festivalEntry', width: 78, surface: 'gravel' },
-  { id: 'festival-connector', from: 'festivalEntry', to: 'festivalHub', width: 76, surface: 'gravel' },
+  { id: 'festival-entry-turn', from: 'festivalEntry', to: 'festivalTurn', width: 76, surface: 'gravel' },
+  { id: 'festival-crossroad', from: 'festivalTurn', to: 'festivalHub', width: 76, surface: 'gravel' },
   { id: 'beach-promenade', from: 'festivalHub', to: 'beachHub', width: 76, surface: 'sand' },
   { id: 'main-dock-approach', from: 'beachHub', to: 'beachDock', width: 66, surface: 'sand' },
   { id: 'woodland-entry', from: 'festivalHub', to: 'woodlandHub', width: 70, surface: 'gravel' },
