@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { ARRIVAL_POSITIONS } from '../src/game/arrivalQuest';
 import {
   QUEST_MARKER_VERTICAL_OFFSET,
   RESERVATION_BOARD_INTERACTION_RADIUS,
@@ -45,7 +46,7 @@ describe('arrival quest navigation reliability', () => {
     expect(questMarkerAnchor(documents)).toEqual({ x: board.x, y: board.y - QUEST_MARKER_VERTICAL_OFFSET });
 
     const gundula = state({ arrivalDocumentsFound: true, reservationSolved: true });
-    expect(questMarkerAnchor(gundula)).toEqual({ x: 790, y: 1390 - QUEST_MARKER_VERTICAL_OFFSET });
+    expect(questMarkerAnchor(gundula)).toEqual({ x: ARRIVAL_POSITIONS.gundula.x, y: ARRIVAL_POSITIONS.gundula.y - QUEST_MARKER_VERTICAL_OFFSET });
   });
 
   it('uses the blackboard as the active interaction after the documents are found', () => {
@@ -67,6 +68,9 @@ describe('arrival quest navigation reliability', () => {
       arrivalDrinksUnloaded: true,
     });
     expect(activeArrivalInteractionId(unloading)).toBe('arrival-unload-tents');
-    expect(questMarkerAnchor(unloading)).toEqual({ x: 1120, y: 1095 - QUEST_MARKER_VERTICAL_OFFSET });
+    expect(questMarkerAnchor(unloading)).toEqual({
+      x: ARRIVAL_POSITIONS.tents.x,
+      y: ARRIVAL_POSITIONS.tents.y - QUEST_MARKER_VERTICAL_OFFSET,
+    });
   });
 });
