@@ -8,8 +8,10 @@ import {
   INTERACTION_STATE_EVENT,
   requestInteractionState,
   sendAction,
+  sendCycleInteraction,
   sendDirection,
   sendReturnToWorld,
+  sendSelectInteraction,
   type InteractionStateDetail,
 } from '../game/events';
 import { clampSwipeVector, directionsForSwipe } from '../game/mobileInput';
@@ -162,7 +164,21 @@ export function MobileGameControls(): ReactElement {
     event.stopPropagation();
   };
 
+  const selectCandidate = (event: ReactPointerEvent<HTMLButtonElement>, id: string): void => {
+    event.preventDefault();
+    event.stopPropagation();
+    sendSelectInteraction(id);
+  };
+
+  const cycleCandidate = (event: ReactPointerEvent<HTMLButtonElement>, direction: 1 | -1): void => {
+    event.preventDefault();
+    event.stopPropagation();
+    sendCycleInteraction(direction);
+  };
+
   const actionLabel = interactionActionLabel(nearbyInteraction?.prompt);
+  const candidates = nearbyInteraction?.candidates ?? [];
+  const selectedIndex = nearbyInteraction?.selectedIndex ?? 0;
 
   return (
     <div className="mobile-touch-controls" aria-label="Mobile Spielsteuerung">
@@ -184,12 +200,36 @@ export function MobileGameControls(): ReactElement {
           </span>
         )}
       </div>
+
       {nearbyInteraction && (
         <div className="mobile-context-prompt" role="status" aria-live="polite">
           <span aria-hidden="true">◆</span>
           <strong>{actionLabel}</strong>
+          {candidates.length > 1 && <small>{selectedIndex + 1}/{candidates.length} auswählbar</small>}
         </div>
       )}
+
+      {candidates.length > 1 && (
+        <div className="mobile-interaction-picker" role="group" aria-label="Interaktion auswählen">
+          <button type="button" aria-label="Vorherige Interaktion" onPointerDown={(event) => cycleCandidate(event, -1)}>‹</button>
+          <div className="mobile-interaction-options">
+            {candidates.map((candidate, index) => (
+              <button
+                type="button"
+                key={candidate.id}
+                className={index === selectedIndex ? 'mobile-interaction-option mobile-interaction-option-active' : 'mobile-interaction-option'}
+                aria-pressed={index === selectedIndex}
+                onPointerDown={(event) => selectCandidate(event, candidate.id)}
+              >
+                <b>{index + 1}</b>
+                <span>{interactionActionLabel(candidate.prompt)}</span>
+              </button>
+            ))}
+          </div>
+          <button type="button" aria-label="Nächste Interaktion" onPointerDown={(event) => cycleCandidate(event, 1)}>›</button>
+        </div>
+      )}
+
       <button
         type="button"
         className={`mobile-action-zone${actionActive ? ' mobile-action-active' : ''}${nearbyInteraction ? ' mobile-action-ready' : ''}`}
@@ -202,7 +242,7 @@ export function MobileGameControls(): ReactElement {
       >
         <span className="mobile-action-glyph" aria-hidden="true">A</span>
         <span className="mobile-action-copy">
-          <strong>{nearbyInteraction ? 'AKTION BEREIT' : 'AKTION'}</strong>
+          <strong>{nearbyInteraction ? 'AUSWÄHLEN' : 'AKTION'}</strong>
           <small>{actionLabel}</small>
         </span>
       </button>
