@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { TOGGLE_MAP_EVENT } from '../events';
 import {
   QUEST_MARKER_BOB_DISTANCE,
   RESERVATION_BOARD_INTERACTION_RADIUS,
@@ -11,7 +12,7 @@ import {
 import { gameStore } from '../state/GameStore';
 import type { GameSnapshot } from '../types';
 import { worldDepth } from '../worldRealism';
-import type { RegionId } from '../worldV2';
+import { isRegionUnlocked, type RegionId } from '../worldV2';
 import { AdvancedWorldScene } from './AdvancedWorldScene';
 
 interface InteractionPoint {
@@ -24,10 +25,21 @@ interface InteractionPoint {
   action: () => void;
 }
 
+type Highlightable =
+  | Phaser.GameObjects.Sprite
+  | Phaser.GameObjects.Image
+  | Phaser.GameObjects.Container
+  | Phaser.GameObjects.Text
+  | Phaser.GameObjects.Arc
+  | Phaser.GameObjects.Ellipse
+  | Phaser.GameObjects.Rectangle;
+
 interface WorldInternals {
   player?: Phaser.Physics.Arcade.Sprite;
   interactions?: InteractionPoint[];
   showMessage?: (text: string) => void;
+  minimap?: Phaser.GameObjects.Container;
+  message?: Phaser.GameObjects.Text;
 }
 
 export class QuestReliabilityWorldScene extends AdvancedWorldScene {
@@ -36,17 +48,28 @@ export class QuestReliabilityWorldScene extends AdvancedWorldScene {
   private questMarker?: Phaser.GameObjects.Container;
   private reservationBoard?: Phaser.GameObjects.Container;
   private reservationBoardHitArea?: Phaser.GameObjects.Zone;
+  private interactionPulse?: Phaser.GameObjects.Container;
+  private highlightedVisual?: Highlightable;
+  private highlightedVisualBaseAlpha = 1;
+  private highlightedInteractionId?: string;
   private baseInteractionRadii = new Map<string, number>();
+  private readonly onToggleMap = (): void => {
+    const minimap = (this as unknown as WorldInternals).minimap;
+    minimap?.setVisible(!minimap.visible);
+  };
 
   create(): void {
     super.create();
     this.questState = gameStore.snapshot();
+    this.configureFocusedWorldHud();
     this.upgradeReservationBoard();
     this.repairQuestMarkerAnimation();
+    this.createInteractionPulse();
     this.questUnsubscribe = gameStore.subscribe((snapshot) => {
       this.questState = snapshot;
       this.syncQuestNavigation();
     });
+    window.addEventListener(TOGGLE_MAP_EVENT, this.onToggleMap);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.shutdownQuestReliability());
   }
 
@@ -54,6 +77,35 @@ export class QuestReliabilityWorldScene extends AdvancedWorldScene {
     super.update(time);
     if (!this.questState) return;
     this.syncQuestNavigation();
+    this.syncInteractionFeedback(time);
+  }
+
+  private configureFocusedWorldHud(): void {
+    const internals = this as unknown as WorldInternals;
+    internals.minimap?.setVisible(false);
+    internals.message?.setAlpha(0);
+    const statusLabel = this.children.list.find((child): child is Phaser.GameObjects.Text => (
+      child instanceof Phaser.GameObjects.Text
+      && child.scrollFactorX === 0
+      && Math.abs(child.x - 18) < 2
+      && Math.abs(child.y - 18) < 2
+    ));
+    statusLabel?.setVisible(false);
+  }
+
+  private createInteractionPulse(): void {
+    const graphics = this.add.graphics();
+    graphics.lineStyle(3, 0xffe39a, 0.95).strokeCircle(0, 0, 34)
+      .lineStyle(1, 0x6ed7c6, 0.78).strokeCircle(0, 0, 43)
+      .fillStyle(0xffe39a, 0.9).fillCircle(0, -43, 4);
+    const label = this.add.text(0, -57, 'AKTION', {
+      fontFamily: 'Arial Black, system-ui',
+      fontSize: '9px',
+      color: '#173027',
+      backgroundColor: '#ffe39ae8',
+      padding: { x: 5, y: 2 },
+    }).setOrigin(0.5);
+    this.interactionPulse = this.add.container(0, 0, [graphics, label]).setVisible(false);
   }
 
   private upgradeReservationBoard(): void {
@@ -161,13 +213,108 @@ export class QuestReliabilityWorldScene extends AdvancedWorldScene {
     }
   }
 
+  private syncInteractionFeedback(time: number): void {
+    const nearest = this.nearestAvailableInteraction();
+    if (!nearest || this.questState.encounter) {
+      this.clearInteractionFeedback();
+      return;
+    }
+
+    if (nearest.id !== this.highlightedInteractionId) {
+      this.resetHighlightedVisual();
+      this.highlightedInteractionId = nearest.id;
+      this.highlightedVisual = this.findInteractionVisual(nearest);
+      this.highlightedVisualBaseAlpha = this.highlightedVisual?.alpha ?? 1;
+    }
+
+    const wave = (Math.sin(time * 0.009) + 1) / 2;
+    this.interactionPulse?.setVisible(true)
+      .setPosition(nearest.x, nearest.y - 4)
+      .setDepth(worldDepth(nearest.y + 70) + 1)
+      .setAlpha(0.58 + wave * 0.38)
+      .setScale(0.94 + wave * 0.08);
+    if (this.highlightedVisual) {
+      this.highlightedVisual.setAlpha(this.highlightedVisualBaseAlpha * (0.72 + wave * 0.28));
+    }
+  }
+
+  private nearestAvailableInteraction(): InteractionPoint | undefined {
+    const internals = this as unknown as WorldInternals;
+    const player = internals.player;
+    const interactions = internals.interactions;
+    if (!player || !interactions) return undefined;
+    let nearest: InteractionPoint | undefined;
+    let bestDistance = Number.POSITIVE_INFINITY;
+    for (const point of interactions) {
+      if (!isRegionUnlocked(point.regionId, this.questState)) continue;
+      const distance = Phaser.Math.Distance.Between(player.x, player.y, point.x, point.y);
+      if (distance <= point.radius && distance < bestDistance) {
+        nearest = point;
+        bestDistance = distance;
+      }
+    }
+    return nearest;
+  }
+
+  private findInteractionVisual(point: InteractionPoint): Highlightable | undefined {
+    if (point.id === 'arrival-board' && this.reservationBoard) return this.reservationBoard;
+    const player = (this as unknown as WorldInternals).player;
+    let best: Highlightable | undefined;
+    let bestScore = Number.POSITIVE_INFINITY;
+    for (const child of this.children.list) {
+      if (child === player || child === this.interactionPulse || child === this.questMarker) continue;
+      if (!isHighlightable(child) || !child.visible || child.scrollFactorX === 0) continue;
+      const distance = Phaser.Math.Distance.Between(child.x, child.y, point.x, point.y);
+      if (distance > 62) continue;
+      const score = distance + highlightPenalty(child);
+      if (score < bestScore) {
+        best = child;
+        bestScore = score;
+      }
+    }
+    return best;
+  }
+
+  private clearInteractionFeedback(): void {
+    this.interactionPulse?.setVisible(false);
+    this.resetHighlightedVisual();
+    this.highlightedInteractionId = undefined;
+  }
+
+  private resetHighlightedVisual(): void {
+    if (this.highlightedVisual?.active) this.highlightedVisual.setAlpha(this.highlightedVisualBaseAlpha);
+    this.highlightedVisual = undefined;
+    this.highlightedVisualBaseAlpha = 1;
+  }
+
   private showQuestMessage(text: string): void {
     const showMessage = (this as unknown as WorldInternals).showMessage;
     showMessage?.call(this, text);
   }
 
   private shutdownQuestReliability(): void {
+    this.clearInteractionFeedback();
     this.questUnsubscribe?.();
     this.reservationBoardHitArea?.removeAllListeners();
+    window.removeEventListener(TOGGLE_MAP_EVENT, this.onToggleMap);
   }
+}
+
+function isHighlightable(child: Phaser.GameObjects.GameObject): child is Highlightable {
+  return child instanceof Phaser.GameObjects.Sprite
+    || child instanceof Phaser.GameObjects.Image
+    || child instanceof Phaser.GameObjects.Container
+    || child instanceof Phaser.GameObjects.Text
+    || child instanceof Phaser.GameObjects.Arc
+    || child instanceof Phaser.GameObjects.Ellipse
+    || child instanceof Phaser.GameObjects.Rectangle;
+}
+
+function highlightPenalty(child: Highlightable): number {
+  if (child instanceof Phaser.GameObjects.Sprite) return 0;
+  if (child instanceof Phaser.GameObjects.Container) return 5;
+  if (child instanceof Phaser.GameObjects.Image) return 10;
+  if (child instanceof Phaser.GameObjects.Arc || child instanceof Phaser.GameObjects.Ellipse) return 18;
+  if (child instanceof Phaser.GameObjects.Rectangle) return 24;
+  return 34;
 }
