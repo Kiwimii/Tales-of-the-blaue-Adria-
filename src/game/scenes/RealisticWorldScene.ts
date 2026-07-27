@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { currentVisualProfile } from '../visuals';
 import { drawWorldDetailLayer } from '../worldDetailLayer';
 import { applyRealisticWorldLayout, worldDepth } from '../worldRealism';
 import { ExpandedWorldScene } from './ExpandedWorldScene';
@@ -14,15 +15,13 @@ interface SceneInternals {
   shadow?: Phaser.GameObjects.Ellipse;
   gate?: Phaser.GameObjects.Container;
   locks?: Map<string, RegionLockInternals>;
-  visualProfile?: Parameters<typeof drawWorldDetailLayer>[1];
 }
 
 export class RealisticWorldScene extends ExpandedWorldScene {
   create(): void {
     applyRealisticWorldLayout();
     super.create();
-    const profile = (this as unknown as SceneInternals).visualProfile;
-    if (profile) drawWorldDetailLayer(this, profile);
+    drawWorldDetailLayer(this, currentVisualProfile());
     this.normalizeStaticDepths();
     this.refreshPlayerDepth();
   }
