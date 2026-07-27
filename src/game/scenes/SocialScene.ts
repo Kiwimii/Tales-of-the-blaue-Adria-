@@ -1,4 +1,10 @@
 import Phaser from 'phaser';
+import {
+  COMBAT_MOVES,
+  attackLearnedFromConversation,
+  equippedCombatMoves,
+} from '../combatMoves';
+import { learnAttack } from '../combatProgress';
 import { ITEMS, RELATIONSHIP_CHARACTERS } from '../content';
 import { FRIEND_PROFILES, type FriendId } from '../friendRoster';
 import {
@@ -16,6 +22,7 @@ import {
 import { gameStore } from '../state/GameStore';
 import { activeStatuses } from '../statusSystem';
 import { adjustRelationship, consumeInventoryItem, toggleActiveTeamMember } from '../storeAdapter';
+import type { CombatMoveId } from '../types';
 import { addCinematicFrame } from '../visuals';
 
 interface SocialSceneData {
@@ -92,7 +99,7 @@ export class SocialScene extends Phaser.Scene {
     buttons.push(this.button(440, 315, 'Gesprächsthema wählen', () => this.showConversationTopics(), false, false, 220));
     if (romance) {
       const chance = flirtChance(this.characterId, this.snapshot);
-      buttons.push(this.button(690, 315, `Flirten · ${chance}%`, () => this.flirt(), false, false, 220));
+      buttons.push(this.button(690, 315, `Flirtmöglichkeiten · ${chance}%`, () => this.showFlirtOptions(), false, false, 220));
     }
     buttons.push(this.button(440, 375, 'Geschenk auswählen', () => this.showGifts(), false, false, 220));
     if (friend) {
@@ -131,23 +138,54 @@ export class SocialScene extends Phaser.Scene {
     adjustRelationship(gameStore, this.characterId, relationship, `${this.characterId}: Gespräch über ${topicId} ${relationship >= 0 ? 'vertieft' : 'misslungen'}.`);
     if (!repeated) gameStore.setFlag(repeatFlag);
     gameStore.advanceMinutes(repeated ? 3 : outcome.minutes);
-    this.reload(`${outcome.text}${repeated ? '\n\nIhr habt dieses Thema heute schon ausführlich besprochen. Die Beziehung wächst deshalb kaum noch.' : ''}`);
+
+    const current = gameStore.snapshot();
+    const attackId = repeated ? null : attackLearnedFromConversation(this.characterId, topicId, current);
+    const learned = attackId ? learnAttack(gameStore, attackId, COMBAT_MOVES[attackId].label) : false;
+    const learningText = learned ? `\n\nNEUE ATTACKE: ${COMBAT_MOVES[attackId!].label}. Sie kann im Charaktermenü ausgerüstet und beim Flirten eingesetzt werden.` : '';
+    this.reload(`${outcome.text}${repeated ? '\n\nIhr habt dieses Thema heute schon ausführlich besprochen. Die Beziehung wächst deshalb kaum noch.' : ''}${learningText}`);
   }
 
-  private flirt(): void {
+  private showFlirtOptions(): void {
+    this.optionContainer.removeAll(true);
+    const baseChance = flirtChance(this.characterId, this.snapshot);
+    const buttons: Phaser.GameObjects.Text[] = [
+      this.button(625, 268, `Direkt flirten · ${baseChance}%`, () => this.flirt(), false, false, 430, 7),
+    ];
+    equippedCombatMoves(this.snapshot).forEach((move, index) => {
+      const chance = clamp(baseChance + move.flirtModifier, 2, 30);
+      buttons.push(this.button(
+        625,
+        318 + index * 48,
+        `${move.shortLabel} · ${chance}%\n${move.flirtOption}`,
+        () => this.flirt(move.id),
+        false,
+        false,
+        430,
+        5,
+      ));
+    });
+    buttons.push(this.button(690, 535, 'Zurück', () => this.buildOptions(), false, true, 220));
+    this.optionContainer.add(buttons);
+  }
+
+  private flirt(moveId?: CombatMoveId): void {
     const attemptFlag = `flirt-${this.characterId}-day-${this.snapshot.day}`;
     if (this.snapshot.flags[attemptFlag]) {
       this.buildOptions('Ein zweiter Versuch am selben Tag wirkt nicht hartnäckig, sondern unaufmerksam.');
       return;
     }
-    const chance = flirtChance(this.characterId, this.snapshot);
+    const move = moveId ? COMBAT_MOVES[moveId] : null;
+    const baseChance = flirtChance(this.characterId, this.snapshot);
+    const chance = clamp(baseChance + (move?.flirtModifier ?? 0), 2, 30);
     const success = Math.floor(Math.random() * 100) + 1 <= chance;
     const delta = success ? 14 : -5;
     adjustRelationship(gameStore, this.characterId, delta, `${ROMANCE_PROFILES[this.characterId as RomanceId].name}: Flirt ${success ? 'positiv' : 'negativ'} reagiert.`);
     gameStore.setFlag(attemptFlag);
     if (success) gameStore.setFlag(`romance-spark-${this.characterId}`);
     gameStore.advanceMinutes(8);
-    this.reload(`${flirtReaction(this.characterId, success, this.snapshot)}\n\nTrefferchance war ${chance}%. Flirten bleibt bewusst anspruchsvoll.`);
+    const moveText = move ? `Du versuchst: „${move.flirtOption}“.\n\n` : '';
+    this.reload(`${moveText}${flirtReaction(this.characterId, success, this.snapshot)}\n\nTrefferchance war ${chance}%. Gelernte und ausgerüstete Attacken verändern die verfügbaren Flirtansätze.`);
   }
 
   private showGifts(): void {
@@ -220,7 +258,7 @@ export class SocialScene extends Phaser.Scene {
       button.setInteractive({ useHandCursor: true });
       button.on('pointerover', () => button.setScale(1.035));
       button.on('pointerout', () => button.setScale(1));
-      button.on('pointerdown', action);
+      button.on('pointerup', action);
     }
     return button;
   }
@@ -229,4 +267,8 @@ export class SocialScene extends Phaser.Scene {
     gameStore.setMode('world');
     this.scene.start('world');
   }
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, value));
 }
