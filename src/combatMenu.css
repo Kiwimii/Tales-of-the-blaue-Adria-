@@ -1,0 +1,129 @@
+.game-menu-tabs {
+  grid-template-columns: repeat(6, minmax(84px, 1fr));
+}
+
+.menu-attack-slots {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.menu-attack-slots span {
+  min-height: 42px;
+  display: grid;
+  place-items: center;
+  padding: 7px;
+  border: 1px solid rgba(244, 212, 123, 0.26);
+  border-radius: 10px;
+  color: #fff1bd;
+  background: rgba(244, 212, 123, 0.08);
+  font-size: 0.68rem;
+  font-weight: 900;
+  text-align: center;
+}
+
+.menu-attack-feedback {
+  color: #8de2cf;
+  font-weight: 800;
+}
+
+.menu-attack-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.menu-attack-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 7px 12px;
+  padding: 13px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.menu-attack-card > div,
+.menu-attack-card > p,
+.menu-attack-card > small {
+  grid-column: 1;
+}
+
+.menu-attack-card strong,
+.menu-attack-card small {
+  display: block;
+}
+
+.menu-attack-card small {
+  color: #aebdb5;
+  font-size: 0.66rem;
+  line-height: 1.35;
+}
+
+.menu-attack-card p {
+  margin: 0;
+  color: #e5ece7;
+  font-size: 0.74rem;
+  line-height: 1.4;
+}
+
+.menu-attack-card button {
+  grid-column: 2;
+  grid-row: 1 / span 3;
+  min-width: 96px;
+  align-self: stretch;
+  border: 1px solid rgba(244, 212, 123, 0.35);
+  border-radius: 10px;
+  color: #173027;
+  background: #f4d47b;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.menu-attack-card-active {
+  border-color: rgba(102, 218, 198, 0.52);
+  background: rgba(102, 218, 198, 0.09);
+}
+
+.menu-attack-card-active button {
+  color: #f4f7ef;
+  background: #355e55;
+}
+
+.menu-attack-card-locked {
+  grid-template-columns: 1fr;
+  opacity: 0.62;
+}
+
+.menu-attack-card-locked > div,
+.menu-attack-card-locked > p {
+  grid-column: 1;
+}
+
+@media (max-width: 760px) {
+  .game-menu-tabs {
+    grid-template-columns: repeat(6, minmax(70px, 1fr));
+  }
+
+  .menu-attack-slots,
+  .menu-attack-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .menu-attack-card {
+    grid-template-columns: 1fr;
+  }
+
+  .menu-attack-card > div,
+  .menu-attack-card > p,
+  .menu-attack-card > small,
+  .menu-attack-card button {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .menu-attack-card button {
+    min-height: 42px;
+  }
+}
