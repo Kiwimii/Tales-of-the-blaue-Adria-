@@ -1,8 +1,10 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import OptimizedApp from './OptimizedApp';
+import { installGraphicsMenuEnhancement } from './graphicsMenuEnhancement';
 import './styles.css';
 import './mobileFocusOverrides.css';
+import './graphicsOptions.css';
 
 const root = document.getElementById('root');
 
@@ -15,6 +17,8 @@ createRoot(root).render(
     <OptimizedApp />
   </StrictMode>,
 );
+
+installGraphicsMenuEnhancement();
 
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
   window.addEventListener('load', () => {
