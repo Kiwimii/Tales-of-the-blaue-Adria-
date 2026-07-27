@@ -25,7 +25,7 @@ export interface ApproachZone {
 export const WALKABLE_CORRIDORS: NavigationCorridor[] = [
   { id: 'arrival-driveway', bounds: { x: 740, y: 1280, width: 200, height: 520 } },
   { id: 'gate-passage', bounds: { x: 735, y: 1200, width: 115, height: 110 } },
-  { id: 'central-spine', bounds: { x: 745, y: 760, width: 105, height: 440 } },
+  { id: 'central-main-path', bounds: { x: 745, y: 760, width: 105, height: 440 } },
   { id: 'north-transition', bounds: { x: 625, y: 700, width: 180, height: 110 } },
   { id: 'north-spine', bounds: { x: 610, y: 250, width: 100, height: 450 } },
   { id: 'festival-link', bounds: { x: 1340, y: 690, width: 120, height: 120 } },
@@ -115,7 +115,7 @@ const OBJECT_OVERRIDES: Record<string, Partial<ExpandedWorldObject>> = {
   'cove-rock-1': { x: 2070, y: 1510 },
   'cove-rock-2': { x: 2420, y: 1510 },
   'cove-tree-1': { x: 1950, y: 1640 },
-  'cove-tree-2': { x: 2470, y: 1640 },
+  'cove-tree-2': { x: 2090, y: 1640 },
   'cove-bench': { x: 2050, y: 1680 },
 };
 
