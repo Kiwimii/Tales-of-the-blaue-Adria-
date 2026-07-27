@@ -39,6 +39,25 @@ Ein sofortiger Austausch wäre trotzdem falsch: Die neue Fassung hat noch keine 
 
 Die älteren Dateien `campgroundPlan.ts`, `campgroundAccessPlan.ts` und `campgroundPlanLayer.ts` bleiben vorerst als Migrationshistorie und Testreferenz erhalten, gehören aber nicht mehr zum aktiven Weltaufbau.
 
+## Verbindliche Kampfarchitektur
+
+`src/game/frustrationCombat.ts` ist die kanonische Berechnungsengine für rundenbasierte Auseinandersetzungen. Sie verwaltet:
+
+- Frustpunkte und persönliche Frustmaxima,
+- Trefferchancen,
+- gegnerspezifische Effektivität,
+- temporäre Zustände,
+- eigene Entlastung und Schutz,
+- Sieg, Niederlage und Rundenprotokolle.
+
+`src/game/combatMoves.ts` ist die einzige Quelle für Attacken, Lernwege, Typen, Werte, Flirtvarianten und Gegnerprofile.
+
+`src/game/scenes/FrustrationBattleSceneBase.ts` ist die gemeinsame Phaser-Darstellung für Frustkämpfe. Konkrete Kampfszenen dürfen nur noch Gegner, Texte und Folgen von Sieg, Niederlage oder Rückzug definieren. Eigene parallele Treffer-, Balken- oder Statusberechnungen sind nicht zulässig.
+
+Attackenfortschritt wird kompatibel über vorhandene Save-Flags gespeichert. Das Spielmenü liest und verändert dasselbe Loadout, das die Kampfszene und die attackenbasierten Flirtoptionen verwenden.
+
+Die älteren Berechnungen in `advancedCombat.ts` und `entryDebate.ts` bleiben vorerst als Migrationsreferenz und für bestehende Vergleichstests erhalten, gehören aber nicht mehr zum aktiven Gundula-/Uli- oder Ronny-Kampf.
+
 ## Verbindliche Entwicklungsregeln
 
 1. Neue Spielfunktionen entstehen ausschließlich in `src/`.
@@ -50,6 +69,9 @@ Die älteren Dateien `campgroundPlan.ts`, `campgroundAccessPlan.ts` und `campgro
 7. Neue Weltbereiche müssen an den Blueprint-Straßengraphen angeschlossen werden.
 8. Neue feste Objekte dürfen keine Blueprint-Straße, keinen Eingang und keinen Questanker blockieren.
 9. Positionen dürfen nicht parallel in Renderer, Szene und Questcode gepflegt werden.
+10. Neue Frustkämpfe verwenden die gemeinsame Kampfengine und die gemeinsame Basisszene.
+11. Neue Attacken werden ausschließlich in `combatMoves.ts` definiert und benötigen Lernweg, Kampfwerte, Statuslogik, Tests und eine Prüfung ihrer sozialen Anschlussfähigkeit.
+12. Kampf- und Flirtansichten müssen dasselbe ausgerüstete Vierer-Loadout lesen.
 
 ## Reihenfolge der Migration
 
