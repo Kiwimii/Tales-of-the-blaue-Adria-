@@ -3,6 +3,7 @@ import type { Direction } from './types';
 export const INPUT_EVENT = 'tales:input';
 export const ACTION_EVENT = 'tales:action';
 export const RETURN_TO_WORLD_EVENT = 'tales:return-to-world';
+export const RECOVER_WORLD_CONTROL_EVENT = 'tales:recover-world-control';
 export const TOGGLE_MAP_EVENT = 'tales:toggle-map';
 export const INTERACTION_STATE_EVENT = 'tales:interaction-state';
 export const REQUEST_INTERACTION_STATE_EVENT = 'tales:request-interaction-state';
@@ -27,6 +28,10 @@ export function sendAction(): void {
 
 export function sendReturnToWorld(): void {
   window.dispatchEvent(new CustomEvent(RETURN_TO_WORLD_EVENT));
+}
+
+export function sendRecoverWorldControl(): void {
+  window.dispatchEvent(new CustomEvent(RECOVER_WORLD_CONTROL_EVENT));
 }
 
 export function sendToggleMap(): void {

@@ -2,10 +2,10 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
 import type Phaser from 'phaser';
 import { QUESTS } from '../game/content';
-import { sendDirection } from '../game/events';
+import { RECOVER_WORLD_CONTROL_EVENT, sendDirection } from '../game/events';
 import type { Direction, GameSnapshot } from '../game/types';
 import { conditionTone, importantNeedAlerts, modeName } from '../game/uiState';
-import { encounterJustClosed } from '../game/worldControlRecovery';
+import { encounterJustClosed, WORLD_RECOVERY_DELAYS_MS } from '../game/worldControlRecovery';
 import { EncounterDialog } from './EncounterDialog';
 import { GameMenu } from './GameMenu';
 import { MobileGameControls, SceneCloseButton } from './MobileGameControls';
@@ -73,19 +73,19 @@ export function PlayExperience({ snapshot }: PlayExperienceProps): ReactElement 
   }, [snapshot.encounter?.id]);
 
   useEffect(() => {
+    const recover = (): void => {
+      void scheduleWorldRecovery(() => gameRef.current);
+    };
+    window.addEventListener(RECOVER_WORLD_CONTROL_EVENT, recover);
+    return () => window.removeEventListener(RECOVER_WORLD_CONTROL_EVENT, recover);
+  }, []);
+
+  useEffect(() => {
     const currentEncounterId = snapshot.encounter?.id ?? null;
     const shouldRecover = encounterJustClosed(previousEncounterId.current, currentEncounterId);
     previousEncounterId.current = currentEncounterId;
     if (!shouldRecover) return;
-
-    releaseAllDirections();
-    const recover = (): void => recoverWorldAfterOverlay(gameRef.current);
-    const frame = window.requestAnimationFrame(recover);
-    const timer = window.setTimeout(recover, 90);
-    return () => {
-      window.cancelAnimationFrame(frame);
-      window.clearTimeout(timer);
-    };
+    return scheduleWorldRecovery(() => gameRef.current);
   }, [snapshot.encounter?.id]);
 
   const alerts = useMemo(() => importantNeedAlerts(snapshot.needs, 2), [snapshot.needs]);
@@ -155,10 +155,25 @@ function resumePausedScenes(game: Phaser.Game | null, keys: string[]): void {
   }
 }
 
+function scheduleWorldRecovery(getGame: () => Phaser.Game | null): () => void {
+  releaseAllDirections();
+  const recover = (): void => recoverWorldAfterOverlay(getGame());
+  recover();
+  const frame = window.requestAnimationFrame(recover);
+  const timers = WORLD_RECOVERY_DELAYS_MS.map((delay) => window.setTimeout(recover, delay));
+  return () => {
+    window.cancelAnimationFrame(frame);
+    for (const timer of timers) window.clearTimeout(timer);
+  };
+}
+
 function recoverWorldAfterOverlay(game: Phaser.Game | null): void {
   if (!game) return;
   game.loop.wake();
+  game.input.enabled = true;
+
   if (game.scene.isPaused('world')) game.scene.resume('world');
+  if (game.scene.isSleeping('world')) game.scene.wake('world');
   if (!game.scene.isActive('world')) game.scene.start('world');
 
   const world = game.scene.getScene('world') as RecoverableWorldScene;
@@ -166,6 +181,8 @@ function recoverWorldAfterOverlay(game: Phaser.Game | null): void {
   world.physics.world.resume();
   world.recoverWorldControl?.();
 
+  const focused = document.activeElement;
+  if (focused instanceof HTMLElement && focused !== game.canvas) focused.blur();
   game.canvas.tabIndex = 0;
   game.canvas.focus({ preventScroll: true });
 }

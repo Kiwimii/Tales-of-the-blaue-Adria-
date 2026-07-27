@@ -1,9 +1,5 @@
 import Phaser from 'phaser';
-import { applyCampgroundAccessPlan } from '../campgroundAccessPlan';
-import { applyCampgroundPlanLayout } from '../campgroundPlan';
-import { drawCampgroundPlanLayer } from '../campgroundPlanLayer';
-import { currentVisualProfile } from '../visuals';
-import { applyRealisticWorldLayout, worldDepth } from '../worldRealism';
+import { worldDepth } from '../worldRealism';
 import { WORLD_REGIONS } from '../worldV2';
 import { ExpandedWorldScene } from './ExpandedWorldScene';
 
@@ -23,11 +19,7 @@ interface SceneInternals {
 
 export class RealisticWorldScene extends ExpandedWorldScene {
   create(): void {
-    applyRealisticWorldLayout();
-    applyCampgroundPlanLayout();
-    applyCampgroundAccessPlan();
     super.create();
-    drawCampgroundPlanLayer(this, currentVisualProfile());
     this.hideLegacyRegionLabels();
     this.normalizeStaticDepths();
     this.refreshPlayerDepth();
@@ -41,18 +33,23 @@ export class RealisticWorldScene extends ExpandedWorldScene {
   public recoverWorldControl(): void {
     const internals = this as unknown as SceneInternals;
     internals.directions?.clear();
+
+    this.scene.setVisible(true);
+    if (this.scene.isPaused()) this.scene.resume();
     this.input.enabled = true;
     this.input.keyboard?.resetKeys();
     this.physics.world.resume();
-    this.scene.resume();
+    this.game.input.enabled = true;
     this.game.loop.wake();
 
     const player = internals.player;
     if (!player) return;
-    player.setVelocity(0, 0).setAcceleration(0, 0);
+    player.setActive(true).setVisible(true).setVelocity(0, 0).setAcceleration(0, 0);
     const body = player.body as Phaser.Physics.Arcade.Body | null;
     if (body) {
       body.enable = true;
+      body.moves = true;
+      body.stop();
       body.reset(player.x, player.y);
     }
   }
