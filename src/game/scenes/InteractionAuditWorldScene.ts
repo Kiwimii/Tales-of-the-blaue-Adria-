@@ -5,9 +5,11 @@ import {
   ACTION_EVENT,
   CYCLE_INTERACTION_EVENT,
   REQUEST_INTERACTION_STATE_EVENT,
+  SELECT_INTERACTION_EVENT,
   sendInteractionState,
   type CycleInteractionDetail,
   type InteractionCandidateDetail,
+  type SelectInteractionDetail,
 } from '../events';
 import { cycleInteractionId, rankInteractionCandidates } from '../interactionSelection';
 import { gameStore } from '../state/GameStore';
@@ -54,10 +56,24 @@ export class InteractionAuditWorldScene extends SocialInteractionWorldScene {
     const detail = (event as CustomEvent<CycleInteractionDetail>).detail;
     this.cycleInteraction(detail?.direction ?? 1);
   };
+  private readonly onSelectInteraction = (event: Event): void => {
+    const id = (event as CustomEvent<SelectInteractionDetail>).detail?.id;
+    if (!id || !this.nearbyInteractions().some((candidate) => candidate.id === id)) return;
+    this.selectedInteractionId = id;
+    this.syncSelectedInteractionFeedback(true);
+  };
   private readonly onInteractionStateRequest = (): void => this.publishSelectedInteraction(true);
   private readonly onTab = (event: KeyboardEvent): void => {
     event.preventDefault();
     this.cycleInteraction(event.shiftKey ? -1 : 1);
+  };
+  private readonly onQ = (): void => this.cycleInteraction(1);
+  private readonly onNumberSelect = (event: KeyboardEvent): void => {
+    const index = Number(event.key) - 1;
+    const candidates = this.nearbyInteractions();
+    if (!Number.isInteger(index) || index < 0 || index >= candidates.length) return;
+    this.selectedInteractionId = candidates[index].id;
+    this.syncSelectedInteractionFeedback(true);
   };
 
   create(): void {
@@ -71,9 +87,11 @@ export class InteractionAuditWorldScene extends SocialInteractionWorldScene {
       this.publishSelectedInteraction(true);
     });
     window.addEventListener(CYCLE_INTERACTION_EVENT, this.onCycleInteraction);
+    window.addEventListener(SELECT_INTERACTION_EVENT, this.onSelectInteraction);
     window.addEventListener(REQUEST_INTERACTION_STATE_EVENT, this.onInteractionStateRequest);
     this.input.keyboard?.on('keydown-TAB', this.onTab);
-    this.input.keyboard?.on('keydown-Q', () => this.cycleInteraction(1));
+    this.input.keyboard?.on('keydown-Q', this.onQ);
+    this.input.keyboard?.on('keydown', this.onNumberSelect);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.shutdownInteractionAudit());
   }
 
@@ -291,16 +309,20 @@ export class InteractionAuditWorldScene extends SocialInteractionWorldScene {
     const internals = this as unknown as WorldRuntimeInternals;
     window.removeEventListener(ACTION_EVENT, this.onAuditedAction);
     window.removeEventListener(CYCLE_INTERACTION_EVENT, this.onCycleInteraction);
+    window.removeEventListener(SELECT_INTERACTION_EVENT, this.onSelectInteraction);
     window.removeEventListener(REQUEST_INTERACTION_STATE_EVENT, this.onInteractionStateRequest);
     internals.keys?.E?.off('down', this.onAuditedAction);
     internals.keys?.SPACE?.off('down', this.onAuditedAction);
     this.input.keyboard?.off('keydown-TAB', this.onTab);
+    this.input.keyboard?.off('keydown-Q', this.onQ);
+    this.input.keyboard?.off('keydown', this.onNumberSelect);
     this.auditUnsubscribe?.();
     sendInteractionState(null, null, [], 0);
   }
 }
 
 function interactionCharacterId(interactionId: string): string | null {
-  const match = interactionId.match(/^npc-(.+?)(?:-story)?$/);
-  return match?.[1] ?? null;
+  if (!interactionId.startsWith('npc-')) return null;
+  const raw = interactionId.slice(4);
+  return raw.endsWith('-story') ? raw.slice(0, -6) : raw;
 }
