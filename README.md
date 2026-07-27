@@ -6,13 +6,13 @@ Ein schwarzhumoriges, storygetriebenes Camping-RPG für Smartphone und Desktop. 
 
 **Vollständige Legacy-Alpha:** [Build v29 starten](https://kiwimii.github.io/Tales-of-the-blaue-Adria-/?v=29)
 
-**Neue Next-Alpha:** [Sprint 72 starten](https://kiwimii.github.io/Tales-of-the-blaue-Adria-/next/?v=72)
+**Neue Next-Alpha:** [Sprint 73 starten](https://kiwimii.github.io/Tales-of-the-blaue-Adria-/next/?v=73)
 
 Inhaltlicher Stand: **Sprint 28 · v1.8.0 · Build v29**
 
 Die Alpha ist von Freitagmorgen bis zum Sonntagsfinale spielbar. Spielstände, Export/Import, mobile Steuerung und Offline-Nutzung werden unterstützt.
 
-Die Zielarchitektur enthält die **Gameplay-Sprints 29–72** und wird parallel unter `/next/` veröffentlicht. Die Sprints 46–55 erweiterten die Außenwelt zu einer großen Karte mit sieben Regionen. Sprint 56 korrigierte Maßstab, Kollision und Tiefensortierung. Sprint 57 baute die zusammenhängende Ankunftsquest zum Taucherplatz. Die Sprints 58–72 vernetzen Körperzustände, visuelle Effekte, Kämpfe, Freundesbeziehungen, aktives Dreierteam, Flirts, Geschenke, Tagesroutinen, Kontrollgänge und Masls Minispiel zu einem gemeinsamen Metagame.
+Die Zielarchitektur enthält die **Gameplay-Sprints 29–73** und wird parallel unter `/next/` veröffentlicht. Die Sprints 46–55 erweiterten die Außenwelt zu einer großen Karte mit sieben Regionen. Sprint 56 korrigierte Maßstab, Kollision und Tiefensortierung. Sprint 57 baute die zusammenhängende Ankunftsquest zum Taucherplatz. Die Sprints 58–72 vernetzen Körperzustände, visuelle Effekte, Kämpfe, Freundesbeziehungen, aktives Dreierteam, Flirts, Geschenke, Tagesroutinen, Kontrollgänge und Masls Minispiel zu einem gemeinsamen Metagame. Sprint 73 stabilisiert das Schwarze Brett und die positionsgenaue Questnavigation.
 
 ## Entwicklungsstatus
 
@@ -30,6 +30,7 @@ Die Architekturentscheidung steht in [ARCHITECTURE.md](docs/ARCHITECTURE.md). De
 
 - Charaktererstellung und Supermarkt-Prolog mit 25-Euro-Budget
 - Ankunftsquest mit Reservierungsrätsel, Gundula-/Uli-Kontrolle, Tutorialkampf, Stromproblem, Ausladen und Bier-Meilenstein
+- sichtbares, antippbares Schwarzes Brett und stabiler Questzielzeiger
 - frei begehbarer Campingplatz mit sieben stufenweise freigeschalteten Regionen
 - realistische Objektabstände, Kollisionsflächen und Y-basierte Tiefensortierung
 - systemische Zustände: Alkohol, Breitheit, Kater, Erschöpfung und Dehydrierung
@@ -66,7 +67,7 @@ Der Befehl prüft:
 - Syntax, Vollständigkeit und Ladefolge der Runtime
 - Build-Version, PWA-Manifest und Offline-Cache
 - TypeScript-Typen
-- Store-, Persistenz-, Welt-, Realismus-, Ankunftsquest-, Zustands-, Flirt-, Team- und Kampftests
+- Store-, Persistenz-, Welt-, Realismus-, Ankunftsquest-, Questnavigation-, Zustands-, Flirt-, Team- und Kampftests
 - Produktionsbuild und Next-Preview
 
-Die Sprint-Historie liegt in [SPRINTS.md](docs/SPRINTS.md), [SPRINTS-21-28.md](docs/SPRINTS-21-28.md), [SPRINTS-29-33.md](docs/SPRINTS-29-33.md), [SPRINTS-34-43.md](docs/SPRINTS-34-43.md), [SPRINTS-44.md](docs/SPRINTS-44.md), [SPRINTS-45.md](docs/SPRINTS-45.md), [SPRINTS-46-55.md](docs/SPRINTS-46-55.md), [SPRINT-56.md](docs/SPRINT-56.md), [SPRINT-57.md](docs/SPRINT-57.md) und [SPRINTS-58-72.md](docs/SPRINTS-58-72.md).
+Die Sprint-Historie liegt in [SPRINTS.md](docs/SPRINTS.md), [SPRINTS-21-28.md](docs/SPRINTS-21-28.md), [SPRINTS-29-33.md](docs/SPRINTS-29-33.md), [SPRINTS-34-43.md](docs/SPRINTS-34-43.md), [SPRINTS-44.md](docs/SPRINTS-44.md), [SPRINTS-45.md](docs/SPRINTS-45.md), [SPRINTS-46-55.md](docs/SPRINTS-46-55.md), [SPRINT-56.md](docs/SPRINT-56.md), [SPRINT-57.md](docs/SPRINT-57.md), [SPRINTS-58-72.md](docs/SPRINTS-58-72.md) und [SPRINT-73.md](docs/SPRINT-73.md).
