@@ -141,7 +141,7 @@ export const AERIAL_NODES = {
   kiosk: { x: 650, y: 1280 },
   lowerEast: { x: 1770, y: 1120 },
   lowerHub: { x: 1570, y: 1190 },
-  taucherEntry: { x: 1570, y: 1190 },
+  taucherEntry: { x: 1570, y: 1130 },
   taucherCenter: { x: 1570, y: 1070 },
   lowerSouth: { x: 1570, y: 1450 },
   serviceEast: { x: 1920, y: 1510 },
@@ -286,8 +286,8 @@ export const OBJECT_PLACEMENTS: Record<string, Placement> = {
 export const NPC_PLACEMENTS: Record<string, PlanPoint> = {
   gundula: { x: 1765, y: 720 },
   uli: { x: 1840, y: 720 },
-  manni: { x: 1510, y: 970 },
-  ronny: { x: 1570, y: 780 },
+  manni: { x: 1320, y: 980 },
+  ronny: { x: 1630, y: 780 },
   andre: { x: 970, y: 1190 },
   rene: { x: 1115, y: 1190 },
   lars: { x: 1260, y: 1190 },
@@ -299,7 +299,7 @@ export const NPC_PLACEMENTS: Record<string, PlanPoint> = {
   schima: { x: 550, y: 1570 },
   susi: { x: 1940, y: 1040 },
   jule: { x: 480, y: 820 },
-  kira: { x: 1050, y: 620 },
+  kira: { x: 950, y: 620 },
 };
 
 export const ENTRANCE_PLACEMENTS: Record<string, PlanPoint> = {
