@@ -13,8 +13,8 @@ export type { WorldVisualBuild };
 
 export function buildExpandedWorldVisuals(scene: Phaser.Scene, profile: VisualProfile): WorldVisualBuild {
   applyRealisticWorldLayout();
-  prepareCampgroundBlueprint();
   applyCampgroundBlueprint();
+  prepareCampgroundBlueprint();
   const visual = buildLegacyWorldObjects(scene, profile);
   drawCampgroundBlueprintLayer(scene, profile);
   return visual;
