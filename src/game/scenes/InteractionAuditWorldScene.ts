@@ -62,7 +62,7 @@ export class InteractionAuditWorldScene extends SocialInteractionWorldScene {
     this.selectedInteractionId = id;
     this.syncSelectedInteractionFeedback(true);
   };
-  private readonly onInteractionStateRequest = (): void => this.publishSelectedInteraction(true);
+  private readonly onAuditInteractionStateRequest = (): void => this.publishSelectedInteraction(true);
   private readonly onTab = (event: KeyboardEvent): void => {
     event.preventDefault();
     this.cycleInteraction(event.shiftKey ? -1 : 1);
@@ -88,7 +88,7 @@ export class InteractionAuditWorldScene extends SocialInteractionWorldScene {
     });
     window.addEventListener(CYCLE_INTERACTION_EVENT, this.onCycleInteraction);
     window.addEventListener(SELECT_INTERACTION_EVENT, this.onSelectInteraction);
-    window.addEventListener(REQUEST_INTERACTION_STATE_EVENT, this.onInteractionStateRequest);
+    window.addEventListener(REQUEST_INTERACTION_STATE_EVENT, this.onAuditInteractionStateRequest);
     this.input.keyboard?.on('keydown-TAB', this.onTab);
     this.input.keyboard?.on('keydown-Q', this.onQ);
     this.input.keyboard?.on('keydown', this.onNumberSelect);
@@ -310,7 +310,7 @@ export class InteractionAuditWorldScene extends SocialInteractionWorldScene {
     window.removeEventListener(ACTION_EVENT, this.onAuditedAction);
     window.removeEventListener(CYCLE_INTERACTION_EVENT, this.onCycleInteraction);
     window.removeEventListener(SELECT_INTERACTION_EVENT, this.onSelectInteraction);
-    window.removeEventListener(REQUEST_INTERACTION_STATE_EVENT, this.onInteractionStateRequest);
+    window.removeEventListener(REQUEST_INTERACTION_STATE_EVENT, this.onAuditInteractionStateRequest);
     internals.keys?.E?.off('down', this.onAuditedAction);
     internals.keys?.SPACE?.off('down', this.onAuditedAction);
     this.input.keyboard?.off('keydown-TAB', this.onTab);
