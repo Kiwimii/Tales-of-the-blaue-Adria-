@@ -59,6 +59,25 @@ Die älteren Dateien `campgroundPlan.ts`, `campgroundAccessPlan.ts` und `campgro
 
 Gundula und Uli sind im Rezeptionshof verankert. Frühere Mittagspausen- oder Patrouillenpositionen dürfen ihre Anmeldefunktion nicht ersetzen.
 
+## Verbindliche Interaktionsarchitektur
+
+`src/game/scenes/InteractionAuditWorldScene.ts` ist die aktive Weltklasse für Interaktionsauswahl. Sie führt alle erreichbaren Personen, Questaktionen, Türen, Landmarken und Aktivitäten in einer sortierten Kandidatenliste zusammen. Eine Interaktion darf eine andere erreichbare Interaktion nicht allein deshalb dauerhaft verdrängen, weil sie wenige Pixel näher liegt.
+
+`src/game/interactionSelection.ts` definiert Priorisierung, Identitätsgruppen und zyklisches Wechseln. Story- und Standardzugänge derselben Person werden als eine logische Interaktion behandelt; unterschiedliche Personen, Objekte und Aktivitäten bleiben getrennt auswählbar.
+
+`src/game/worldActivityCatalog.ts` ist die einzige Quelle für frei zugängliche Weltaktivitäten. Jede Aktivität benötigt:
+
+- eine eindeutige ID,
+- einen registrierten Szenenschlüssel,
+- eine Region und erreichbare Weltposition,
+- einen sichtbaren Marker und verständlichen Prompt,
+- einen Auswahlradius,
+- gegebenenfalls eine nachvollziehbare Fortschrittsbedingung.
+
+Aktuell umfasst der Katalog Ronny-Duell, Flip Cup, Beer Pong, Flunkyball, Masls „Komm ans Loch“ und das Hecken-Minispiel. Zusätzliche Minispiele dürfen nicht ausschließlich als registrierte Phaser-Szene existieren; sie benötigen einen geprüften Weltzugang.
+
+`src/components/MobileGameControls.tsx` zeigt bei mehreren Kandidaten eine direkte Auswahlleiste. Desktop verwendet Q beziehungsweise Tab zum Wechseln und Zifferntasten zur direkten Auswahl. Die Hauptaktion führt ausschließlich die sichtbar markierte Interaktion aus.
+
 ## Verbindliche Kampfarchitektur
 
 `src/game/frustrationCombat.ts` ist die kanonische Berechnungsengine für rundenbasierte Auseinandersetzungen. Sie verwaltet:
@@ -97,7 +116,7 @@ Neue HUD-Elemente dürfen die Spielfläche nicht dauerhaft überdecken und das a
 
 `src/components/GameMenu.tsx` ist die zentrale Informations- und Verwaltungsoberfläche. Desktop verwendet eine Seitennavigation; kleine Displays verwenden eine horizontal scrollbare Tab-Leiste. Neue Bereiche benötigen Tastatur-, Touch- und Fokusunterstützung.
 
-`src/uxRefresh.css` enthält die Sprint-85-Oberflächenregeln. Neue Animationen benötigen eine `prefers-reduced-motion`-Alternative. Fokuszustände dürfen nicht ausschließlich über Farbe erkennbar sein.
+`src/uxRefresh.css` enthält die Sprint-85-Oberflächenregeln. `src/interactionAudit.css` enthält die ergänzende Mehrfachauswahl. Neue Animationen benötigen eine `prefers-reduced-motion`-Alternative. Fokuszustände dürfen nicht ausschließlich über Farbe erkennbar sein.
 
 ## Verbindliche mobile Runtime
 
@@ -133,6 +152,10 @@ Der Phaser-Build wird weiterhin als lazy Chunk geladen. Fehler beim Laden dieses
 19. Neue Menü- oder Dialogoberflächen benötigen Touch-, Tastatur- und Fokusunterstützung.
 20. Touchziele der Hauptbedienung dürfen nicht kleiner als 44 Pixel sein.
 21. Neue Animationen benötigen eine Reduced-Motion-Alternative.
+22. Mehrere erreichbare Interaktionen müssen einzeln auswählbar bleiben.
+23. Neue frei spielbare Aktivitäten werden ausschließlich im Weltaktivitätskatalog registriert.
+24. Eine registrierte Minispielszene benötigt einen sichtbaren, geprüften Weltzugang.
+25. Mobile und Desktop-Auswahl müssen denselben markierten Kandidaten ausführen.
 
 ## Reihenfolge der Migration
 
