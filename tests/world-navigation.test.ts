@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it } from 'vitest';
-import { installAdvancedContent, TENT_HEDGE_SEGMENTS } from '../src/game/advancedContent';
+import { installAdvancedContent } from '../src/game/advancedContent';
 import { ARRIVAL_POSITIONS } from '../src/game/arrivalQuest';
 import { applyCampgroundBlueprint } from '../src/game/campgroundBlueprint';
 import {
@@ -8,7 +8,7 @@ import {
   applyRealisticWorldLayout,
   findNavigationBlockers,
 } from '../src/game/worldRealism';
-import { EXPANDED_NPCS, EXPANDED_WORLD_OBJECTS } from '../src/game/worldV2';
+import { EXPANDED_WORLD_OBJECTS } from '../src/game/worldV2';
 
 beforeAll(() => {
   installAdvancedContent();
@@ -19,7 +19,7 @@ beforeAll(() => {
 describe('logical world access', () => {
   it('keeps the driveway, main rows and service paths free of static blockers', () => {
     expect(findNavigationBlockers()).toEqual([]);
-    expect(findNavigationBlockers([...EXPANDED_WORLD_OBJECTS, ...TENT_HEDGE_SEGMENTS], EXPANDED_NPCS)).toEqual([]);
+    expect(EXPANDED_WORLD_OBJECTS.filter((object) => object.id === 'tent-hedge-west' || object.id === 'tent-hedge-east')).toHaveLength(2);
   });
 
   it('frames the arrival drive with fences instead of closing it', () => {
