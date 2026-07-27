@@ -14,6 +14,7 @@ import '../playExperience.css';
 import '../combatMenu.css';
 import '../responsiveGame.css';
 import '../uxRefresh.css';
+import '../interactionAudit.css';
 
 interface PlayExperienceProps {
   snapshot: GameSnapshot;
@@ -24,7 +25,7 @@ interface RecoverableWorldScene extends Phaser.Scene {
 }
 
 const ALL_DIRECTIONS: Direction[] = ['up', 'down', 'left', 'right'];
-const MOBILE_REPAIR_KEY = 'tales-adria-mobile-repair-s85';
+const MOBILE_REPAIR_KEY = 'tales-adria-mobile-repair-s86';
 
 export function PlayExperience({ snapshot }: PlayExperienceProps): ReactElement {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -217,6 +218,7 @@ export function PlayExperience({ snapshot }: PlayExperienceProps): ReactElement 
         <div className="desktop-control-hint" aria-hidden="true">
           <span><kbd>WASD</kbd> / Pfeile · Laufen</span>
           <span><kbd>E</kbd> / Leertaste · Aktion</span>
+          <span><kbd>Q</kbd> / Tab · Auswahl</span>
           <span><kbd>M</kbd> · Karte</span>
         </div>
 

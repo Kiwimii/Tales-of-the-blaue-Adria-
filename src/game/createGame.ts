@@ -9,10 +9,11 @@ import { BeerPongScene } from './scenes/BeerPongScene';
 import { BootScene } from './scenes/BootScene';
 import { FlunkyballScene } from './scenes/FlunkyballScene';
 import { FlipCupScene } from './scenes/FlipCupScene';
+import { HedgePeeScene } from './scenes/HedgePeeScene';
+import { InteractionAuditWorldScene } from './scenes/InteractionAuditWorldScene';
 import { InteriorScene } from './scenes/InteriorScene';
 import { MaslHoleScene } from './scenes/MaslHoleScene';
 import { ReservationPuzzleScene } from './scenes/ReservationPuzzleScene';
-import { SocialInteractionWorldScene } from './scenes/SocialInteractionWorldScene';
 import { SocialScene } from './scenes/SocialScene';
 import { gameStore } from './state/GameStore';
 
@@ -45,7 +46,7 @@ export function createGame(parent: HTMLElement): Phaser.Game {
     },
     scene: [
       BootScene,
-      SocialInteractionWorldScene,
+      InteractionAuditWorldScene,
       ReservationPuzzleScene,
       AdvancedEntryDebateScene,
       InteriorScene,
@@ -55,6 +56,7 @@ export function createGame(parent: HTMLElement): Phaser.Game {
       FlipCupScene,
       BeerPongScene,
       FlunkyballScene,
+      HedgePeeScene,
     ],
   });
 
