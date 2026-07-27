@@ -1,7 +1,7 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import { applyCampgroundBlueprint } from '../src/game/campgroundBlueprint';
 import { NPC_PLACEMENTS } from '../src/game/aerialCampgroundPlan';
-import { recoveryPointOutsideNpcCluster } from '../src/game/scenes/RealisticWorldScene';
+import { recoveryPointOutsideNpcCluster } from '../src/game/worldRecoveryPosition';
 
 beforeAll(() => applyCampgroundBlueprint());
 
