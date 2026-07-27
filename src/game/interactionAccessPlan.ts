@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import type Phaser from 'phaser';
 import type { PlanPoint } from './aerialCampgroundPlan';
 
 export interface InteractionAccessPath {
@@ -29,15 +29,19 @@ export function drawInteractionAccessPaths(scene: Phaser.Scene): void {
     paths.lineStyle(path.width + 10, edge, 0.88).lineBetween(path.from.x, path.from.y, path.to.x, path.to.y)
       .lineStyle(path.width, fill, 0.96).lineBetween(path.from.x, path.from.y, path.to.x, path.to.y);
 
-    const distance = Phaser.Math.Distance.Between(path.from.x, path.from.y, path.to.x, path.to.y);
+    const distance = Math.hypot(path.to.x - path.from.x, path.to.y - path.from.y);
     for (let step = 34; step < distance - 18; step += 52) {
       const progress = step / distance;
       markings.fillStyle(mark, 0.18).fillEllipse(
-        Phaser.Math.Linear(path.from.x, path.to.x, progress),
-        Phaser.Math.Linear(path.from.y, path.to.y, progress),
+        linear(path.from.x, path.to.x, progress),
+        linear(path.from.y, path.to.y, progress),
         9,
         5,
       );
     }
   }
+}
+
+function linear(from: number, to: number, progress: number): number {
+  return from + (to - from) * progress;
 }
