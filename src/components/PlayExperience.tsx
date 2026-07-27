@@ -22,10 +22,13 @@ interface RecoverableWorldScene extends Phaser.Scene {
 }
 
 const ALL_DIRECTIONS: Direction[] = ['up', 'down', 'left', 'right'];
+const MOBILE_REPAIR_KEY = 'tales-adria-mobile-repair-s83';
 
 export function PlayExperience({ snapshot }: PlayExperienceProps): ReactElement {
   const [menuOpen, setMenuOpen] = useState(false);
   const [gameReady, setGameReady] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [loadAttempt, setLoadAttempt] = useState(0);
   const gameHostRef = useRef<HTMLDivElement>(null);
   const gameRef = useRef<Phaser.Game | null>(null);
   const pausedScenes = useRef<string[]>([]);
@@ -35,18 +38,33 @@ export function PlayExperience({ snapshot }: PlayExperienceProps): ReactElement 
     if (!gameHostRef.current || gameRef.current) return;
     const host = gameHostRef.current;
     let cancelled = false;
-    void import('../game/createGame').then(({ createGame }) => {
-      if (cancelled || gameRef.current) return;
-      gameRef.current = createGame(host);
-      setGameReady(true);
-    });
+    setLoadError(null);
+
+    void import('../game/createGame')
+      .then(({ createGame }) => {
+        if (cancelled || gameRef.current) return;
+        gameRef.current = createGame(host);
+        sessionStorage.removeItem(MOBILE_REPAIR_KEY);
+        setGameReady(true);
+      })
+      .catch((error: unknown) => {
+        if (cancelled) return;
+        const message = error instanceof Error ? error.message : String(error);
+        if (isLikelyStaleBundleError(message) && !sessionStorage.getItem(MOBILE_REPAIR_KEY)) {
+          sessionStorage.setItem(MOBILE_REPAIR_KEY, '1');
+          void clearNextRuntimeCaches().finally(() => window.location.reload());
+          return;
+        }
+        setLoadError(message || 'Die Spielengine konnte nicht geladen werden.');
+      });
+
     return () => {
       cancelled = true;
       resumePausedScenes(gameRef.current, pausedScenes.current);
       gameRef.current?.destroy(true);
       gameRef.current = null;
     };
-  }, []);
+  }, [loadAttempt]);
 
   useEffect(() => {
     const game = gameRef.current;
@@ -54,24 +72,30 @@ export function PlayExperience({ snapshot }: PlayExperienceProps): ReactElement 
     if (!gameReady || !game || !host) return;
 
     let frame = 0;
+    const timers: number[] = [];
     const refreshScale = (): void => {
       window.cancelAnimationFrame(frame);
       frame = window.requestAnimationFrame(() => {
+        if (!game.isRunning) return;
         game.scale.refresh();
         game.canvas.style.aspectRatio = '3 / 2';
         game.canvas.style.objectFit = 'contain';
       });
+      timers.push(window.setTimeout(() => game.isRunning && game.scale.refresh(), 120));
+      timers.push(window.setTimeout(() => game.isRunning && game.scale.refresh(), 420));
     };
-    const observer = new ResizeObserver(refreshScale);
-    observer.observe(host);
+
+    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(refreshScale);
+    observer?.observe(host);
     window.addEventListener('orientationchange', refreshScale);
     window.addEventListener('resize', refreshScale);
     window.visualViewport?.addEventListener('resize', refreshScale);
     refreshScale();
 
     return () => {
-      observer.disconnect();
+      observer?.disconnect();
       window.cancelAnimationFrame(frame);
+      timers.forEach((timer) => window.clearTimeout(timer));
       window.removeEventListener('orientationchange', refreshScale);
       window.removeEventListener('resize', refreshScale);
       window.visualViewport?.removeEventListener('resize', refreshScale);
@@ -130,6 +154,19 @@ export function PlayExperience({ snapshot }: PlayExperienceProps): ReactElement 
     <main className="play-screen">
       <section className="game-frame focused-game-frame">
         <div className="game-host" ref={gameHostRef} />
+
+        {!gameReady && (
+          <div className={loadError ? 'game-load-panel game-load-error' : 'game-load-panel'} role="status">
+            <strong>{loadError ? 'Spiel konnte nicht geladen werden' : 'Campingplatz wird aufgebaut …'}</strong>
+            <p>{loadError ? 'Meist ist ein veralteter mobiler PWA-Cache die Ursache. Der Spielstand bleibt beim Reparieren erhalten.' : 'Grafiken, Welt und Steuerung werden geladen.'}</p>
+            {loadError && (
+              <div>
+                <button type="button" onClick={() => { setGameReady(false); setLoadAttempt((value) => value + 1); }}>Erneut versuchen</button>
+                <button type="button" onClick={() => void clearNextRuntimeCaches().finally(() => window.location.reload())}>Cache reparieren</button>
+              </div>
+            )}
+          </div>
+        )}
 
         <header className="play-hud" aria-label="Aktuelle Spielinformationen">
           <div className="play-time-card">
@@ -217,4 +254,19 @@ function recoverWorldAfterOverlay(game: Phaser.Game | null): void {
   if (focused instanceof HTMLElement && focused !== game.canvas) focused.blur();
   game.canvas.tabIndex = 0;
   game.canvas.focus({ preventScroll: true });
+}
+
+function isLikelyStaleBundleError(message: string): boolean {
+  return /dynamically imported module|failed to fetch|loading chunk|importing a module script/i.test(message);
+}
+
+async function clearNextRuntimeCaches(): Promise<void> {
+  if ('caches' in window) {
+    const names = await window.caches.keys();
+    await Promise.all(names.filter((name) => name.startsWith('tales-adria-next-')).map((name) => window.caches.delete(name)));
+  }
+  if ('serviceWorker' in navigator) {
+    const registrations = await navigator.serviceWorker.getRegistrations();
+    await Promise.all(registrations.map((registration) => registration.update().catch(() => undefined)));
+  }
 }
