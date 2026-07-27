@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { worldDepth } from '../worldRealism';
-import { WORLD_REGIONS } from '../worldV2';
+import { EXPANDED_NPCS, EXPANDED_WORLD_HEIGHT, EXPANDED_WORLD_WIDTH, WORLD_REGIONS } from '../worldV2';
 import { ExpandedWorldScene } from './ExpandedWorldScene';
 
 interface RegionLockInternals {
@@ -44,14 +44,17 @@ export class RealisticWorldScene extends ExpandedWorldScene {
 
     const player = internals.player;
     if (!player) return;
-    player.setActive(true).setVisible(true).setVelocity(0, 0).setAcceleration(0, 0);
+
+    const safePoint = recoveryPointOutsideNpcCluster(player.x, player.y);
+    player.setActive(true).setVisible(true).setVelocity(0, 0).setAcceleration(0, 0).setPosition(safePoint.x, safePoint.y);
     const body = player.body as Phaser.Physics.Arcade.Body | null;
     if (body) {
       body.enable = true;
       body.moves = true;
       body.stop();
-      body.reset(player.x, player.y);
+      body.reset(safePoint.x, safePoint.y);
     }
+    internals.shadow?.setPosition(safePoint.x + 2, safePoint.y + 25);
   }
 
   private refreshPlayerDepth(): void {
@@ -72,7 +75,7 @@ export class RealisticWorldScene extends ExpandedWorldScene {
 
   private normalizeStaticDepths(): void {
     const internals = this as unknown as SceneInternals;
-    internals.gate?.setDepth(worldDepth(1300));
+    internals.gate?.setDepth(worldDepth(650));
     internals.locks?.forEach((lock) => {
       lock.overlay.setDepth(76);
       lock.border.setDepth(77);
@@ -107,4 +110,28 @@ export class RealisticWorldScene extends ExpandedWorldScene {
       }
     }
   }
+}
+
+export function recoveryPointOutsideNpcCluster(x: number, y: number): { x: number; y: number } {
+  const nearby = EXPANDED_NPCS.filter((npc) => Phaser.Math.Distance.Between(x, y, npc.x, npc.y) < 96);
+  if (!nearby.length) return { x, y };
+
+  const center = nearby.reduce((sum, npc) => ({ x: sum.x + npc.x, y: sum.y + npc.y }), { x: 0, y: 0 });
+  center.x /= nearby.length;
+  center.y /= nearby.length;
+  let dx = x - center.x;
+  let dy = y - center.y;
+  const length = Math.hypot(dx, dy);
+  if (length < 4) {
+    dx = -1;
+    dy = 0.45;
+  } else {
+    dx /= length;
+    dy /= length;
+  }
+
+  return {
+    x: Phaser.Math.Clamp(center.x + dx * 118, 45, EXPANDED_WORLD_WIDTH - 45),
+    y: Phaser.Math.Clamp(center.y + dy * 118, 45, EXPANDED_WORLD_HEIGHT - 45),
+  };
 }
