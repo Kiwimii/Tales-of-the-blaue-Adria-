@@ -1,9 +1,20 @@
 import { RELATIONSHIP_CHARACTERS, TEAM_MEMBERS } from './content';
 import { FRIEND_PROFILES, FRIEND_TEAM_MEMBERS, type FriendId } from './friendRoster';
 import { ROMANCE_PROFILES } from './socialSystem';
-import { EXPANDED_NPCS, EXPANDED_WORLD_OBJECTS } from './worldV2';
+import { EXPANDED_NPCS, EXPANDED_WORLD_OBJECTS, type ExpandedWorldObject } from './worldV2';
 
 let installed = false;
+
+export const TENT_HEDGE_SEGMENTS: ExpandedWorldObject[] = [
+  {
+    id: 'tent-hedge-west', kind: 'fence', regionId: 'central', x: 245, y: 1245, width: 385, height: 24,
+    label: 'HECKE', color: 0x315c3f, solid: true,
+  },
+  {
+    id: 'tent-hedge-east', kind: 'fence', regionId: 'central', x: 1010, y: 1245, width: 280, height: 24,
+    color: 0x315c3f, solid: true,
+  },
+];
 
 export function installAdvancedContent(): void {
   if (installed) return;
@@ -41,11 +52,8 @@ export function installAdvancedContent(): void {
     }
   }
 
-  if (!EXPANDED_WORLD_OBJECTS.some((object) => object.id === 'tent-hedge')) {
-    EXPANDED_WORLD_OBJECTS.push({
-      id: 'tent-hedge', kind: 'fence', regionId: 'central', x: 245, y: 1245, width: 825, height: 24,
-      label: 'HECKE', color: 0x315c3f, solid: true,
-    });
+  for (const segment of TENT_HEDGE_SEGMENTS) {
+    if (!EXPANDED_WORLD_OBJECTS.some((object) => object.id === segment.id)) EXPANDED_WORLD_OBJECTS.push({ ...segment });
   }
   if (!EXPANDED_WORLD_OBJECTS.some((object) => object.id === 'lunch-sign')) {
     EXPANDED_WORLD_OBJECTS.push({
