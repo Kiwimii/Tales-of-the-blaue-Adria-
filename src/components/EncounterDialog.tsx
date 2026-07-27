@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { ReactElement } from 'react';
 import { ENCOUNTERS } from '../game/content';
+import { sendRecoverWorldControl } from '../game/events';
 import { calculateChallengeChance } from '../game/mechanics';
 import { gameStore } from '../game/state/GameStore';
 import { DIALOG_TOUCH_GUARD_MS } from '../game/touchInteraction';
@@ -19,7 +20,10 @@ export function EncounterDialog({ snapshot }: { snapshot: GameSnapshot }): React
   }, [active?.id]);
 
   if (!active || !encounter) return null;
-  const close = (): void => gameStore.closeEncounter();
+  const close = (): void => {
+    gameStore.closeEncounter();
+    sendRecoverWorldControl();
+  };
 
   return (
     <div className="encounter-overlay" role="dialog" aria-modal="true" aria-labelledby="encounter-title">
