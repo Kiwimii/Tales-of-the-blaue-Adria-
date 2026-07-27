@@ -9,7 +9,7 @@ export interface Placement extends PlanPoint { width?: number; height?: number; 
 export interface PlanArea extends Bounds { id: FunctionalAreaId; label: string; regionId: RegionId; fill: number; border: number; }
 
 export const AERIAL_REGION_LAYOUT: Record<RegionId, Bounds> = {
-  arrival: { x: 450, y: 1050, width: 950, height: 750 },
+  arrival: { x: 450, y: 1300, width: 950, height: 500 },
   north: { x: 0, y: 0, width: 1400, height: 700 },
   central: { x: 0, y: 700, width: 1400, height: 680 },
   festival: { x: 1400, y: 0, width: 550, height: 1000 },
@@ -19,8 +19,8 @@ export const AERIAL_REGION_LAYOUT: Record<RegionId, Bounds> = {
 };
 
 export const AERIAL_SITE_POLYGONS: PlanPolygon[] = [
-  { id: 'campground-main', fill: 0x678b59, border: 0x355f42, points: [{ x: 0, y: 0 }, { x: 1950, y: 0 }, { x: 1950, y: 1380 }, { x: 1400, y: 1380 }, { x: 1400, y: 1800 }, { x: 450, y: 1800 }, { x: 450, y: 1380 }, { x: 0, y: 1380 }] },
-  { id: 'arrival-apron', fill: 0x748175, border: 0x465f4c, points: [{ x: 450, y: 1250 }, { x: 1400, y: 1250 }, { x: 1400, y: 1800 }, { x: 450, y: 1800 }] },
+  { id: 'campground-main', fill: 0x678b59, border: 0x355f42, points: [{ x: 0, y: 0 }, { x: 1950, y: 0 }, { x: 1950, y: 1300 }, { x: 1400, y: 1300 }, { x: 1400, y: 1800 }, { x: 450, y: 1800 }, { x: 450, y: 1300 }, { x: 0, y: 1300 }] },
+  { id: 'arrival-apron', fill: 0x748175, border: 0x465f4c, points: [{ x: 450, y: 1300 }, { x: 1400, y: 1300 }, { x: 1400, y: 1800 }, { x: 450, y: 1800 }] },
   { id: 'beach-strip', fill: 0xd8c487, border: 0xb1945c, points: [{ x: 1950, y: 0 }, { x: 2250, y: 0 }, { x: 2250, y: 1100 }, { x: 1950, y: 1100 }] },
   { id: 'cove-strip', fill: 0x5b8061, border: 0x31563f, points: [{ x: 1950, y: 1100 }, { x: 2220, y: 1100 }, { x: 2220, y: 1800 }, { x: 1950, y: 1800 }] },
 ];
@@ -37,7 +37,7 @@ export const AERIAL_NODES = {
   parkingEast: { x: 1200, y: 1650 },
   gate: { x: 900, y: 1400 },
   receptionJunction: { x: 1130, y: 1400 },
-  receptionDoor: { x: 1130, y: 1250 },
+  receptionDoor: { x: 1130, y: 1420 },
   mainSouth: { x: 900, y: 1300 },
   middleHub: { x: 900, y: 950 },
   upperHub: { x: 900, y: 650 },
@@ -116,22 +116,22 @@ export const AERIAL_PITCHES: PlanPitch[] = [
   { id: 'north-east', x: 960, y: 40, width: 300, height: 240 },
   { id: 'north-social', x: 40, y: 340, width: 1320, height: 260 },
   { id: 'services', x: 40, y: 690, width: 1320, height: 230 },
-  { id: 'taucher', x: 40, y: 980, width: 1320, height: 400, label: 'TAUCHERPLATZ' },
+  { id: 'taucher', x: 40, y: 980, width: 1320, height: 300, label: 'TAUCHERPLATZ' },
   { id: 'festival', x: 1420, y: 40, width: 500, height: 910, label: 'FESTWIESE' },
   { id: 'service', x: 1420, y: 1030, width: 500, height: 720 },
 ];
 
-export const TAUCHER_PITCH_BOUNDS: Bounds = { x: 40, y: 980, width: 1320, height: 400 };
+export const TAUCHER_PITCH_BOUNDS: Bounds = { x: 40, y: 980, width: 1320, height: 300 };
 export const ARRIVAL_CAR_POSITION: PlanPoint = { x: 900, y: 1600 };
 export const TAUCHER_CAR_POSITION: PlanPoint = { x: 1280, y: 1190 };
 
 export const AERIAL_FUNCTIONAL_AREAS = {
-  parking: { id: 'parking', label: 'PARKPLATZ UND ANKUNFT', regionId: 'arrival', x: 500, y: 1480, width: 750, height: 300, fill: 0x7d8179, border: 0xc9c0a0 },
-  reception: { id: 'reception', label: 'REZEPTION UND SCHRANKENHOF', regionId: 'arrival', x: 960, y: 1040, width: 420, height: 410, fill: 0x788a72, border: 0xd5c689 },
+  parking: { id: 'parking', label: 'PARKPLATZ UND ANKUNFT', regionId: 'arrival', x: 450, y: 1480, width: 520, height: 300, fill: 0x7d8179, border: 0xc9c0a0 },
+  reception: { id: 'reception', label: 'REZEPTION UND SCHRANKENHOF', regionId: 'arrival', x: 980, y: 1320, width: 400, height: 290, fill: 0x788a72, border: 0xd5c689 },
   'north-pitches': { id: 'north-pitches', label: 'OBERE STELLPLATZREIHE', regionId: 'north', x: 40, y: 40, width: 1320, height: 260, fill: 0x6f965f, border: 0xa8c782 },
   'north-social': { id: 'north-social', label: 'ADRIA-KLAUSE UND SITZBEREICH', regionId: 'north', x: 40, y: 340, width: 1320, height: 370, fill: 0x739861, border: 0xb3ca8d },
   'central-services': { id: 'central-services', label: 'SANITÄR UND DAUERCAMPER', regionId: 'central', x: 40, y: 690, width: 1320, height: 230, fill: 0x759b63, border: 0xb6ce8f },
-  'taucher-tent-row': { id: 'taucher-tent-row', label: 'TAUCHERPLATZ UND ZELTGRUPPE', regionId: 'central', x: 40, y: 980, width: 1320, height: 400, fill: 0x82a96a, border: 0xf0d77e },
+  'taucher-tent-row': { id: 'taucher-tent-row', label: 'TAUCHERPLATZ UND ZELTGRUPPE', regionId: 'central', x: 40, y: 980, width: 1320, height: 300, fill: 0x82a96a, border: 0xf0d77e },
   'festival-stage': { id: 'festival-stage', label: 'BÜHNE UND VERANSTALTUNGSFLÄCHE', regionId: 'festival', x: 1420, y: 40, width: 500, height: 280, fill: 0x84945c, border: 0xd8ba6d },
   'festival-social': { id: 'festival-social', label: 'PARTYZELT UND FESTWIESE', regionId: 'festival', x: 1420, y: 350, width: 500, height: 600, fill: 0x8d995f, border: 0xe2c779 },
   'beach-north': { id: 'beach-north', label: 'WACHE UND HAUPTSTEG', regionId: 'beach', x: 1960, y: 40, width: 600, height: 500, fill: 0xdac88f, border: 0xf2dfa7 },
@@ -142,14 +142,14 @@ export const AERIAL_FUNCTIONAL_AREAS = {
 export type FunctionalAreaId = keyof typeof AERIAL_FUNCTIONAL_AREAS;
 
 export const OBJECT_PLACEMENTS: Record<string, Placement> = {
-  reception: { x: 1030, y: 1080, width: 260, height: 155 },
+  reception: { x: 1000, y: 1430, width: 260, height: 155 },
   'arrival-sign': { x: 650, y: 1690, width: 115, height: 70 },
   'parking-fence-left': { x: 500, y: 1500, width: 22, height: 230 },
-  'parking-fence-right': { x: 1220, y: 1500, width: 22, height: 230 },
-  'arrival-flowerbed': { x: 1280, y: 1120, width: 90, height: 70 },
+  'parking-fence-right': { x: 950, y: 1500, width: 22, height: 230 },
+  'arrival-flowerbed': { x: 1280, y: 1460, width: 90, height: 70 },
   'arrival-lantern-1': { x: 850, y: 1530, width: 24, height: 70 },
-  'arrival-lantern-2': { x: 950, y: 1320, width: 24, height: 70 },
-  'lunch-sign': { x: 1240, y: 1260, width: 105, height: 65 },
+  'arrival-lantern-2': { x: 1300, y: 1390, width: 24, height: 70 },
+  'lunch-sign': { x: 1240, y: 1340, width: 105, height: 65 },
   sanitary: { x: 80, y: 720, width: 255, height: 170 },
   'central-camper': { x: 400, y: 720, width: 220, height: 108 },
   'home-tent': { x: 80, y: 1030, width: 145, height: 120 },
@@ -162,8 +162,8 @@ export const OBJECT_PLACEMENTS: Record<string, Placement> = {
   'central-sign': { x: 50, y: 950, width: 92, height: 62 },
   'central-tree-1': { x: 20, y: 700, width: 95, height: 105 },
   'central-tree-2': { x: 1280, y: 1020, width: 100, height: 112 },
-  'central-tree-3': { x: 20, y: 1260, width: 82, height: 92 },
-  'central-flowerbed': { x: 1050, y: 1260, width: 210, height: 52 },
+  'central-tree-3': { x: 20, y: 1220, width: 82, height: 92 },
+  'central-flowerbed': { x: 1050, y: 1220, width: 210, height: 52 },
   'tent-hedge-west': { x: 80, y: 990, width: 370, height: 24 },
   'tent-hedge-east': { x: 560, y: 990, width: 280, height: 24 },
   clubhouse: { x: 50, y: 50, width: 320, height: 190 },
@@ -235,14 +235,14 @@ export const NPC_PLACEMENTS: Record<string, PlanPoint> = {
 };
 
 export const ENTRANCE_PLACEMENTS: Record<string, PlanPoint> = {
-  'reception-door': { x: 1130, y: 1250 },
+  'reception-door': { x: 1130, y: 1420 },
   'sanitary-door': { x: 208, y: 905 },
   'home-door': { x: 152, y: 1160 },
   'party-door': { x: 1750, y: 625 },
 };
 
 export const LANDMARK_PLACEMENTS: Record<string, PlanPoint> = {
-  'notice-board': { x: 1250, y: 1350 },
+  'notice-board': { x: 1280, y: 1360 },
   campfire: { x: 1120, y: 1080 },
   'clubhouse-wall': { x: 210, y: 280 },
   'festival-lights': { x: 1680, y: 650 },
@@ -346,7 +346,7 @@ export const NPC_AREA_ASSIGNMENTS: Record<string, FunctionalAreaId> = {
 
 export const ARRIVAL_STORY_PLACEMENTS = {
   trunk: { x: 900, y: 1600 },
-  reservationBoard: { x: 1250, y: 1350 },
+  reservationBoard: { x: 1280, y: 1360 },
   gundula: { x: 1040, y: 1360 },
   uli: { x: 1200, y: 1360 },
   gateDebate: { x: 900, y: 1400 },
