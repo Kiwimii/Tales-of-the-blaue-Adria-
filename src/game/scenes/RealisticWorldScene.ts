@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
+import { recoveryPointOutsideNpcCluster } from '../worldRecoveryPosition';
 import { worldDepth } from '../worldRealism';
-import { EXPANDED_NPCS, EXPANDED_WORLD_HEIGHT, EXPANDED_WORLD_WIDTH, WORLD_REGIONS } from '../worldV2';
+import { WORLD_REGIONS } from '../worldV2';
 import { ExpandedWorldScene } from './ExpandedWorldScene';
 
 interface RegionLockInternals {
@@ -110,28 +111,4 @@ export class RealisticWorldScene extends ExpandedWorldScene {
       }
     }
   }
-}
-
-export function recoveryPointOutsideNpcCluster(x: number, y: number): { x: number; y: number } {
-  const nearby = EXPANDED_NPCS.filter((npc) => Phaser.Math.Distance.Between(x, y, npc.x, npc.y) < 96);
-  if (!nearby.length) return { x, y };
-
-  const center = nearby.reduce((sum, npc) => ({ x: sum.x + npc.x, y: sum.y + npc.y }), { x: 0, y: 0 });
-  center.x /= nearby.length;
-  center.y /= nearby.length;
-  let dx = x - center.x;
-  let dy = y - center.y;
-  const length = Math.hypot(dx, dy);
-  if (length < 4) {
-    dx = -1;
-    dy = 0.45;
-  } else {
-    dx /= length;
-    dy /= length;
-  }
-
-  return {
-    x: Phaser.Math.Clamp(center.x + dx * 118, 45, EXPANDED_WORLD_WIDTH - 45),
-    y: Phaser.Math.Clamp(center.y + dy * 118, 45, EXPANDED_WORLD_HEIGHT - 45),
-  };
 }
