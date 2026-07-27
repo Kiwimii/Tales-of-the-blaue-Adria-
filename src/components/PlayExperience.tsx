@@ -18,6 +18,7 @@ const ALL_DIRECTIONS: Direction[] = ['up', 'down', 'left', 'right'];
 
 export function PlayExperience({ snapshot }: PlayExperienceProps): ReactElement {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [gameReady, setGameReady] = useState(false);
   const gameHostRef = useRef<HTMLDivElement>(null);
   const gameRef = useRef<Phaser.Game | null>(null);
   const pausedScenes = useRef<string[]>([]);
@@ -29,6 +30,7 @@ export function PlayExperience({ snapshot }: PlayExperienceProps): ReactElement 
     void import('../game/createGame').then(({ createGame }) => {
       if (cancelled || gameRef.current) return;
       gameRef.current = createGame(host);
+      setGameReady(true);
     });
     return () => {
       cancelled = true;
@@ -44,7 +46,7 @@ export function PlayExperience({ snapshot }: PlayExperienceProps): ReactElement 
 
   useEffect(() => {
     const game = gameRef.current;
-    if (!game) return;
+    if (!gameReady || !game) return;
     if (menuOpen) {
       pausedScenes.current = game.scene.getScenes(true)
         .filter((scene) => scene.scene.key !== 'boot')
@@ -58,7 +60,7 @@ export function PlayExperience({ snapshot }: PlayExperienceProps): ReactElement 
     }
     resumePausedScenes(game, pausedScenes.current);
     pausedScenes.current = [];
-  }, [menuOpen]);
+  }, [gameReady, menuOpen]);
 
   useEffect(() => {
     if (snapshot.encounter) setMenuOpen(false);
