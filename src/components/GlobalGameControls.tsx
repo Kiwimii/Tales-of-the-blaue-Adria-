@@ -1,17 +1,27 @@
 import { useEffect, useState } from 'react';
-import type { ReactElement } from 'react';
+import type { PointerEvent as ReactPointerEvent, ReactElement } from 'react';
 import { createPortal } from 'react-dom';
+import { sendDirection } from '../game/events';
+import { DIALOG_TOUCH_GUARD_MS } from '../game/touchInteraction';
 import { gameStore } from '../game/state/GameStore';
-import type { GameSnapshot } from '../game/types';
+import type { Direction, GameSnapshot } from '../game/types';
 import { MobileGameControls, SceneCloseButton } from './MobileGameControls';
+import '../dialogGuard.css';
 
 interface PortalTargets {
   frame: HTMLElement | null;
   encounter: HTMLElement | null;
+  encounterResult: HTMLElement | null;
   relationships: HTMLElement | null;
 }
 
-const EMPTY_TARGETS: PortalTargets = { frame: null, encounter: null, relationships: null };
+const EMPTY_TARGETS: PortalTargets = {
+  frame: null,
+  encounter: null,
+  encounterResult: null,
+  relationships: null,
+};
+const ALL_DIRECTIONS: Direction[] = ['up', 'down', 'left', 'right'];
 
 export function GlobalGameControls(): ReactElement {
   const [snapshot, setSnapshot] = useState<GameSnapshot>(() => gameStore.snapshot());
@@ -20,15 +30,21 @@ export function GlobalGameControls(): ReactElement {
   useEffect(() => gameStore.subscribe(setSnapshot), []);
 
   useEffect(() => {
+    releaseAllDirections();
+  }, [snapshot.encounter?.id, snapshot.encounter?.result?.optionId]);
+
+  useEffect(() => {
     const refresh = (): void => {
       const next: PortalTargets = {
         frame: document.querySelector<HTMLElement>('.game-frame'),
         encounter: document.querySelector<HTMLElement>('.encounter-card'),
+        encounterResult: document.querySelector<HTMLElement>('.encounter-result'),
         relationships: document.querySelector<HTMLElement>('.relationship-panel'),
       };
       setTargets((current) => (
         current.frame === next.frame
         && current.encounter === next.encounter
+        && current.encounterResult === next.encounterResult
         && current.relationships === next.relationships
           ? current
           : next
@@ -48,6 +64,10 @@ export function GlobalGameControls(): ReactElement {
   const movementActive = snapshot.mode === 'world'
     || (snapshot.mode === 'interior' && Boolean(snapshot.currentInterior));
   const phaserWindowOpen = snapshot.mode !== 'world' && snapshot.mode !== 'shop';
+  const closeEncounter = (): void => {
+    releaseAllDirections();
+    gameStore.closeEncounter();
+  };
 
   return (
     <>
@@ -57,6 +77,12 @@ export function GlobalGameControls(): ReactElement {
       {targets.frame && phaserWindowOpen && !snapshot.encounter
         ? createPortal(<SceneCloseButton />, targets.frame)
         : null}
+      {targets.encounter && snapshot.encounter && !snapshot.encounter.result
+        ? createPortal(
+          <EncounterTouchGuard key={snapshot.encounter.id} />,
+          targets.encounter,
+        )
+        : null}
       {targets.encounter
         ? createPortal(
           <button
@@ -64,11 +90,23 @@ export function GlobalGameControls(): ReactElement {
             className="dialog-x-button"
             aria-label="Gespräch schließen"
             title="Zurück zur Welt"
-            onClick={() => gameStore.closeEncounter()}
+            onClick={closeEncounter}
           >
             ×
           </button>,
           targets.encounter,
+        )
+        : null}
+      {targets.encounterResult && snapshot.encounter?.result
+        ? createPortal(
+          <button
+            type="button"
+            className="encounter-world-return"
+            onClick={closeEncounter}
+          >
+            Gespräch schließen und weiterlaufen
+          </button>,
+          targets.encounterResult,
         )
         : null}
       {targets.relationships
@@ -89,4 +127,35 @@ export function GlobalGameControls(): ReactElement {
         : null}
     </>
   );
+}
+
+function EncounterTouchGuard(): ReactElement | null {
+  const [locked, setLocked] = useState(true);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setLocked(false), DIALOG_TOUCH_GUARD_MS);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  if (!locked) return null;
+  const block = (event: ReactPointerEvent<HTMLDivElement>): void => {
+    event.preventDefault();
+    event.stopPropagation();
+  };
+  return (
+    <div
+      className="dialog-input-guard"
+      aria-hidden="true"
+      onPointerDown={block}
+      onPointerUp={block}
+      onClick={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+      }}
+    />
+  );
+}
+
+function releaseAllDirections(): void {
+  for (const direction of ALL_DIRECTIONS) sendDirection(direction, false);
 }
