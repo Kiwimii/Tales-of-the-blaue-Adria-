@@ -2,9 +2,11 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import OptimizedApp from './OptimizedApp';
 import { installGraphicsMenuEnhancement } from './graphicsMenuEnhancement';
+import { installQuestTrackingEnhancement } from './questTrackingEnhancement';
 import './styles.css';
 import './mobileFocusOverrides.css';
 import './graphicsOptions.css';
+import './questTracking.css';
 
 const root = document.getElementById('root');
 
@@ -19,6 +21,7 @@ createRoot(root).render(
 );
 
 installGraphicsMenuEnhancement();
+installQuestTrackingEnhancement();
 
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
   window.addEventListener('load', () => {
