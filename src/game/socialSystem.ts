@@ -3,6 +3,7 @@ import { activeStatuses, statusModifiers } from './statusSystem';
 import type { GameSnapshot } from './types';
 
 export type RomanceId = 'susi' | 'jule' | 'kira';
+export type ConversationTopicId = 'weekend' | 'personal' | 'plan';
 
 export interface RomanceProfile {
   id: RomanceId;
@@ -15,6 +16,24 @@ export interface RomanceProfile {
   rejects: Array<'drunk' | 'veryHigh' | 'hangover' | 'chaos'>;
   opening: string[];
 }
+
+export interface ConversationTopic {
+  id: ConversationTopicId;
+  label: string;
+  hint: string;
+}
+
+export interface ConversationOutcome {
+  relationship: number;
+  minutes: number;
+  text: string;
+}
+
+export const CONVERSATION_TOPICS: ConversationTopic[] = [
+  { id: 'weekend', label: 'Über das Wochenende reden', hint: 'Leichtes Thema · aktuelle Ereignisse und Gruppendynamik' },
+  { id: 'personal', label: 'Persönlich werden', hint: 'Mehr Nähe · funktioniert besser mit bestehender Beziehung' },
+  { id: 'plan', label: 'Etwas gemeinsam planen', hint: 'Praktisch · Hilfsbereitschaft, Team und nächste Aktionen' },
+];
 
 export const ROMANCE_PROFILES: Record<RomanceId, RomanceProfile> = {
   susi: {
@@ -55,21 +74,49 @@ export function dynamicOpening(characterId: string, state: GameSnapshot): string
 }
 
 export function conversationDelta(characterId: string, state: GameSnapshot): { relationship: number; text: string } {
+  const outcome = conversationTopicOutcome(characterId, 'weekend', state);
+  return { relationship: outcome.relationship, text: outcome.text };
+}
+
+export function conversationTopicOutcome(
+  characterId: string,
+  topicId: ConversationTopicId,
+  state: GameSnapshot,
+): ConversationOutcome {
   const friend = FRIEND_PROFILES[characterId as FriendId];
+  const romance = ROMANCE_PROFILES[characterId as RomanceId];
+  const currentRelation = state.relationships[characterId] ?? 0;
   const modifiers = statusModifiers(state.needs);
-  let relationship = friend ? 4 : 2;
+  let relationship = topicId === 'personal' ? (currentRelation >= 12 ? 5 : 2) : topicId === 'plan' ? 4 : 3;
+
+  if (!friend && !romance) relationship -= 1;
   if (state.needs.hangover >= 45) relationship -= 2;
-  if (state.needs.alcohol >= 68) relationship -= friend?.alcoholTolerance === 'hoch' ? 0 : 3;
-  if (state.needs.highness >= 55 && friend) relationship += friend.likesCannabis ? 2 : -2;
-  relationship = Math.max(-4, Math.min(7, relationship));
-  return {
-    relationship,
-    text: relationship > 3
-      ? 'Das Gespräch trifft ein gemeinsames Thema und wirkt ungewöhnlich ehrlich.'
-      : relationship >= 0
-        ? 'Das Gespräch bleibt stabil, ohne bereits Freundschaftsgeschichte zu schreiben.'
-        : `Dein Zustand kostet soziale Präzision (${modifiers.charm} Charme-Modifikator).`,
-  };
+  if (state.needs.alcohol >= 68 && friend?.alcoholTolerance !== 'hoch') relationship -= 3;
+  if (state.needs.highness >= 55 && friend) relationship += friend.likesCannabis ? 1 : -2;
+  if (topicId === 'personal' && currentRelation < 0) relationship -= 2;
+  if (topicId === 'plan' && state.profile?.trait === 'hilfsbereit') relationship += 2;
+  if (topicId === 'weekend' && state.profile?.trait === 'chaotisch') relationship += 1;
+  if (romance && topicId === 'personal') relationship += 1;
+  relationship = Math.max(-5, Math.min(8, relationship));
+
+  const topic = friend?.topics[Math.abs(state.day + Math.floor(state.minutes / 30)) % friend.topics.length];
+  let text: string;
+  if (topicId === 'weekend') {
+    text = topic
+      ? `Ihr landet bei ${topic}. Aus einem lockeren Einstieg wird ein echtes Gespräch über das Wochenende und die Gruppe.`
+      : 'Ihr sprecht über den Platz, die Gruppe und die Entscheidungen, die bis Sonntag vermutlich noch schlechter werden.';
+  } else if (topicId === 'personal') {
+    text = currentRelation >= 12
+      ? `${friend?.archetype ?? romance?.nickname ?? 'Die Person'} erzählt etwas, das nicht für jede Bekanntschaft bestimmt ist. Du hörst diesmal tatsächlich zu.`
+      : 'Du versuchst, das Gespräch persönlicher zu machen. Die Antwort bleibt vorsichtig, aber nicht abweisend.';
+  } else {
+    text = friend
+      ? `Ihr plant den nächsten sinnvollen Schritt. ${friend.archetype} bringt ${friend.strengths[0]} ein, statt nur einen weiteren Kommentar abzugeben.`
+      : 'Ihr besprecht, was auf dem Platz als Nächstes ansteht. Das Gespräch wird konkreter und weniger oberflächlich.';
+  }
+
+  if (relationship < 0) text = `Das Thema wäre brauchbar, aber dein Zustand kostet soziale Präzision (${modifiers.charm} Charme-Modifikator).`;
+  return { relationship, minutes: topicId === 'personal' ? 8 : topicId === 'plan' ? 7 : 6, text };
 }
 
 export function flirtChance(characterId: string, state: GameSnapshot): number {

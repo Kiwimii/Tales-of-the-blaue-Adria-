@@ -3,10 +3,22 @@ import {
   EXPANDED_WORLD_OBJECTS,
   LANDMARKS,
   type Bounds,
+  type ExpandedNpc,
   type ExpandedWorldObject,
 } from './worldV2';
 
-export const CAMPFIRE_POSITION = { x: 780, y: 1030, safeRadius: 58 } as const;
+export const CAMPFIRE_POSITION = { x: 900, y: 1010, safeRadius: 58 } as const;
+
+export interface NavigationCorridor {
+  id: string;
+  bounds: Bounds;
+}
+
+export const WALKABLE_CORRIDORS: NavigationCorridor[] = [
+  { id: 'arrival-driveway', bounds: { x: 745, y: 1280, width: 180, height: 500 } },
+  { id: 'central-main-path', bounds: { x: 675, y: 760, width: 135, height: 520 } },
+  { id: 'woodland-service-path', bounds: { x: 1640, y: 980, width: 95, height: 820 } },
+];
 
 export const WATER_AREAS: Bounds[] = [
   { x: 2250, y: 20, width: 350, height: 1080 },
@@ -23,11 +35,17 @@ export const WATER_COLLIDERS: Bounds[] = [
 ];
 
 const OBJECT_OVERRIDES: Record<string, Partial<ExpandedWorldObject>> = {
+  'parking-fence-left': { x: 500, width: 220 },
+  'parking-fence-right': { x: 950, width: 440 },
+  'arrival-sign': { x: 520, y: 1375 },
   'home-tent': { y: 1125 },
   'tent-andre': { x: 500, y: 1135 },
-  'tent-rene': { x: 665, y: 1140 },
+  'tent-rene': { x: 820, y: 1140 },
   'tent-lars': { x: 835, y: 1125 },
   'tent-danny': { x: 1020, y: 1135 },
+  'central-camper': { x: 1080, y: 800 },
+  'central-table': { x: 470, y: 930 },
+  'central-bench': { x: 520, y: 1030 },
   'central-tree-2': { x: 1260, y: 1035 },
   'central-tree-3': { x: 190, y: 800 },
   'central-flowerbed': { x: 80, y: 1195, width: 180, height: 45 },
@@ -37,7 +55,9 @@ const OBJECT_OVERRIDES: Record<string, Partial<ExpandedWorldObject>> = {
   'beach-bench-1': { x: 2010, y: 480 },
   'beach-table': { x: 1985, y: 900 },
   'beach-sign': { x: 1990, y: 1000 },
+  workshop: { x: 1420, y: 1130, width: 220, height: 170 },
   'woodland-tree-1': { x: 1405, y: 985 },
+  'woodland-tree-5': { x: 1830, y: 1570 },
   'woodland-bench': { x: 1510, y: 1710 },
   'cove-sign': { x: 1980, y: 1320 },
   'cove-tree-2': { x: 1955, y: 1430 },
@@ -47,14 +67,17 @@ const OBJECT_OVERRIDES: Record<string, Partial<ExpandedWorldObject>> = {
 };
 
 const NPC_OVERRIDES: Record<string, { x: number; y: number }> = {
+  gundula: { x: 690, y: 1380 },
+  uli: { x: 980, y: 1380 },
   andre: { x: 540, y: 1090 },
-  rene: { x: 705, y: 1095 },
-  lars: { x: 880, y: 1085 },
-  danny: { x: 1065, y: 1095 },
+  rene: { x: 860, y: 1095 },
+  lars: { x: 930, y: 1085 },
+  danny: { x: 1080, y: 1095 },
   schima: { x: 2150, y: 1580 },
 };
 
 const LANDMARK_OVERRIDES: Record<string, { x: number; y: number }> = {
+  'notice-board': { x: 650, y: 1460 },
   campfire: { x: CAMPFIRE_POSITION.x, y: CAMPFIRE_POSITION.y },
   'lake-lookout': { x: 2460, y: 535 },
   'cove-echo': { x: 2340, y: 1425 },
@@ -118,6 +141,23 @@ export function isPointOnDock(x: number, y: number): boolean {
     .some((dock) => contains(dock, x, y));
 }
 
+export function findNavigationBlockers(
+  objects: ExpandedWorldObject[] = EXPANDED_WORLD_OBJECTS,
+  npcs: ExpandedNpc[] = EXPANDED_NPCS,
+): string[] {
+  const blockers: string[] = [];
+  for (const corridor of WALKABLE_CORRIDORS) {
+    for (const object of objects) {
+      if (object.solid === false || ['sign', 'lantern', 'flowerbed', 'dock'].includes(object.kind)) continue;
+      if (overlaps(corridor.bounds, collisionFootprint(object))) blockers.push(`${corridor.id}: object ${object.id}`);
+    }
+    for (const npc of npcs) {
+      if (contains(corridor.bounds, npc.x, npc.y)) blockers.push(`${corridor.id}: npc ${npc.id}`);
+    }
+  }
+  return blockers;
+}
+
 export function validateRealisticLayout(): string[] {
   applyRealisticWorldLayout();
   const errors: string[] = [];
@@ -148,6 +188,7 @@ export function validateRealisticLayout(): string[] {
     if (overlaps(fireBounds, collisionFootprint(object))) errors.push(`Campfire clearance blocked by: ${object.id}`);
   }
 
+  errors.push(...findNavigationBlockers());
   return errors;
 }
 

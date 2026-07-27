@@ -2,9 +2,9 @@ import type { GameSnapshot } from './types';
 
 export const ARRIVAL_POSITIONS = {
   trunk: { x: 650, y: 1590 },
-  reservationBoard: { x: 700, y: 1460 },
-  gundula: { x: 790, y: 1390 },
-  uli: { x: 885, y: 1390 },
+  reservationBoard: { x: 650, y: 1460 },
+  gundula: { x: 690, y: 1380 },
+  uli: { x: 980, y: 1380 },
   gateDebate: { x: 835, y: 1325 },
   taucherplatz: { x: 1125, y: 1015 },
   powerBox: { x: 1280, y: 970 },
