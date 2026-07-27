@@ -37,7 +37,7 @@ export class RealisticWorldScene extends ExpandedWorldScene {
     this.scene.setVisible(true);
     if (this.scene.isPaused()) this.scene.resume();
     this.input.enabled = true;
-    this.input.keyboard?.resetKeys(true);
+    this.input.keyboard?.resetKeys();
     this.physics.world.resume();
     this.game.input.enabled = true;
     this.game.loop.wake();
