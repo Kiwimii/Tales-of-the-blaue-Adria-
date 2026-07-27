@@ -5,6 +5,7 @@ import { QUESTS } from '../game/content';
 import { sendDirection } from '../game/events';
 import type { Direction, GameSnapshot } from '../game/types';
 import { conditionTone, importantNeedAlerts, modeName } from '../game/uiState';
+import { encounterJustClosed } from '../game/worldControlRecovery';
 import { EncounterDialog } from './EncounterDialog';
 import { GameMenu } from './GameMenu';
 import { MobileGameControls, SceneCloseButton } from './MobileGameControls';
@@ -12,6 +13,10 @@ import '../playExperience.css';
 
 interface PlayExperienceProps {
   snapshot: GameSnapshot;
+}
+
+interface RecoverableWorldScene extends Phaser.Scene {
+  recoverWorldControl?: () => void;
 }
 
 const ALL_DIRECTIONS: Direction[] = ['up', 'down', 'left', 'right'];
@@ -22,6 +27,7 @@ export function PlayExperience({ snapshot }: PlayExperienceProps): ReactElement 
   const gameHostRef = useRef<HTMLDivElement>(null);
   const gameRef = useRef<Phaser.Game | null>(null);
   const pausedScenes = useRef<string[]>([]);
+  const previousEncounterId = useRef<string | null>(snapshot.encounter?.id ?? null);
 
   useEffect(() => {
     if (!gameHostRef.current || gameRef.current) return;
@@ -64,6 +70,22 @@ export function PlayExperience({ snapshot }: PlayExperienceProps): ReactElement 
 
   useEffect(() => {
     if (snapshot.encounter) setMenuOpen(false);
+  }, [snapshot.encounter?.id]);
+
+  useEffect(() => {
+    const currentEncounterId = snapshot.encounter?.id ?? null;
+    const shouldRecover = encounterJustClosed(previousEncounterId.current, currentEncounterId);
+    previousEncounterId.current = currentEncounterId;
+    if (!shouldRecover) return;
+
+    releaseAllDirections();
+    const recover = (): void => recoverWorldAfterOverlay(gameRef.current);
+    const frame = window.requestAnimationFrame(recover);
+    const timer = window.setTimeout(recover, 90);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.clearTimeout(timer);
+    };
   }, [snapshot.encounter?.id]);
 
   const alerts = useMemo(() => importantNeedAlerts(snapshot.needs, 2), [snapshot.needs]);
@@ -131,4 +153,19 @@ function resumePausedScenes(game: Phaser.Game | null, keys: string[]): void {
   for (const key of keys) {
     if (game.scene.isPaused(key)) game.scene.resume(key);
   }
+}
+
+function recoverWorldAfterOverlay(game: Phaser.Game | null): void {
+  if (!game) return;
+  game.loop.wake();
+  if (game.scene.isPaused('world')) game.scene.resume('world');
+  if (!game.scene.isActive('world')) game.scene.start('world');
+
+  const world = game.scene.getScene('world') as RecoverableWorldScene;
+  world.input.enabled = true;
+  world.physics.world.resume();
+  world.recoverWorldControl?.();
+
+  game.canvas.tabIndex = 0;
+  game.canvas.focus({ preventScroll: true });
 }
