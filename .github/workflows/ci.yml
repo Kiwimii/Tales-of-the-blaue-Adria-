@@ -56,6 +56,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "Next build already current."
           else
-            git commit -m "Publish Sprint 55 Next build"
+            git commit -m "Publish current Next build"
             git push
           fi
