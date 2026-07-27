@@ -2,6 +2,7 @@ import type { Direction } from './types';
 
 export const INPUT_EVENT = 'tales:input';
 export const ACTION_EVENT = 'tales:action';
+export const RETURN_TO_WORLD_EVENT = 'tales:return-to-world';
 
 export interface InputEventDetail {
   direction: Direction;
@@ -14,4 +15,8 @@ export function sendDirection(direction: Direction, active: boolean): void {
 
 export function sendAction(): void {
   window.dispatchEvent(new CustomEvent(ACTION_EVENT));
+}
+
+export function sendReturnToWorld(): void {
+  window.dispatchEvent(new CustomEvent(RETURN_TO_WORLD_EVENT));
 }
