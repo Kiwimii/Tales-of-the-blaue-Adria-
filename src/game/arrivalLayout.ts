@@ -11,7 +11,7 @@ export const TAUCHER_TENT: ExpandedWorldObject = {
   kind: 'tent',
   regionId: 'central',
   x: 930,
-  y: 1120,
+  y: 1040,
   width: 155,
   height: 120,
   label: 'DEIN ZELT',
@@ -23,7 +23,7 @@ let applied = false;
 
 export function applyArrivalLayout(): void {
   if (applied) return;
-  Object.assign(TAUCHER_TENT, { x: 930, y: 1120, width: 155, height: 120 });
+  Object.assign(TAUCHER_TENT, { x: 930, y: 1040, width: 155, height: 120 });
   applied = true;
 }
 
@@ -45,6 +45,9 @@ export function validateArrivalLayout(): string[] {
     const width = tent.width ?? 140;
     const height = tent.height ?? 110;
     if (!insidePitch(tent.x, tent.y, width, height)) errors.push(`Friend tent outside Taucherplatz: ${friendTentIds[index]}`);
+    if (rectanglesOverlap(TAUCHER_TENT, { x: tent.x, y: tent.y, width, height })) {
+      errors.push(`Friend tent overlaps player tent: ${friendTentIds[index]}`);
+    }
   }
 
   const sorted = friendTents.filter(Boolean).map((tent) => tent.x).sort((a, b) => a - b);
@@ -70,4 +73,11 @@ function insidePitch(x: number, y: number, width: number, height: number): boole
     && y >= TAUCHER_PITCH_BOUNDS.y
     && x + width <= TAUCHER_PITCH_BOUNDS.x + TAUCHER_PITCH_BOUNDS.width
     && y + height <= TAUCHER_PITCH_BOUNDS.y + TAUCHER_PITCH_BOUNDS.height;
+}
+
+function rectanglesOverlap(
+  a: { x: number; y: number; width: number; height: number },
+  b: { x: number; y: number; width: number; height: number },
+): boolean {
+  return a.x < b.x + b.width && a.x + a.width > b.x && a.y < b.y + b.height && a.y + a.height > b.y;
 }
