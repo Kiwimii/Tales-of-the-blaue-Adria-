@@ -1,5 +1,6 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import { installAdvancedContent } from '../src/game/advancedContent';
+import { applyCampgroundAccessPlan } from '../src/game/campgroundAccessPlan';
 import {
   CAMP_ROADS,
   CAMP_ROAD_NODES,
@@ -13,11 +14,12 @@ import { EXPANDED_ENTRANCES, EXPANDED_NPCS, EXPANDED_WORLD_OBJECTS } from '../sr
 beforeAll(() => {
   installAdvancedContent();
   applyCampgroundPlanLayout();
+  applyCampgroundAccessPlan();
 });
 
 describe('central campground plan', () => {
   it('builds one connected, orthogonal road graph', () => {
-    expect(CAMP_ROADS.length).toBeGreaterThanOrEqual(15);
+    expect(CAMP_ROADS.length).toBeGreaterThanOrEqual(24);
     for (const road of CAMP_ROADS) {
       const from = CAMP_ROAD_NODES[road.from];
       const to = CAMP_ROAD_NODES[road.to];
