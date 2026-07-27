@@ -1,4 +1,6 @@
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
+import { installAdvancedContent } from '../src/game/advancedContent';
+import { applyCampgroundBlueprint } from '../src/game/campgroundBlueprint';
 import {
   APPROACH_ZONES,
   CAMPFIRE_POSITION,
@@ -15,13 +17,18 @@ import {
 } from '../src/game/worldRealism';
 import { EXPANDED_NPCS, EXPANDED_WORLD_OBJECTS, LANDMARKS } from '../src/game/worldV2';
 
+beforeAll(() => {
+  installAdvancedContent();
+  applyRealisticWorldLayout();
+  applyCampgroundBlueprint();
+});
+
 function object(id: string) {
   return EXPANDED_WORLD_OBJECTS.find((entry) => entry.id === id);
 }
 
 describe('realistic world layout', () => {
   it('keeps buildings, characters and landmarks out of unintended water', () => {
-    applyRealisticWorldLayout();
     expect(validateRealisticLayout()).toEqual([]);
 
     const lifeguard = object('lifeguard');
@@ -33,7 +40,6 @@ describe('realistic world layout', () => {
   });
 
   it('places the fire in a clear shared area instead of inside a tent', () => {
-    applyRealisticWorldLayout();
     const tents = EXPANDED_WORLD_OBJECTS.filter((entry) => entry.kind === 'tent');
     for (const tent of tents) {
       const footprint = collisionFootprint(tent);
@@ -46,17 +52,16 @@ describe('realistic world layout', () => {
 
   it('blocks open water while preserving only the two dock corridors', () => {
     expect(WATER_COLLIDERS).toHaveLength(6);
-    expect(isBlocked(2570, 535)).toBe(true);
-    expect(isBlocked(2460, 535)).toBe(false);
-    expect(isPointOnDock(2460, 535)).toBe(true);
-    expect(isBlocked(2500, 1425)).toBe(true);
-    expect(isBlocked(2340, 1425)).toBe(false);
-    expect(isPointOnDock(2340, 1425)).toBe(true);
+    expect(isBlocked(2570, 500)).toBe(true);
+    expect(isBlocked(2460, 500)).toBe(false);
+    expect(isPointOnDock(2460, 500)).toBe(true);
+    expect(isBlocked(2570, 1450)).toBe(true);
+    expect(isBlocked(2340, 1450)).toBe(false);
+    expect(isPointOnDock(2340, 1450)).toBe(true);
   });
 
   it('keeps every audited travel corridor and interaction approach clear', () => {
-    applyRealisticWorldLayout();
-    expect(WALKABLE_CORRIDORS.length).toBeGreaterThanOrEqual(11);
+    expect(WALKABLE_CORRIDORS.length).toBeGreaterThanOrEqual(12);
     expect(APPROACH_ZONES.map((zone) => zone.id)).toEqual(expect.arrayContaining([
       'reception-door',
       'sanitary-door',
@@ -68,8 +73,7 @@ describe('realistic world layout', () => {
     expect(findObjectPlacementIssues()).toEqual([]);
   });
 
-  it('separates the previously overlapping tents and sanitary furniture', () => {
-    applyRealisticWorldLayout();
+  it('separates the tent row and keeps furniture away from the sanitary building', () => {
     const rene = object('tent-rene');
     const lars = object('tent-lars');
     const sanitary = object('sanitary');
@@ -80,7 +84,6 @@ describe('realistic world layout', () => {
   });
 
   it('uses narrow physical footprints and monotonic depth sorting', () => {
-    applyRealisticWorldLayout();
     const tree = object('central-tree-1');
     const building = object('reception');
     expect(tree).toBeDefined();
