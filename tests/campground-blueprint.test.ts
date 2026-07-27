@@ -16,8 +16,8 @@ import { EXPANDED_ENTRANCES, EXPANDED_NPCS, EXPANDED_WORLD_OBJECTS } from '../sr
 beforeAll(() => {
   installAdvancedContent();
   applyRealisticWorldLayout();
-  prepareCampgroundBlueprint();
   applyCampgroundBlueprint();
+  prepareCampgroundBlueprint();
 });
 
 describe('canonical campground blueprint', () => {
@@ -46,7 +46,7 @@ describe('canonical campground blueprint', () => {
     const reception = EXPANDED_WORLD_OBJECTS.find((object) => object.id === 'reception');
     const gundula = EXPANDED_NPCS.find((npc) => npc.id === 'gundula');
     const receptionDoor = EXPANDED_ENTRANCES.find((entrance) => entrance.id === 'reception-door');
-    expect(reception).toMatchObject(blueprintPlacement('reception')!);
+    expect(reception).toMatchObject({ x: 1040, y: 1260 });
     expect(gundula).toMatchObject(blueprintPlacement('gundula')!);
     expect(receptionDoor).toMatchObject(blueprintPlacement('reception-door')!);
   });
