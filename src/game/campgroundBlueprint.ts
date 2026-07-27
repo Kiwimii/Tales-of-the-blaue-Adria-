@@ -55,7 +55,7 @@ export const BLUEPRINT_WATER_POLYGONS = AERIAL_WATER_POLYGONS;
 export { TAUCHER_PITCH_BOUNDS };
 
 const REGION_STYLE: Record<RegionId, { label: string; ground: number; border: number }> = {
-  arrival: { label: 'ZUFahrt · PARKPLATZ · ANMELDUNG', ground: 0x748175, border: 0xc4b98b },
+  arrival: { label: 'ZUFAHRT · PARKPLATZ · ANMELDUNG', ground: 0x748175, border: 0xc4b98b },
   north: { label: 'OBERE CAMPINGREIHEN', ground: 0x698c59, border: 0x9fbd7f },
   central: { label: 'CAMPINGPLATZ · TAUCHERPLATZ', ground: 0x70945f, border: 0xa8c47e },
   festival: { label: 'FESTWIESE', ground: 0x7d9457, border: 0xd0b36a },
@@ -99,6 +99,19 @@ export function applyCampgroundBlueprint(): void {
   applyPlacements(EXPANDED_ENTRANCES, ENTRANCE_PLACEMENTS);
   applyPlacements(LANDMARKS, LANDMARK_PLACEMENTS);
 
+  const legacyHomeTent = EXPANDED_WORLD_OBJECTS.find((object) => object.id === 'home-tent');
+  if (legacyHomeTent) {
+    Object.assign(legacyHomeTent, {
+      kind: 'flowerbed',
+      x: 1540,
+      y: 1345,
+      width: 1,
+      height: 1,
+      label: undefined,
+      solid: false,
+    });
+  }
+
   Object.assign(CAMPFIRE_POSITION as unknown as { x: number; y: number; safeRadius: number }, {
     ...LANDMARK_PLACEMENTS.campfire,
     safeRadius: 68,
@@ -106,7 +119,7 @@ export function applyCampgroundBlueprint(): void {
 
   Object.assign(TAUCHER_TENT, {
     x: 930,
-    y: 1120,
+    y: 1040,
     width: 155,
     height: 120,
   });
@@ -181,7 +194,7 @@ function validateConnectedRoadGraph(errors: string[]): void {
   for (const road of BLUEPRINT_ROADS) {
     const from = BLUEPRINT_NODES[road.from];
     const to = BLUEPRINT_NODES[road.to];
-    if (PhaserLikeDistance(from, to) < 55) errors.push(`Road segment is too short: ${road.id}`);
+    if (pointDistance(from, to) < 55) errors.push(`Road segment is too short: ${road.id}`);
   }
 }
 
@@ -256,12 +269,12 @@ function distanceToSegment(point: PlanPoint, from: PlanPoint, to: PlanPoint): nu
   const dx = to.x - from.x;
   const dy = to.y - from.y;
   const lengthSquared = dx * dx + dy * dy;
-  if (!lengthSquared) return PhaserLikeDistance(point, from);
+  if (!lengthSquared) return pointDistance(point, from);
   const t = Math.max(0, Math.min(1, ((point.x - from.x) * dx + (point.y - from.y) * dy) / lengthSquared));
-  return PhaserLikeDistance(point, { x: from.x + t * dx, y: from.y + t * dy });
+  return pointDistance(point, { x: from.x + t * dx, y: from.y + t * dy });
 }
 
-function PhaserLikeDistance(a: PlanPoint, b: PlanPoint): number {
+function pointDistance(a: PlanPoint, b: PlanPoint): number {
   return Math.hypot(a.x - b.x, a.y - b.y);
 }
 
