@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { applyCampgroundAccessPlan } from '../campgroundAccessPlan';
 import { applyCampgroundPlanLayout } from '../campgroundPlan';
 import { drawCampgroundPlanLayer } from '../campgroundPlanLayer';
 import { currentVisualProfile } from '../visuals';
@@ -24,6 +25,7 @@ export class RealisticWorldScene extends ExpandedWorldScene {
   create(): void {
     applyRealisticWorldLayout();
     applyCampgroundPlanLayout();
+    applyCampgroundAccessPlan();
     super.create();
     drawCampgroundPlanLayer(this, currentVisualProfile());
     this.hideLegacyRegionLabels();
