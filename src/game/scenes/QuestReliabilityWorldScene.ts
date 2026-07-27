@@ -1,5 +1,9 @@
 import Phaser from 'phaser';
-import { TOGGLE_MAP_EVENT } from '../events';
+import {
+  REQUEST_INTERACTION_STATE_EVENT,
+  TOGGLE_MAP_EVENT,
+  sendInteractionState,
+} from '../events';
 import {
   QUEST_MARKER_BOB_DISTANCE,
   RESERVATION_BOARD_INTERACTION_RADIUS,
@@ -7,7 +11,6 @@ import {
   activeArrivalInteractionId,
   questMarkerAnchor,
   reservationBoardPosition,
-  reservationBoardState,
 } from '../questNavigation';
 import { gameStore } from '../state/GameStore';
 import type { GameSnapshot } from '../types';
@@ -52,10 +55,14 @@ export class QuestReliabilityWorldScene extends AdvancedWorldScene {
   private highlightedVisual?: Highlightable;
   private highlightedVisualBaseAlpha = 1;
   private highlightedInteractionId?: string;
+  private interactionStateSignature = '';
   private baseInteractionRadii = new Map<string, number>();
   private readonly onToggleMap = (): void => {
     const minimap = (this as unknown as WorldInternals).minimap;
     minimap?.setVisible(!minimap.visible);
+  };
+  private readonly onInteractionStateRequest = (): void => {
+    this.publishInteractionState(this.nearestAvailableInteraction(), true);
   };
 
   create(): void {
@@ -70,6 +77,7 @@ export class QuestReliabilityWorldScene extends AdvancedWorldScene {
       this.syncQuestNavigation();
     });
     window.addEventListener(TOGGLE_MAP_EVENT, this.onToggleMap);
+    window.addEventListener(REQUEST_INTERACTION_STATE_EVENT, this.onInteractionStateRequest);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.shutdownQuestReliability());
   }
 
@@ -139,16 +147,15 @@ export class QuestReliabilityWorldScene extends AdvancedWorldScene {
     }).setOrigin(0.5);
     this.reservationBoard = this.add.container(x, y, [graphics, title]).setDepth(worldDepth(y + 48));
 
-    this.reservationBoardHitArea = this.add.zone(x, y, 150, 118)
+    this.reservationBoardHitArea = this.add.zone(x, y, 184, 148)
       .setDepth(worldDepth(y + 50))
       .setInteractive({ useHandCursor: true });
     this.reservationBoardHitArea.on('pointerover', () => this.reservationBoard?.setScale(1.04));
     this.reservationBoardHitArea.on('pointerout', () => this.reservationBoard?.setScale(1));
-    this.reservationBoardHitArea.on('pointerdown', () => this.openReservationBoard(true));
+    this.reservationBoardHitArea.on('pointerup', () => this.openReservationBoard(true));
   }
 
   private openReservationBoard(fromPointer: boolean): void {
-    const state = gameStore.snapshot();
     const player = (this as unknown as WorldInternals).player;
     const { x, y } = reservationBoardPosition();
     if (fromPointer && player && Phaser.Math.Distance.Between(player.x, player.y, x, y) > RESERVATION_BOARD_TAP_RADIUS) {
@@ -156,20 +163,8 @@ export class QuestReliabilityWorldScene extends AdvancedWorldScene {
       return;
     }
 
-    switch (reservationBoardState(state)) {
-      case 'archive':
-        this.showQuestMessage('Am Brett hängt eure Buchung unter „Tauchgruppe Tiefenrausch“. Daneben steht Gundulas Vermerk: „Sonntag Personen, Zelte und Strom nachberechnen.“');
-        return;
-      case 'needs-documents':
-        this.showQuestMessage('Zu viele ähnliche Aliasnamen. Suche zuerst im Kofferraum nach den Reservierungsunterlagen.');
-        return;
-      case 'solved':
-        this.showQuestMessage('Die passende Reservierung ist markiert: „Tauchgruppe Tiefenrausch“ · Taucherplatz · 3 Personen · 2 Zelte · ohne Strom.');
-        return;
-      case 'available':
-        if (player) gameStore.setWorldPosition(player.x, player.y);
-        if (!this.scene.isActive('reservation-puzzle')) this.scene.start('reservation-puzzle');
-    }
+    if (player) gameStore.setWorldPosition(player.x, player.y);
+    if (!this.scene.isActive('reservation-puzzle')) this.scene.start('reservation-puzzle');
   }
 
   private repairQuestMarkerAnimation(): void {
@@ -214,8 +209,9 @@ export class QuestReliabilityWorldScene extends AdvancedWorldScene {
   }
 
   private syncInteractionFeedback(time: number): void {
-    const nearest = this.nearestAvailableInteraction();
-    if (!nearest || this.questState.encounter) {
+    const nearest = this.questState.encounter ? undefined : this.nearestAvailableInteraction();
+    this.publishInteractionState(nearest);
+    if (!nearest) {
       this.clearInteractionFeedback();
       return;
     }
@@ -256,6 +252,13 @@ export class QuestReliabilityWorldScene extends AdvancedWorldScene {
     return nearest;
   }
 
+  private publishInteractionState(point: InteractionPoint | undefined, force = false): void {
+    const signature = point ? `${point.id}:${point.prompt}` : '';
+    if (!force && signature === this.interactionStateSignature) return;
+    this.interactionStateSignature = signature;
+    sendInteractionState(point?.id ?? null, point?.prompt ?? null);
+  }
+
   private findInteractionVisual(point: InteractionPoint): Highlightable | undefined {
     if (point.id === 'arrival-board' && this.reservationBoard) return this.reservationBoard;
     const player = (this as unknown as WorldInternals).player;
@@ -294,9 +297,11 @@ export class QuestReliabilityWorldScene extends AdvancedWorldScene {
 
   private shutdownQuestReliability(): void {
     this.clearInteractionFeedback();
+    this.publishInteractionState(undefined, true);
     this.questUnsubscribe?.();
     this.reservationBoardHitArea?.removeAllListeners();
     window.removeEventListener(TOGGLE_MAP_EVENT, this.onToggleMap);
+    window.removeEventListener(REQUEST_INTERACTION_STATE_EVENT, this.onInteractionStateRequest);
   }
 }
 
