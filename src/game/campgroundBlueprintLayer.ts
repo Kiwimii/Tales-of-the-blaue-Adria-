@@ -68,8 +68,9 @@ function drawLand(scene: Phaser.Scene): void {
 }
 
 function drawPolygon(graphics: Phaser.GameObjects.Graphics, polygon: PlanPolygon, alpha: number): void {
-  graphics.fillStyle(polygon.fill, alpha).fillPoints(polygon.points, true)
-    .lineStyle(4, polygon.border, 0.5).strokePoints(polygon.points, true);
+  const points = polygon.points.map(({ x, y }) => new Phaser.Math.Vector2(x, y));
+  graphics.fillStyle(polygon.fill, alpha).fillPoints(points, true)
+    .lineStyle(4, polygon.border, 0.5).strokePoints(points, true);
 }
 
 function drawRoadNetwork(scene: Phaser.Scene): void {
@@ -180,7 +181,7 @@ function drawGroundDetail(scene: Phaser.Scene, profile: VisualProfile): void {
   for (let index = 0; index < 120; index += 1) {
     const point = {
       x: 180 + seededFraction('aerial-sand-x', index) * 650,
-      y: 270 + seededFraction('aerial-sand-y', index) * 1030,
+      y: 270 + seededFraction('aerial-sand-y', index) * 1170,
     };
     if (!pointInPolygon(point, beach)) continue;
     detail.fillStyle(index % 2 ? 0xb89d67 : 0xe7d39b, 0.34).fillEllipse(point.x, point.y, 5 + index % 4, 3);
@@ -189,11 +190,11 @@ function drawGroundDetail(scene: Phaser.Scene, profile: VisualProfile): void {
 
 function drawAreaLabels(scene: Phaser.Scene): void {
   const labels: Array<[number, number, string]> = [
-    [2160, 160, 'ZUFahrt VON DER ADRIASTRASSE'],
+    [2160, 160, 'ZUFAHRT VON DER ADRIASTRASSE'],
     [1680, 500, 'ANMELDUNG'],
     [950, 230, 'CAMPINGPLATZ'],
-    [935, 1518, 'TAUCHERPLATZ'],
-    [560, 1260, 'KIOSK AM STRANDTOR'],
+    [935, 1365, 'TAUCHERPLATZ'],
+    [560, 1370, 'KIOSK AM STRANDTOR'],
     [260, 320, 'STRAND'],
     [1700, 1760, 'SERVICEWEG'],
   ];
