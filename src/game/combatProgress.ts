@@ -73,24 +73,25 @@ export function installCombatProgressRuntime(store: GameStore): () => void {
   let syncing = false;
   return store.subscribe((snapshot) => {
     if (syncing) return;
+    let current = snapshot;
 
-    if (!snapshot.flags['attack-loadout-initialized']) {
+    if (!current.flags['attack-loadout-initialized']) {
       syncing = true;
       mutateStore(store, (state) => {
         state.flags['attack-loadout-initialized'] = true;
         state.flags[equippedAttackFlag(STARTER_ATTACK)] = true;
       });
       syncing = false;
-      return;
+      current = store.snapshot();
     }
 
     const automatic: Array<[boolean, CombatMoveId, string]> = [
-      [Boolean(snapshot.flags.entryDebateWon), 'aldi-shirt-show', 'Aldi-T-Shirt präsentieren'],
-      [Boolean(snapshot.flags.flipCupWon), 'synchronised-cheer', 'Synchroner Gruppen-Zuruf'],
-      [Boolean(snapshot.flags.beerPongWon), 'cup-eye-contact', 'Becher-Blickkontakt'],
-      [Boolean(snapshot.flags.flunkyballWon), 'total-exaggeration', 'Komplett übertreiben'],
+      [Boolean(current.flags.entryDebateWon), 'aldi-shirt-show', 'Aldi-T-Shirt präsentieren'],
+      [Boolean(current.flags.flipCupWon), 'synchronised-cheer', 'Synchroner Gruppen-Zuruf'],
+      [Boolean(current.flags.beerPongWon), 'cup-eye-contact', 'Becher-Blickkontakt'],
+      [Boolean(current.flags.flunkyballWon), 'total-exaggeration', 'Komplett übertreiben'],
     ];
-    const missing = automatic.filter(([condition, id]) => condition && !attackIsLearned(snapshot, id));
+    const missing = automatic.filter(([condition, id]) => condition && !attackIsLearned(current, id));
     if (!missing.length) return;
     syncing = true;
     for (const [, id, label] of missing) learnAttack(store, id, label);
