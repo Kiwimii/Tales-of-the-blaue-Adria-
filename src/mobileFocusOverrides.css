@@ -1,0 +1,16 @@
+@media (max-width: 760px) and (orientation: portrait) {
+  .focused-game-frame {
+    width: 100vw;
+    height: min(100dvh, calc(100vw / 1.5));
+    aspect-ratio: 3 / 2;
+  }
+
+  .play-alert-critical {
+    display: grid;
+    max-width: 92px;
+    overflow: hidden;
+    padding: 5px 7px;
+    font-size: 0.52rem;
+    text-overflow: ellipsis;
+  }
+}

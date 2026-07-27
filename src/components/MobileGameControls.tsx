@@ -6,7 +6,7 @@ import type {
 } from 'react';
 import { sendAction, sendDirection, sendReturnToWorld } from '../game/events';
 import { clampSwipeVector, directionsForSwipe } from '../game/mobileInput';
-import { isActionTap } from '../game/touchInteraction';
+import { canTriggerAction, isActionTap } from '../game/touchInteraction';
 import type { Direction } from '../game/types';
 import '../mobileControls.css';
 
@@ -21,13 +21,12 @@ export function MobileGameControls(): ReactElement {
   const activeDirections = useRef(new Set<Direction>());
   const actionPointerId = useRef<number | null>(null);
   const actionOrigin = useRef<Point | null>(null);
-  const scheduledAction = useRef<number | null>(null);
+  const lastActionAt = useRef(Number.NEGATIVE_INFINITY);
   const [joystick, setJoystick] = useState<{ origin: Point; offset: Point } | null>(null);
   const [actionActive, setActionActive] = useState(false);
 
   useEffect(() => () => {
     releaseDirections(activeDirections.current);
-    if (scheduledAction.current !== null) window.clearTimeout(scheduledAction.current);
   }, []);
 
   const updateDirections = (x: number, y: number): void => {
@@ -99,11 +98,10 @@ export function MobileGameControls(): ReactElement {
     setActionActive(false);
 
     if (!isActionTap(deltaX, deltaY)) return;
-    if (scheduledAction.current !== null) window.clearTimeout(scheduledAction.current);
-    scheduledAction.current = window.setTimeout(() => {
-      scheduledAction.current = null;
-      sendAction();
-    }, 0);
+    const now = performance.now();
+    if (!canTriggerAction(lastActionAt.current, now)) return;
+    lastActionAt.current = now;
+    sendAction();
   };
 
   const cancelAction = (event: ReactPointerEvent<HTMLButtonElement>): void => {

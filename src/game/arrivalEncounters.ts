@@ -81,16 +81,16 @@ export const ARRIVAL_ENCOUNTERS: Record<string, EncounterDefinition> = {
     id: 'uli-entry',
     speaker: 'Uli',
     portrait: 'U',
-    intro: 'Uli mustert Fahrzeug, Taucherplatz-Zettel und dein Oberteil. „Der Platz ist groß. Das heißt nicht, dass Lidl Racing oder Aldimania Motorsport hier eine Boxengasse eröffnen.“',
+    intro: 'Uli mustert Fahrzeug, Taucherplatz-Zettel und dein Oberteil. „Lidl und Aldimania machen also jetzt auch Mode. Manche feiern das als Hype. Andere fragen, warum man Klamotten beim Discounter kauft, ob man sich nichts Vernünftiges leisten kann oder gleich dort arbeitet. Welche Erklärung soll ich eintragen?“',
     options: [
       {
         id: 'cover-logo',
-        label: 'Logo abdecken und Taucherplatz-Markierung zeigen',
-        hint: 'Fokus · Kleidung entschärfen, Lageplan korrekt lesen',
+        label: 'Funktion vor Preis erklären und den Lageplan zeigen',
+        hint: 'Fokus · günstige Kleidung ist nicht automatisch schlechte Kleidung',
         challenge: { skill: 'focus', baseChance: 76, relation: 'uli' },
-        successText: 'Das Logo verschwindet unter der Jacke, der Taucherplatz stimmt. Uli hat nur noch technische Einwände.',
-        failureText: 'Beim Abdecken kommt auf der Rückseite ein noch größeres Discounter-Logo zum Vorschein.',
-        greatText: 'Du faltest die Jacke exakt entlang des Logos. Uli respektiert widerwillig die Geometrie.',
+        successText: 'Du erklärst Material, Funktion und Preis ohne Markenpredigt. Uli akzeptiert, dass kostenbewusst nicht dasselbe wie mittellos bedeutet, und prüft wieder den Taucherplatz.',
+        failureText: 'Die Erklärung klingt wie eine Rechtfertigung. Uli fragt trocken, ob es zum Outfit auch Mitarbeiterrabatt gab.',
+        greatText: 'Du trennst Preis, Qualität und Markenimage so sauber wie Uli seine Parzellengrenzen. Er findet keinen sachlichen Einwand.',
         success: {
           flags: { uliInspectionPassed: true },
           relationships: { uli: 12 },
@@ -105,11 +105,11 @@ export const ARRIVAL_ENCOUNTERS: Record<string, EncounterDefinition> = {
       },
       {
         id: 'aldimania-fashion',
-        label: 'Aldimania als italienische Funktionsmode verkaufen',
-        hint: 'Charme · riskante Textilkunde',
+        label: 'Die Discounter-Kollektion als aktuellen Hype verteidigen',
+        hint: 'Charme · für manche Kultstück, für andere billige Mode',
         challenge: { skill: 'charm', baseChance: 48, relation: 'uli' },
-        successText: 'Uli kennt die Marke nicht sicher genug und will keine Wissenslücke dokumentieren.',
-        failureText: 'Uli besitzt denselben Pullover zum Rasenmähen. Die Argumentation endet sofort.',
+        successText: 'Du verkaufst Lidl und Aldimania als bewusst ironische, limitierte Alltagsmode. Uli hat den Hype nicht verfolgt und will seine Wissenslücke nicht protokollieren.',
+        failureText: 'Uli besitzt ein ähnliches Oberteil zum Rasenmähen und hält den angeblichen Hype für eine nachträgliche Schutzbehauptung.',
         success: {
           flags: { uliInspectionPassed: true, aldimaniaAcceptedAsFashion: true },
           relationships: { uli: 6 },
@@ -128,7 +128,7 @@ export const ARRIVAL_ENCOUNTERS: Record<string, EncounterDefinition> = {
         hint: 'Chaos · benötigt Batida, erstaunlich etablierte Methode',
         requiredItem: 'batida',
         challenge: { skill: 'chaos', baseChance: 80, relation: 'uli' },
-        successText: 'Uli erkennt das bekannte Kokos-Protokoll und erklärt die Kleidungsprüfung für zweitrangig.',
+        successText: 'Uli erkennt das bekannte Kokos-Protokoll und erklärt die Kleidungsdebatte für zweitrangig.',
         failureText: 'Die Flasche reflektiert nichts und erfüllt keine einzige Warnwestennorm.',
         success: {
           flags: { uliInspectionPassed: true, batidaRegulatedOutfit: true },
