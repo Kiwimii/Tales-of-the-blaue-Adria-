@@ -3,6 +3,7 @@ import type { Direction } from './types';
 export const INPUT_EVENT = 'tales:input';
 export const ACTION_EVENT = 'tales:action';
 export const RETURN_TO_WORLD_EVENT = 'tales:return-to-world';
+export const TOGGLE_MAP_EVENT = 'tales:toggle-map';
 
 export interface InputEventDetail {
   direction: Direction;
@@ -19,4 +20,8 @@ export function sendAction(): void {
 
 export function sendReturnToWorld(): void {
   window.dispatchEvent(new CustomEvent(RETURN_TO_WORLD_EVENT));
+}
+
+export function sendToggleMap(): void {
+  window.dispatchEvent(new CustomEvent(TOGGLE_MAP_EVENT));
 }
