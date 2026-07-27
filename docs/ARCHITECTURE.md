@@ -1,7 +1,7 @@
 # Architekturentscheidung
 
 **Status:** angenommen  
-**Datum:** 26. Juli 2026
+**Datum:** 27. Juli 2026
 
 ## Entscheidung
 
@@ -22,6 +22,23 @@ Die React-/Phaser-Fassung besitzt eine klarere Trennung:
 
 Ein sofortiger Austausch wäre trotzdem falsch: Die neue Fassung hat noch keine inhaltliche Parität. Deshalb bleibt die Alpha spielbar, während die Migration kontrolliert in vertikalen Abschnitten erfolgt.
 
+## Verbindliche Weltarchitektur
+
+`src/game/campgroundBlueprint.ts` ist die kanonische Quelle für den Campingplatz. Sie definiert gemeinsam:
+
+- die sieben Funktionszonen,
+- das Planraster,
+- alle Knoten und Straßenverbindungen,
+- Oberflächen und Wegbreiten,
+- Objekt-, NPC-, Eingangs- und Landmarkenpositionen,
+- Questanker der Ankunft.
+
+`src/game/campgroundBlueprintLayer.ts` rendert diese Planung. Laufzeitcode darf keine zweite unabhängige Straßen- oder Parzellengeometrie mehr zeichnen. Der historische Renderer wird nur noch für vorhandene Objektgrafiken verwendet.
+
+`src/game/campgroundBlueprintBootstrap.ts` enthält ausschließlich abschließende Normalisierungen, die vor der Objektzeichnung angewendet und durch Blueprint-Tests abgesichert werden. Neue Platzänderungen sollen grundsätzlich im Blueprint entstehen; weitere nachträgliche Override-Schichten sind nicht zulässig.
+
+Die älteren Dateien `campgroundPlan.ts`, `campgroundAccessPlan.ts` und `campgroundPlanLayer.ts` bleiben vorerst als Migrationshistorie und Testreferenz erhalten, gehören aber nicht mehr zum aktiven Weltaufbau.
+
 ## Verbindliche Entwicklungsregeln
 
 1. Neue Spielfunktionen entstehen ausschließlich in `src/`.
@@ -30,6 +47,9 @@ Ein sofortiger Austausch wäre trotzdem falsch: Die neue Fassung hat noch keine 
 4. Ein Abschnitt gilt nicht als migriert, wenn nur eine vereinfachte Demo vorhanden ist.
 5. Das Save-Format wird versioniert; vor dem Release muss ein Importpfad für bestehende v13-Spielstände vorhanden sein.
 6. Der neue Build wird erst veröffentlicht, wenn `npm run check` erfolgreich ist und der manuelle Release-Durchlauf bestanden wurde.
+7. Neue Weltbereiche müssen an den Blueprint-Straßengraphen angeschlossen werden.
+8. Neue feste Objekte dürfen keine Blueprint-Straße, keinen Eingang und keinen Questanker blockieren.
+9. Positionen dürfen nicht parallel in Renderer, Szene und Questcode gepflegt werden.
 
 ## Reihenfolge der Migration
 
