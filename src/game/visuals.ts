@@ -1,4 +1,7 @@
+import type Phaser from 'phaser';
+
 export type VisualTier = 'cinematic' | 'balanced';
+export type GraphicsMode = 'auto' | 'mobile' | 'pc';
 
 export interface VisualCapabilities {
   coarsePointer: boolean;
@@ -14,22 +17,30 @@ export interface VisualProfile {
   animatedWaterLines: number;
   foliageMotion: boolean;
   postFx: boolean;
+  detailDensity: number;
+  animatedDetails: boolean;
 }
+
+export const GRAPHICS_MODE_STORAGE_KEY = 'tales-adria-graphics-mode';
 
 export const VISUAL_PROFILES: Record<VisualTier, Omit<VisualProfile, 'tier'>> = {
   cinematic: {
     pixelRatio: 2,
-    ambientSprites: 24,
-    animatedWaterLines: 12,
+    ambientSprites: 28,
+    animatedWaterLines: 14,
     foliageMotion: true,
     postFx: true,
+    detailDensity: 1,
+    animatedDetails: true,
   },
   balanced: {
-    pixelRatio: 1.35,
-    ambientSprites: 9,
-    animatedWaterLines: 6,
+    pixelRatio: 1.25,
+    ambientSprites: 8,
+    animatedWaterLines: 4,
     foliageMotion: false,
     postFx: false,
+    detailDensity: 0.48,
+    animatedDetails: false,
   },
 };
 
@@ -40,13 +51,38 @@ export function selectVisualProfile(capabilities: VisualCapabilities): VisualPro
     || (capabilities.coarsePointer && (constrainedMemory || constrainedCpu))
     ? 'balanced'
     : 'cinematic';
-  return { tier, ...VISUAL_PROFILES[tier] };
+  return profileForTier(tier);
+}
+
+export function currentGraphicsMode(): GraphicsMode {
+  if (typeof window === 'undefined') return 'auto';
+  const stored = window.localStorage.getItem(GRAPHICS_MODE_STORAGE_KEY);
+  return isGraphicsMode(stored) ? stored : 'auto';
+}
+
+export function setGraphicsMode(mode: GraphicsMode): void {
+  if (typeof window === 'undefined') return;
+  window.localStorage.setItem(GRAPHICS_MODE_STORAGE_KEY, mode);
+}
+
+export function graphicsModeLabel(mode: GraphicsMode): string {
+  if (mode === 'mobile') return 'Mobil optimiert';
+  if (mode === 'pc') return 'PC optimiert';
+  return 'Automatisch';
+}
+
+export function graphicsModeDescription(mode: GraphicsMode): string {
+  if (mode === 'mobile') return 'Reduzierte Partikel, Animationen und Detaildichte für stabile Touch-Steuerung und weniger Akkuverbrauch.';
+  if (mode === 'pc') return 'Volle Detailtiefe, dichtere Umgebung, höhere Auflösung und zusätzliche atmosphärische Animationen.';
+  return 'Wählt anhand von Eingabegerät, Arbeitsspeicher, CPU-Kernen und Bewegungseinstellung automatisch ein passendes Profil.';
 }
 
 export function currentVisualProfile(): VisualProfile {
-  if (typeof window === 'undefined' || typeof navigator === 'undefined') {
-    return { tier: 'cinematic', ...VISUAL_PROFILES.cinematic };
-  }
+  const preference = currentGraphicsMode();
+  if (preference === 'mobile') return profileForTier('balanced');
+  if (preference === 'pc') return profileForTier('cinematic');
+  if (typeof window === 'undefined' || typeof navigator === 'undefined') return profileForTier('cinematic');
+
   const extendedNavigator = navigator as Navigator & { deviceMemory?: number };
   return selectVisualProfile({
     coarsePointer: window.matchMedia?.('(pointer: coarse)').matches ?? false,
@@ -97,4 +133,11 @@ export function addCinematicFrame(scene: Phaser.Scene, accent = 0xf4c75d): void 
     frame.fillCircle(x, y, 3);
   }
 }
-import type Phaser from 'phaser';
+
+function profileForTier(tier: VisualTier): VisualProfile {
+  return { tier, ...VISUAL_PROFILES[tier] };
+}
+
+function isGraphicsMode(value: string | null): value is GraphicsMode {
+  return value === 'auto' || value === 'mobile' || value === 'pc';
+}
