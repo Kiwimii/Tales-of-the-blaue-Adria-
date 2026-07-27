@@ -246,20 +246,28 @@ export function isCombatMoveId(value: unknown): value is CombatMoveId {
   return typeof value === 'string' && value in COMBAT_MOVES;
 }
 
-export function normalizeLearnedAttacks(value: unknown): CombatMoveId[] {
-  const learned = Array.isArray(value) ? value.filter(isCombatMoveId) : [];
-  return [...new Set<CombatMoveId>([STARTER_ATTACK, ...learned])];
+export function learnedAttackFlag(id: CombatMoveId): string {
+  return `attack-learned-${id}`;
 }
 
-export function normalizeEquippedAttacks(value: unknown, learnedValue: unknown): CombatMoveId[] {
-  const learned = normalizeLearnedAttacks(learnedValue);
-  const requested = Array.isArray(value) ? value.filter(isCombatMoveId) : [];
-  const equipped = [...new Set(requested)].filter((id) => learned.includes(id)).slice(0, MAX_EQUIPPED_ATTACKS);
-  return equipped.length ? equipped : [STARTER_ATTACK];
+export function equippedAttackFlag(id: CombatMoveId): string {
+  return `attack-equipped-${id}`;
 }
 
-export function equippedCombatMoves(snapshot: Pick<GameSnapshot, 'learnedAttacks' | 'equippedAttacks'>): CombatMoveDefinition[] {
-  return normalizeEquippedAttacks(snapshot.equippedAttacks, snapshot.learnedAttacks).map((id) => COMBAT_MOVES[id]);
+export function learnedAttackIds(snapshot: Pick<GameSnapshot, 'flags'>): CombatMoveId[] {
+  return combatMoveList()
+    .map((move) => move.id)
+    .filter((id) => id === STARTER_ATTACK || Boolean(snapshot.flags[learnedAttackFlag(id)]));
+}
+
+export function equippedAttackIds(snapshot: Pick<GameSnapshot, 'flags'>): CombatMoveId[] {
+  const learned = learnedAttackIds(snapshot);
+  const equipped = learned.filter((id) => Boolean(snapshot.flags[equippedAttackFlag(id)]));
+  return (equipped.length ? equipped : [STARTER_ATTACK]).slice(0, MAX_EQUIPPED_ATTACKS);
+}
+
+export function equippedCombatMoves(snapshot: Pick<GameSnapshot, 'flags'>): CombatMoveDefinition[] {
+  return equippedAttackIds(snapshot).map((id) => COMBAT_MOVES[id]);
 }
 
 export function attackLearnedFromConversation(
