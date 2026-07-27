@@ -1,14 +1,27 @@
 import { arrivalObjective, arrivalStage, arrivalTarget } from './arrivalQuest';
-import { FRIEND_IDS, QUESTS } from './content';
-import type { GameSnapshot, QuestProgress } from './types';
-import { WORLD_ACTIVITY_CATALOG } from './worldActivityCatalog';
 import { NPC_PLACEMENTS, ENTRANCE_PLACEMENTS } from './aerialCampgroundPlan';
+import { FRIEND_IDS, QUESTS } from './content';
+import {
+  TRACKED_QUEST_CHANGED_EVENT,
+  TRACKED_QUEST_STORAGE_KEY,
+  activeQuestIds,
+  currentTrackedQuestId,
+  setTrackedQuestId,
+  type QuestTrackingUiState,
+} from './questTrackingUi';
+import type { GameSnapshot } from './types';
+import { WORLD_ACTIVITY_CATALOG } from './worldActivityCatalog';
 import { regionAt, type RegionId } from './worldV2';
 
-export const TRACKED_QUEST_STORAGE_KEY = 'tales-adria-tracked-quest';
-export const TRACKED_QUEST_CHANGED_EVENT = 'tales:tracked-quest-changed';
+export {
+  TRACKED_QUEST_CHANGED_EVENT,
+  TRACKED_QUEST_STORAGE_KEY,
+  activeQuestIds,
+  currentTrackedQuestId,
+  setTrackedQuestId,
+};
 
-export type QuestTrackingState = Pick<GameSnapshot, 'quests' | 'activeQuest' | 'flags' | 'needs' | 'inventory'>;
+export type QuestTrackingState = QuestTrackingUiState & Pick<GameSnapshot, 'inventory'>;
 
 export interface QuestTrackingTarget {
   questId: string;
@@ -39,28 +52,6 @@ const ARRIVAL_LABELS = [
   'Erstes Bier',
   'Taucherplatz',
 ] as const;
-
-export function activeQuestIds(state: QuestTrackingState): string[] {
-  return Object.keys(QUESTS).filter((id) => state.quests[id]?.status === 'active');
-}
-
-export function currentTrackedQuestId(state: QuestTrackingState): string | null {
-  const active = activeQuestIds(state);
-  if (!active.length) return null;
-  const stored = readStoredQuestId();
-  if (stored && active.includes(stored)) return stored;
-  if (state.activeQuest && active.includes(state.activeQuest)) return state.activeQuest;
-  return active[0];
-}
-
-export function setTrackedQuestId(id: string, state: QuestTrackingState): boolean {
-  if (state.quests[id]?.status !== 'active') return false;
-  if (typeof window !== 'undefined') {
-    window.localStorage.setItem(TRACKED_QUEST_STORAGE_KEY, id);
-    window.dispatchEvent(new CustomEvent(TRACKED_QUEST_CHANGED_EVENT, { detail: { id } }));
-  }
-  return true;
-}
 
 export function questTrackingTarget(
   state: QuestTrackingState,
@@ -139,14 +130,4 @@ function displayName(id: string): string {
     masl: 'Masl', schubert: 'Schubert', schima: 'Schima',
   };
   return names[id] ?? id;
-}
-
-function readStoredQuestId(): string | null {
-  if (typeof window === 'undefined') return null;
-  const value = window.localStorage.getItem(TRACKED_QUEST_STORAGE_KEY);
-  return value && QUESTS[value] ? value : null;
-}
-
-export function normalizeQuestProgress(value: Record<string, QuestProgress>): Record<string, QuestProgress> {
-  return value;
 }
