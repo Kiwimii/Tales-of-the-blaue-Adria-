@@ -2,13 +2,15 @@ import Phaser from 'phaser';
 import { ITEMS, RELATIONSHIP_CHARACTERS } from '../content';
 import { FRIEND_PROFILES, type FriendId } from '../friendRoster';
 import {
+  CONVERSATION_TOPICS,
   ROMANCE_PROFILES,
   canRecruit,
-  conversationDelta,
+  conversationTopicOutcome,
   dynamicOpening,
   flirtChance,
   flirtReaction,
   giftReaction,
+  type ConversationTopicId,
   type RomanceId,
 } from '../socialSystem';
 import { gameStore } from '../state/GameStore';
@@ -47,7 +49,7 @@ export class SocialScene extends Phaser.Scene {
     background.fillStyle(0x07120f, 0.42).fillRoundedRect(56, 60, 848, 510, 34);
     background.lineStyle(3, Phaser.Display.Color.HexStringToColor(character.color).color, 0.46).strokeRoundedRect(56, 60, 848, 510, 34);
 
-    this.add.text(80, 30, 'SOZIALES SYSTEM · ZUSTAND, BEZIEHUNG UND PERSÖNLICHE PRÄFERENZEN', {
+    this.add.text(80, 30, 'GESPRÄCH · THEMEN, BEZIEHUNG, TEAM UND FLIRT', {
       fontFamily: 'Arial Black, system-ui', fontSize: '11px', color: '#66dac6', letterSpacing: 2,
     });
     this.add.circle(220, 235, 128, 0x0b1918, 0.85).setStrokeStyle(5, Phaser.Display.Color.HexStringToColor(character.color).color, 0.58);
@@ -87,29 +89,49 @@ export class SocialScene extends Phaser.Scene {
     const friend = FRIEND_PROFILES[this.characterId as FriendId];
     const buttons: Phaser.GameObjects.Text[] = [];
 
-    buttons.push(this.button(430, 315, 'Gespräch vertiefen', () => this.talk()));
+    buttons.push(this.button(440, 315, 'Gesprächsthema wählen', () => this.showConversationTopics(), false, false, 220));
     if (romance) {
       const chance = flirtChance(this.characterId, this.snapshot);
-      buttons.push(this.button(650, 315, `Flirten · ${chance}%`, () => this.flirt()));
-      buttons.push(this.button(430, 375, 'Geschenk auswählen', () => this.showGifts()));
+      buttons.push(this.button(690, 315, `Flirten · ${chance}%`, () => this.flirt(), false, false, 220));
     }
+    buttons.push(this.button(440, 375, 'Geschenk auswählen', () => this.showGifts(), false, false, 220));
     if (friend) {
       const active = this.snapshot.team.some((member) => member.id === this.characterId);
       const label = active ? 'Aus Aktivteam nehmen' : canRecruit(this.characterId, this.snapshot) ? 'Ins Aktivteam holen' : `Team ab Beziehung ${friend.recruitmentThreshold}`;
-      buttons.push(this.button(650, 375, label, () => this.toggleTeam(), !active && !canRecruit(this.characterId, this.snapshot)));
+      buttons.push(this.button(690, 375, label, () => this.toggleTeam(), !active && !canRecruit(this.characterId, this.snapshot), false, 220));
       if (this.characterId === 'masl' && (this.snapshot.relationships.masl ?? 0) >= 8) {
-        buttons.push(this.button(540, 435, 'Minispiel: Komm ans Loch', () => this.startMaslGame()));
+        buttons.push(this.button(565, 435, 'Minispiel: Komm ans Loch', () => this.startMaslGame(), false, false, 280));
       }
     }
-    buttons.push(this.button(650, 515, 'Gespräch beenden', () => this.returnToWorld(), false, true));
+    buttons.push(this.button(690, 515, 'Gespräch beenden', () => this.returnToWorld(), false, true, 220));
     this.optionContainer.add(buttons);
   }
 
-  private talk(): void {
-    const outcome = conversationDelta(this.characterId, this.snapshot);
-    adjustRelationship(gameStore, this.characterId, outcome.relationship, `${this.characterId}: Gespräch ${outcome.relationship >= 0 ? 'vertieft' : 'misslungen'}.`);
-    gameStore.advanceMinutes(6);
-    this.reload(outcome.text);
+  private showConversationTopics(): void {
+    this.optionContainer.removeAll(true);
+    const buttons = CONVERSATION_TOPICS.map((topic, index) => this.button(
+      625,
+      300 + index * 68,
+      `${topic.label}\n${topic.hint}`,
+      () => this.talk(topic.id),
+      false,
+      false,
+      430,
+      48,
+    ));
+    buttons.push(this.button(690, 515, 'Zurück', () => this.buildOptions(), false, true, 220));
+    this.optionContainer.add(buttons);
+  }
+
+  private talk(topicId: ConversationTopicId): void {
+    const outcome = conversationTopicOutcome(this.characterId, topicId, this.snapshot);
+    const repeatFlag = `conversation-${this.characterId}-${topicId}-day-${this.snapshot.day}`;
+    const repeated = Boolean(this.snapshot.flags[repeatFlag]);
+    const relationship = repeated ? Math.max(0, Math.min(1, outcome.relationship)) : outcome.relationship;
+    adjustRelationship(gameStore, this.characterId, relationship, `${this.characterId}: Gespräch über ${topicId} ${relationship >= 0 ? 'vertieft' : 'misslungen'}.`);
+    if (!repeated) gameStore.setFlag(repeatFlag);
+    gameStore.advanceMinutes(repeated ? 3 : outcome.minutes);
+    this.reload(`${outcome.text}${repeated ? '\n\nIhr habt dieses Thema heute schon ausführlich besprochen. Die Beziehung wächst deshalb kaum noch.' : ''}`);
   }
 
   private flirt(): void {
@@ -137,11 +159,11 @@ export class SocialScene extends Phaser.Scene {
     }
     const buttons = available.slice(0, 6).map((itemId, index) => {
       const item = ITEMS[itemId];
-      const x = index % 2 ? 650 : 430;
+      const x = index % 2 ? 690 : 440;
       const y = 315 + Math.floor(index / 2) * 58;
-      return this.button(x, y, `${item.icon} ${item.label} ×${this.snapshot.inventory[itemId]}`, () => this.giveGift(itemId));
+      return this.button(x, y, `${item.icon} ${item.label} ×${this.snapshot.inventory[itemId]}`, () => this.giveGift(itemId), false, false, 220);
     });
-    buttons.push(this.button(650, 515, 'Zurück', () => this.buildOptions(), false, true));
+    buttons.push(this.button(690, 515, 'Zurück', () => this.buildOptions(), false, true, 220));
     this.optionContainer.add(buttons);
   }
 
@@ -180,10 +202,19 @@ export class SocialScene extends Phaser.Scene {
     this.teamLabel.setText(`Aktives Team ${this.snapshot.team.length}/3\n${this.snapshot.team.map((member) => member.name).join(' · ') || 'Du startest und kämpfst allein.'}`);
   }
 
-  private button(x: number, y: number, label: string, action: () => void, disabled = false, danger = false): Phaser.GameObjects.Text {
+  private button(
+    x: number,
+    y: number,
+    label: string,
+    action: () => void,
+    disabled = false,
+    danger = false,
+    width = 200,
+    paddingY = 10,
+  ): Phaser.GameObjects.Text {
     const button = this.add.text(x, y, label, {
       fontFamily: 'system-ui', fontSize: '14px', fontStyle: 'bold', color: disabled ? '#7f8d86' : '#173027',
-      backgroundColor: disabled ? '#303a36' : danger ? '#ef8b72' : '#f4d47b', padding: { x: 13, y: 10 }, align: 'center', fixedWidth: 200,
+      backgroundColor: disabled ? '#303a36' : danger ? '#ef8b72' : '#f4d47b', padding: { x: 13, y: paddingY }, align: 'center', fixedWidth: width,
     }).setOrigin(0.5);
     if (!disabled) {
       button.setInteractive({ useHandCursor: true });
