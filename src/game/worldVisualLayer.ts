@@ -2,6 +2,7 @@ import type Phaser from 'phaser';
 import { applyCampgroundBlueprint } from './campgroundBlueprint';
 import { addAerialBoundaryObstacles, drawCampgroundBlueprintLayer } from './campgroundBlueprintLayer';
 import { drawCanonicalCampgroundDetails } from './campgroundDetailLayer';
+import { drawVisibleCampgroundFeatures } from './campgroundFeatureLayer';
 import { drawInteractionAccessPaths } from './interactionAccessPlan';
 import type { VisualProfile } from './visuals';
 import { applyRealisticWorldLayout } from './worldRealism';
@@ -22,6 +23,7 @@ export function buildExpandedWorldVisuals(scene: Phaser.Scene, profile: VisualPr
   drawCampgroundBlueprintLayer(scene, profile);
   drawInteractionAccessPaths(scene);
   drawCanonicalCampgroundDetails(scene, profile);
+  drawVisibleCampgroundFeatures(scene, profile);
   return visual;
 }
 
