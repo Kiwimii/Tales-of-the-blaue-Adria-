@@ -38,6 +38,8 @@ assert(stylesheet.includes('.encounter-option-chance'), 'Sprint 85 encounter ris
 assert(stylesheet.includes('.mobile-interaction-picker'), 'Sprint 86 interaction picker is missing from the production CSS.');
 assert(stylesheet.includes('.graphics-options-panel'), 'Sprint 87 graphics options are missing from the production CSS.');
 assert(stylesheet.includes('.graphics-option-active'), 'Sprint 87 active graphics profile state is missing from the production CSS.');
+assert(stylesheet.includes('.quest-tracking-panel'), 'Sprint 88 selectable quest list is missing from the production CSS.');
+assert(stylesheet.includes('.quest-hud-destination'), 'Sprint 88 tracked destination feedback is missing from the production CSS.');
 
 const gameBundle = javascript
   .map((file) => readFileSync(resolve(output, 'assets', file), 'utf8'))
@@ -47,9 +49,13 @@ assert(gameBundle.includes('tales:cycle-interaction'), 'Sprint 86 interaction cy
 assert(gameBundle.includes('tales-adria-graphics-mode'), 'Sprint 87 persisted graphics selection is missing from the production bundle.');
 assert(gameBundle.includes('tent-front-walk'), 'Sprint 87 tent access path is missing from the production game bundle.');
 assert(gameBundle.includes('Mobil optimiert') && gameBundle.includes('PC optimiert'), 'Sprint 87 graphics profile labels are missing from the production bundle.');
+assert(gameBundle.includes('tales:tracked-quest-changed'), 'Sprint 88 tracked quest event is missing from the production bundle.');
+assert(gameBundle.includes('Kofferraum') && gameBundle.includes('Stromkasten'), 'Sprint 88 dynamic arrival navigation targets are missing from the game bundle.');
+assert(gameBundle.includes('BLAUE ADRIA') && gameBundle.includes('FESTWIESE'), 'Sprint 88 visible campground feature groups are missing from the game bundle.');
+assert(gameBundle.includes('Nächstes Ankunftsziel') && gameBundle.includes('Nächste fehlende Person'), 'Sprint 88 quest selection labels are missing from the UI bundle.');
 
 assert(manifest.start_url === './' && manifest.scope === './', 'Next PWA scope is invalid.');
-assert(worker.includes('tales-adria-next-s87'), 'Next service worker cache version is stale.');
+assert(worker.includes('tales-adria-next-s88'), 'Next service worker cache version is stale.');
 assert(worker.includes("destination === 'script'"), 'Game bundles must use the network-first mobile update path.');
 
 console.log(`Next validation passed: ${linkedAssets.length} linked files, ${Math.round(initial.bytes / 1024)} kB initial UI, lazy Phaser chunk.`);
