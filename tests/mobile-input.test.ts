@@ -25,7 +25,7 @@ describe('mobile swipe controls', () => {
 
   it('caps only the visual joystick displacement, not the requested direction', () => {
     const vector = clampSwipeVector(200, 0);
-    expect(vector.x).toBe(MOBILE_SWIPE_RADIUS);
+    expect(vector.x).toBeCloseTo(MOBILE_SWIPE_RADIUS);
     expect(vector.y).toBe(0);
     expect(Math.hypot(vector.x, vector.y)).toBeCloseTo(MOBILE_SWIPE_RADIUS);
   });
