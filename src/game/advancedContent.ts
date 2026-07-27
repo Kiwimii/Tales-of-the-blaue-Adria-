@@ -7,11 +7,11 @@ let installed = false;
 
 export const TENT_HEDGE_SEGMENTS: ExpandedWorldObject[] = [
   {
-    id: 'tent-hedge-west', kind: 'fence', regionId: 'central', x: 245, y: 1245, width: 385, height: 24,
+    id: 'tent-hedge-west', kind: 'fence', regionId: 'central', x: 245, y: 1275, width: 385, height: 24,
     label: 'HECKE', color: 0x315c3f, solid: true,
   },
   {
-    id: 'tent-hedge-east', kind: 'fence', regionId: 'central', x: 1010, y: 1245, width: 280, height: 24,
+    id: 'tent-hedge-east', kind: 'fence', regionId: 'central', x: 1010, y: 1275, width: 280, height: 24,
     color: 0x315c3f, solid: true,
   },
 ];
