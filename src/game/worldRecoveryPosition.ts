@@ -9,18 +9,18 @@ export function recoveryPointOutsideNpcCluster(x: number, y: number): { x: numbe
   center.y /= nearby.length;
   let dx = x - center.x;
   let dy = y - center.y;
-  const length = Math.hypot(dx, dy);
+  let length = Math.hypot(dx, dy);
   if (length < 4) {
     dx = -1;
     dy = 0.45;
-  } else {
-    dx /= length;
-    dy /= length;
+    length = Math.hypot(dx, dy);
   }
+  dx /= length;
+  dy /= length;
 
   return {
-    x: clamp(center.x + dx * 118, 45, EXPANDED_WORLD_WIDTH - 45),
-    y: clamp(center.y + dy * 118, 45, EXPANDED_WORLD_HEIGHT - 45),
+    x: clamp(center.x + dx * 150, 45, EXPANDED_WORLD_WIDTH - 45),
+    y: clamp(center.y + dy * 150, 45, EXPANDED_WORLD_HEIGHT - 45),
   };
 }
 
