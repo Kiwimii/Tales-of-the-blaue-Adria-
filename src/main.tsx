@@ -2,6 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import OptimizedApp from './OptimizedApp';
 import './styles.css';
+import './mobileFocusOverrides.css';
 
 const root = document.getElementById('root');
 
