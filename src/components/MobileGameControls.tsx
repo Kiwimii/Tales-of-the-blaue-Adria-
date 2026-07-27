@@ -1,5 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
-import type { PointerEvent as ReactPointerEvent, ReactElement } from 'react';
+import type {
+  MouseEvent as ReactMouseEvent,
+  PointerEvent as ReactPointerEvent,
+  ReactElement,
+} from 'react';
 import { sendAction, sendDirection, sendReturnToWorld } from '../game/events';
 import { clampSwipeVector, directionsForSwipe } from '../game/mobileInput';
 import { isActionTap } from '../game/touchInteraction';
@@ -18,14 +22,12 @@ export function MobileGameControls(): ReactElement {
   const actionPointerId = useRef<number | null>(null);
   const actionOrigin = useRef<Point | null>(null);
   const scheduledAction = useRef<number | null>(null);
-  const actionFeedbackTimer = useRef<number | null>(null);
   const [joystick, setJoystick] = useState<{ origin: Point; offset: Point } | null>(null);
   const [actionActive, setActionActive] = useState(false);
 
   useEffect(() => () => {
     releaseDirections(activeDirections.current);
     if (scheduledAction.current !== null) window.clearTimeout(scheduledAction.current);
-    if (actionFeedbackTimer.current !== null) window.clearTimeout(actionFeedbackTimer.current);
   }, []);
 
   const updateDirections = (x: number, y: number): void => {
@@ -113,7 +115,7 @@ export function MobileGameControls(): ReactElement {
     setActionActive(false);
   };
 
-  const clickGuard = (event: React.MouseEvent<HTMLButtonElement>): void => {
+  const clickGuard = (event: ReactMouseEvent<HTMLButtonElement>): void => {
     event.preventDefault();
     event.stopPropagation();
   };
