@@ -10,6 +10,7 @@ import {
   type PlanPoint,
   type Placement,
 } from './aerialCampgroundPlan';
+import { INTERACTION_ACCESS_PATHS } from './interactionAccessPlan';
 import { WORLD_ACTIVITY_CATALOG, type WorldActivityDefinition } from './worldActivityCatalog';
 import { regionAt, type RegionId } from './worldV2';
 
@@ -105,6 +106,9 @@ export function nearestRoadDistance(point: PlanPoint): number {
     const from = AERIAL_NODES[road.from];
     const to = AERIAL_NODES[road.to];
     best = Math.min(best, Math.max(0, distanceToSegment(point, from, to) - road.width / 2));
+  }
+  for (const path of INTERACTION_ACCESS_PATHS) {
+    best = Math.min(best, Math.max(0, distanceToSegment(point, path.from, path.to) - path.width / 2));
   }
   return best;
 }
