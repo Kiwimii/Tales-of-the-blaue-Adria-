@@ -12,7 +12,7 @@ import { FlipCupScene } from './scenes/FlipCupScene';
 import { HedgePeeScene } from './scenes/HedgePeeScene';
 import { InteriorScene } from './scenes/InteriorScene';
 import { MaslHoleScene } from './scenes/MaslHoleScene';
-import { QuestNavigationWorldScene } from './scenes/QuestNavigationWorldScene';
+import { PixelArtWorldScene } from './scenes/PixelArtWorldScene';
 import { ReservationPuzzleScene } from './scenes/ReservationPuzzleScene';
 import { SocialScene } from './scenes/SocialScene';
 import { gameStore } from './state/GameStore';
@@ -46,7 +46,7 @@ export function createGame(parent: HTMLElement): Phaser.Game {
     },
     scene: [
       BootScene,
-      QuestNavigationWorldScene,
+      PixelArtWorldScene,
       ReservationPuzzleScene,
       AdvancedEntryDebateScene,
       InteriorScene,
