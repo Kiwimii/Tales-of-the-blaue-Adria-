@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#132b24" />
+    <meta name="description" content="Tales of the Blaue Adria – LPC Charakter- und Stiltest." />
+    <title>Tales of the Blaue Adria · LPC Charaktertest</title>
+  </head>
+  <body>
+    <main class="lpc-shell">
+      <header class="topbar">
+        <div class="brand">
+          <span class="build-label">LPC CHARACTER TEST</span>
+          <strong>Tales of the Blaue Adria</strong>
+        </div>
+        <nav>
+          <a href="../next/">Aktueller Build</a>
+          <a href="../redesign/">Erster Redesign-Test</a>
+          <button id="reset-test" type="button">Teststand löschen</button>
+        </nav>
+      </header>
+
+      <section class="comparison-layout">
+        <aside class="side-panel roster-panel">
+          <div class="panel-heading">
+            <span>FIGURENVERGLEICH</span>
+            <strong id="progress-text">0 / 6</strong>
+          </div>
+          <p id="objective-text">Sprich mit allen sechs Figuren.</p>
+          <div id="character-roster" class="character-roster"></div>
+          <div class="controls-note">
+            <kbd>WASD</kbd><span>Bewegen</span>
+            <kbd>E</kbd><span>Ansprechen</span>
+            <kbd>Tab</kbd><span>Figuren durchschalten</span>
+          </div>
+        </aside>
+
+        <section class="game-column">
+          <div class="game-frame">
+            <div id="lpc-game" class="game-mount" tabindex="0" aria-label="Spielbarer LPC Charaktertest"></div>
+            <div id="interaction-prompt" class="interaction-prompt" hidden>
+              <kbd>E</kbd><span id="interaction-name">Figur ansehen</span>
+            </div>
+
+            <section id="intro" class="intro-card">
+              <span class="build-label">NEUE CHARAKTERBASIS</span>
+              <h1>Mehr Persönlichkeit statt Fertigsprite</h1>
+              <p>Der echte LPC-Bewegungsaufbau dient nur als anatomische Basis. Kleidung, Haare, Proportionen und Rollenmerkmale wurden für jede Figur separat gestaltet.</p>
+              <div class="feature-row">
+                <span>6 Silhouetten</span><span>6 Outfits</span><span>6 Frisuren</span><span>LPC-Laufanimation</span>
+              </div>
+              <button id="start-test" type="button">Zeltkreis betreten</button>
+            </section>
+
+            <section id="dialog" class="dialog-layer" hidden role="dialog" aria-modal="true">
+              <div class="dialog-box">
+                <div id="dialog-portrait" class="dialog-portrait">AJ</div>
+                <div class="dialog-copy">
+                  <span id="dialog-role">ROLLE</span>
+                  <strong id="dialog-name">Figur</strong>
+                  <p id="dialog-body"></p>
+                  <button id="dialog-close" type="button">Weiter</button>
+                </div>
+              </div>
+            </section>
+
+            <div class="mobile-controls" aria-label="Mobile Steuerung">
+              <div class="dpad">
+                <button type="button" data-direction="up" aria-label="Nach oben">▲</button>
+                <button type="button" data-direction="left" aria-label="Nach links">◀</button>
+                <button type="button" data-direction="down" aria-label="Nach unten">▼</button>
+                <button type="button" data-direction="right" aria-label="Nach rechts">▶</button>
+              </div>
+              <button id="mobile-action" class="action-button" type="button">AKTION</button>
+            </div>
+          </div>
+        </section>
+
+        <aside class="side-panel profile-panel">
+          <span class="profile-kicker">DESIGNPROFIL</span>
+          <strong id="profile-name">André</strong>
+          <small id="profile-role">ORGANISATOR</small>
+          <p id="profile-description"></p>
+          <div id="profile-traits" class="trait-list"></div>
+          <div class="design-principle">
+            <strong>Prüffrage</strong>
+            <p>Ist die Figur schon ohne Namensschild eindeutig erkennbar?</p>
+          </div>
+          <details>
+            <summary>Lizenzen und Herkunft</summary>
+            <p>LPC-Körper, Kopf und Gesicht stammen aus dem Universal-LPC-Generator. Eigene Kleidung, Haare und Accessoires dieses Tests werden separat im Projekt dokumentiert.</p>
+            <a href="https://github.com/LiberatedPixelCup/Universal-LPC-Spritesheet-Character-Generator" target="_blank" rel="noreferrer">Universal LPC öffnen</a>
+          </details>
+        </aside>
+      </section>
+    </main>
+
+    <script type="module" src="../src/lpc-test/bootstrap.ts"></script>
+  </body>
+</html>

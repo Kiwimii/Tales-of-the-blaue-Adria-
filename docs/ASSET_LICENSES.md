@@ -25,13 +25,34 @@ Der bestehende Spielbuild verwendet kuratierte Ausschnitte für Bäume, Büsche,
 
 ## Verwendung im separaten `/redesign/`-Build
 
-Der eigenständige Redesign-Testbuild verwendet die Assetfamilie als visuelle Grundlage für:
+Der eigenständige Redesign-Testbuild verwendet die Assetfamilie als visuelle Grundlage für Gebäude, Vegetation, Requisiten sowie eine vollständig neu komponierte Karte. Dieser Build bleibt zum direkten Vergleich bestehen, wird aber nicht als bevorzugte Figurenrichtung weitergeführt.
 
-- Gebäude, Vegetation und Requisiten
-- Spieler- und NPC-Sprites
-- einheitliche Pixelgröße, Filterung und Farbwelt
-- eine komplett neu komponierte Karte mit Rezeption, Zeltkreis, Servicehof, Festwiese und Strand
+## Universal LPC – separater `/lpc-test/`-Build
 
-Boden-, Wasser-, Weg-, Zelt-, Lagerfeuer- und Oberflächentexturen wurden ergänzend speziell für den Redesign-Build erstellt, damit die Campingwelt thematisch passt und nicht wie eine unveränderte Fantasy-Demokarte wirkt.
+- Projekt: Universal LPC Spritesheet Character Generator
+- Hauptquelle: https://github.com/LiberatedPixelCup/Universal-LPC-Spritesheet-Character-Generator
+- Fixierte Quellrevision: `0f898bb675a1abe16ce430e82e3bf9daed278690`
 
-Alle externen URLs sind revisionsgenau fixiert. Spätere Änderungen im fremden Repository können den veröffentlichten Spielbuild daher nicht unbemerkt verändern.
+Verwendete LPC-Layer:
+
+- `spritesheets/body/bodies/male/walk.png`
+- `spritesheets/head/heads/human/male/walk.png`
+- `spritesheets/head/faces/male/neutral/walk.png`
+
+Laufzeitquellen:
+
+- https://raw.githubusercontent.com/LiberatedPixelCup/Universal-LPC-Spritesheet-Character-Generator/0f898bb675a1abe16ce430e82e3bf9daed278690/spritesheets/body/bodies/male/walk.png
+- https://raw.githubusercontent.com/LiberatedPixelCup/Universal-LPC-Spritesheet-Character-Generator/0f898bb675a1abe16ce430e82e3bf9daed278690/spritesheets/head/heads/human/male/walk.png
+- https://raw.githubusercontent.com/LiberatedPixelCup/Universal-LPC-Spritesheet-Character-Generator/0f898bb675a1abe16ce430e82e3bf9daed278690/spritesheets/head/faces/male/neutral/walk.png
+
+Urheber und Lizenzangaben der verwendeten Basislayer:
+
+- Körper: bluecarrot16, JaidynReiman, Benjamin K. Smith, Evert, Eliza Wyatt, TheraHedwig, MuffinElZangano, Durrani, Johannes Sjölund und Stephen Challener. Angeboten unter OGA-BY 3.0, CC-BY-SA 3.0 und GPL 3.0.
+- Kopf: bluecarrot16, Benjamin K. Smith und Stephen Challener. Angeboten unter OGA-BY 3.0, CC-BY-SA 3.0 und GPL 3.0.
+- Gesicht: JaidynReiman, Eliza Wyatt und Stephen Challener. Angeboten unter OGA-BY 3.0.
+
+Für diesen Test werden die LPC-Dateien unverändert als anatomische und animierte Grundebenen geladen. Kleidung, Frisuren, Accessoires, Proportionen und Rollenmerkmale werden im Spielcode separat darüber gezeichnet. Diese neuen grafischen Overlays dürfen unter CC-BY-SA 4.0 weiterverwendet und verändert werden, solange das Projekt und die jeweiligen Urheber genannt werden.
+
+Der `/lpc-test/`-Build ist bewusst ein Charaktervergleich und kein vollständiger Inhaltsersatz. Er prüft sechs individuelle moderne Figuren, bevor weitere Spielwelten oder Mechaniken auf diese Basis migriert werden.
+
+Alle externen URLs sind revisionsgenau fixiert. Spätere Änderungen in fremden Repositories können die veröffentlichten Spielbuilds daher nicht unbemerkt verändern.
