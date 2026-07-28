@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import {
   ARRIVAL_CAR_POSITION,
   NPC_PLACEMENTS,
+  OBJECT_PLACEMENTS,
   TAUCHER_CAR_POSITION,
   TAUCHER_PITCH_BOUNDS,
 } from '../aerialCampgroundPlan';
@@ -11,6 +12,7 @@ import { BLUEPRINT_NODES } from '../campgroundBlueprint';
 import { RELATIONSHIP_CHARACTERS } from '../content';
 import { gameStore } from '../state/GameStore';
 import type { GameSnapshot } from '../types';
+import { WORLD_ACTIVITY_CATALOG } from '../worldActivityCatalog';
 import type { RegionId } from '../worldV2';
 import { worldDepth } from '../worldRealism';
 import { QuestReliabilityWorldScene } from './QuestReliabilityWorldScene';
@@ -81,8 +83,9 @@ export class SocialInteractionWorldScene extends QuestReliabilityWorldScene {
   private installAerialRuntimeAnchors(): void {
     this.alignArrivalVisuals();
     this.rebuildEntranceGate();
-    this.moveActivity('battle', 1530, 820, 'central', 'CAMPING-DUELL');
-    this.moveActivity('flunkyball', 540, 930, 'beach', 'FLUNKYBALL');
+    for (const activity of WORLD_ACTIVITY_CATALOG) {
+      this.moveActivity(activity.id, activity.x, activity.y, activity.regionId, activity.label);
+    }
     this.pinAuthorityAtReception();
   }
 
@@ -91,27 +94,37 @@ export class SocialInteractionWorldScene extends QuestReliabilityWorldScene {
     internals.initialCar?.setPosition(ARRIVAL_CAR_POSITION.x, ARRIVAL_CAR_POSITION.y);
     internals.pitchCar?.setPosition(TAUCHER_CAR_POSITION.x, TAUCHER_CAR_POSITION.y);
 
-    Object.assign(TAUCHER_TENT, { x: 930, y: 1040, width: 155, height: 120 });
+    const homeTent = OBJECT_PLACEMENTS['home-tent'];
+    Object.assign(TAUCHER_TENT, {
+      x: homeTent.x,
+      y: homeTent.y,
+      width: homeTent.width ?? 145,
+      height: homeTent.height ?? 120,
+    });
     internals.taucherTent?.setPosition(TAUCHER_TENT.x, TAUCHER_TENT.y);
 
     moveStaticObstacle(internals.initialCarObstacle, ARRIVAL_CAR_POSITION.x, ARRIVAL_CAR_POSITION.y);
     moveStaticObstacle(internals.pitchCarObstacle, TAUCHER_CAR_POSITION.x, TAUCHER_CAR_POSITION.y);
-    moveStaticObstacle(internals.tentObstacle, TAUCHER_TENT.x + 78, TAUCHER_TENT.y + 94);
+    moveStaticObstacle(internals.tentObstacle, TAUCHER_TENT.x + (TAUCHER_TENT.width ?? 145) / 2, TAUCHER_TENT.y + (TAUCHER_TENT.height ?? 120) * 0.78);
 
     const oldPitchLabel = this.children.list.find((child): child is Phaser.GameObjects.Text => (
       child instanceof Phaser.GameObjects.Text && child.text === 'TAUCHERPLATZ · T-7'
     ));
     if (oldPitchLabel) {
       const labelIndex = this.children.list.indexOf(oldPitchLabel);
-      const boundary = this.children.list[labelIndex - 1];
-      if (boundary instanceof Phaser.GameObjects.Graphics) {
-        boundary.setPosition(TAUCHER_PITCH_BOUNDS.x - 970, TAUCHER_PITCH_BOUNDS.y - 940);
-      }
-      oldPitchLabel.setPosition(
-        TAUCHER_PITCH_BOUNDS.x + TAUCHER_PITCH_BOUNDS.width / 2,
-        TAUCHER_PITCH_BOUNDS.y + 15,
-      );
+      const oldBoundary = this.children.list[labelIndex - 1];
+      if (oldBoundary instanceof Phaser.GameObjects.Graphics) oldBoundary.destroy();
+      oldPitchLabel.destroy();
     }
+
+    const boundary = this.add.graphics().setDepth(worldDepth(TAUCHER_PITCH_BOUNDS.y + TAUCHER_PITCH_BOUNDS.height) - 1);
+    boundary.fillStyle(0x8fb56d, 0.08)
+      .fillRoundedRect(TAUCHER_PITCH_BOUNDS.x, TAUCHER_PITCH_BOUNDS.y, TAUCHER_PITCH_BOUNDS.width, TAUCHER_PITCH_BOUNDS.height, 24)
+      .lineStyle(4, 0xf4d47b, 0.38)
+      .strokeRoundedRect(TAUCHER_PITCH_BOUNDS.x, TAUCHER_PITCH_BOUNDS.y, TAUCHER_PITCH_BOUNDS.width, TAUCHER_PITCH_BOUNDS.height, 24);
+    this.add.text(TAUCHER_PITCH_BOUNDS.x + 18, TAUCHER_PITCH_BOUNDS.y + 14, 'TAUCHERPLATZ · ZELTKREIS', {
+      fontFamily: 'Arial Black, system-ui', fontSize: '12px', color: '#fff0ba', stroke: '#173027', strokeThickness: 4,
+    }).setDepth(worldDepth(TAUCHER_PITCH_BOUNDS.y + 24));
   }
 
   private rebuildEntranceGate(): void {

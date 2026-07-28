@@ -1,18 +1,21 @@
+import { applySprint89CampPlan } from './sprint89CampPlan';
 import type { GameSnapshot } from './types';
 
+applySprint89CampPlan();
+
 export const ARRIVAL_POSITIONS = {
-  trunk: { x: 650, y: 1590 },
-  reservationBoard: { x: 650, y: 1460 },
-  gundula: { x: 690, y: 1380 },
-  uli: { x: 980, y: 1380 },
-  gateDebate: { x: 835, y: 1325 },
-  taucherplatz: { x: 1125, y: 1015 },
-  powerBox: { x: 1280, y: 970 },
-  drinks: { x: 1020, y: 1065 },
-  tents: { x: 925, y: 1095 },
-  cable: { x: 1220, y: 1065 },
-  firstBeer: { x: 1010, y: 1140 },
-  homeDoor: { x: 942, y: 1250 },
+  trunk: { x: 900, y: 1600 },
+  reservationBoard: { x: 1280, y: 1360 },
+  gundula: { x: 1180, y: 1360 },
+  uli: { x: 1020, y: 1350 },
+  gateDebate: { x: 900, y: 1400 },
+  taucherplatz: { x: 1240, y: 1170 },
+  powerBox: { x: 1290, y: 1080 },
+  drinks: { x: 1130, y: 1210 },
+  tents: { x: 1110, y: 1020 },
+  cable: { x: 1210, y: 1090 },
+  firstBeer: { x: 1100, y: 1170 },
+  homeDoor: { x: 225, y: 1120 },
 } as const;
 
 export const ARRIVAL_UNLOAD_FLAGS = [
@@ -49,11 +52,11 @@ export function arrivalObjective(state: ArrivalState): string {
     case 2: return 'Melde die Gruppe bei Gundula an – unter dem richtigen falschen Namen.';
     case 3: return 'Bestehe Ulis Kontrolle von Taucherplatz, Fahrzeug und fragwürdiger Discounter-Kleidung.';
     case 4: return 'Stelle dich an der Schranke der Einlassdiskussion gegen Gundula und Uli.';
-    case 5: return 'Gehe durch die Schranke und bringe den Wagen zum Be- und Entladen auf den Taucherplatz.';
-    case 6: return 'Organisiere am Stromkasten einen Anschluss. Strom wurde natürlich nicht angemeldet.';
-    case 7: return `Lade Getränke, Zeltsäcke und Kabeltrommel aus (${arrivalUnloadCount(state)}/${ARRIVAL_UNLOAD_FLAGS.length}).`;
-    case 8: return 'Alles steht und der Strom läuft. Öffne das erste Bier; danach muss das Auto zurück auf den Parkplatz.';
-    default: return 'Intro abgeschlossen. Die Zeltgruppe steht an der Hecke, das Auto wieder vor der Schranke.';
+    case 5: return 'Gehe durch die Schranke und bringe den Wagen an den östlichen Versorgungsrand des Taucherplatzes.';
+    case 6: return 'Organisiere am Stromkasten einen Anschluss. Die Kabeltrommel liegt direkt zwischen Wagen und Verteiler.';
+    case 7: return `Lade Getränke am Kühlplatz, Zeltsäcke am Kreiszugang und Kabeltrommel am Stromkasten aus (${arrivalUnloadCount(state)}/${ARRIVAL_UNLOAD_FLAGS.length}).`;
+    case 8: return 'Alles steht und der Strom läuft. Öffne das erste Bier direkt bei Getränkekisten und Kühlplatz.';
+    default: return 'Intro abgeschlossen. Der Zeltkreis steht, der Mittelbereich bleibt begehbar und der Versorgungsrand ist eingerichtet.';
   }
 }
 
