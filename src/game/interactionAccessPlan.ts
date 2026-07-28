@@ -12,36 +12,36 @@ export interface InteractionAccessPath {
 export const INTERACTION_ACCESS_PATHS: readonly InteractionAccessPath[] = [
   {
     id: 'tent-circle-west-entry',
-    from: { x: 210, y: 1120 },
-    to: { x: 650, y: 1120 },
+    from: { x: 225, y: 1090 },
+    to: { x: 470, y: 1090 },
     width: 38,
     surface: 'gravel',
   },
   {
     id: 'tent-circle-east-service',
-    from: { x: 650, y: 1120 },
-    to: { x: 1320, y: 1120 },
+    from: { x: 470, y: 1090 },
+    to: { x: 850, y: 1090 },
     width: 38,
     surface: 'gravel',
   },
   {
     id: 'tent-circle-north-gap',
-    from: { x: 650, y: 950 },
-    to: { x: 650, y: 1120 },
+    from: { x: 470, y: 1015 },
+    to: { x: 470, y: 1090 },
     width: 34,
     surface: 'gravel',
   },
   {
     id: 'tent-circle-south-gap',
-    from: { x: 650, y: 1120 },
-    to: { x: 650, y: 1270 },
+    from: { x: 470, y: 1090 },
+    to: { x: 470, y: 1270 },
     width: 34,
     surface: 'gravel',
   },
   {
     id: 'home-tent-door-spur',
-    from: { x: 210, y: 1110 },
-    to: { x: 212, y: 1160 },
+    from: { x: 225, y: 1090 },
+    to: { x: 225, y: 1100 },
     width: 32,
     surface: 'gravel',
   },
@@ -58,7 +58,7 @@ export function drawInteractionAccessPaths(scene: Phaser.Scene): void {
       .lineStyle(path.width, fill, 0.96).lineBetween(path.from.x, path.from.y, path.to.x, path.to.y);
 
     const distance = Math.hypot(path.to.x - path.from.x, path.to.y - path.from.y);
-    for (let step = 34; step < distance - 18; step += 52) {
+    for (let step = 18; step < distance - 10; step += 42) {
       const progress = step / distance;
       markings.fillStyle(mark, 0.18).fillEllipse(
         linear(path.from.x, path.to.x, progress),
