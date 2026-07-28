@@ -12,11 +12,15 @@ import {
   ARRIVAL_STORY_PLACEMENTS,
   BEACH_GATE,
   ENTRANCE_PLACEMENTS,
+  FRIEND_CAMP_CENTER,
+  FRIEND_TENT_ENTRY_POINTS,
+  FRIEND_TENT_IDS,
   LANDMARK_PLACEMENTS,
   NPC_AREA_ASSIGNMENTS,
   NPC_PLACEMENTS,
   OBJECT_AREA_ASSIGNMENTS,
   OBJECT_PLACEMENTS,
+  TAUCHER_CAR_POSITION,
   TAUCHER_PITCH_BOUNDS,
   type AerialNodeId,
   type FunctionalAreaId,
@@ -95,7 +99,7 @@ export function applyCampgroundBlueprint(): void {
     }
     if (region.id === 'central') {
       region.title = 'Sanitär & Taucherplatz';
-      region.subtitle = 'Sanitärreihe, ausgerichtete Freundeszeltgruppe und gemeinsame Feuerstelle';
+      region.subtitle = 'Sanitärreihe, begehbarer Zeltkreis und gebündelter Versorgungsrand';
     }
     if (region.id === 'festival') {
       region.title = 'Festwiese';
@@ -135,7 +139,7 @@ export function applyCampgroundBlueprint(): void {
 
   Object.assign(CAMPFIRE_POSITION as unknown as { x: number; y: number; safeRadius: number }, {
     ...LANDMARK_PLACEMENTS.campfire,
-    safeRadius: 62,
+    safeRadius: 35,
   });
 
   const homeTent = OBJECT_PLACEMENTS['home-tent'];
@@ -191,6 +195,7 @@ export function validateCampgroundBlueprint(): string[] {
   validateFunctionalAssignments(errors);
   validatePlacements(errors);
   validateLogicalGroups(errors);
+  validateQuestSupplyChain(errors);
   validateEntrances(errors);
   return [...new Set(errors)];
 }
@@ -326,23 +331,47 @@ function validatePlacements(errors: string[]): void {
 }
 
 function validateLogicalGroups(errors: string[]): void {
-  const tentIds = ['home-tent', 'tent-andre', 'tent-rene', 'tent-lars', 'tent-danny'];
-  const tents = tentIds.map((id) => OBJECT_PLACEMENTS[id]);
-  const rowY = tents[0].y;
-  if (tents.some((tent) => Math.abs(tent.y - rowY) > 4)) errors.push('Friend tents must form one aligned row.');
-  for (let index = 1; index < tents.length; index += 1) {
-    const previousEnd = tents[index - 1].x + (tents[index - 1].width ?? 135);
-    const gap = tents[index].x - previousEnd;
-    if (gap < 8 || gap > 25) errors.push(`Tent row has illogical gap before ${tentIds[index]}: ${gap}`);
+  const tents = FRIEND_TENT_IDS.map((id) => ({ id, placement: OBJECT_PLACEMENTS[id] }));
+  const centres = tents.map(({ id, placement }) => ({ id, ...centerOfPlacement(placement) }));
+  const angles = centres
+    .map((point) => ({ ...point, angle: Math.atan2(point.y - FRIEND_CAMP_CENTER.y, point.x - FRIEND_CAMP_CENTER.x) }))
+    .sort((left, right) => left.angle - right.angle);
+
+  for (const point of centres) {
+    const distance = pointDistance(point, FRIEND_CAMP_CENTER);
+    if (distance < 160 || distance > 470) errors.push(`Tent ${point.id} does not sit on the friend camp ring: ${distance.toFixed(1)} px.`);
   }
 
-  const friendIds = ['andre', 'rene', 'lars', 'danny'];
-  friendIds.forEach((id, index) => {
-    const tent = OBJECT_PLACEMENTS[`tent-${id}`];
-    const npc = NPC_PLACEMENTS[id];
-    const centerX = tent.x + (tent.width ?? 135) / 2;
-    if (Math.abs(npc.x - centerX) > 45 || npc.y < tent.y + (tent.height ?? 105)) errors.push(`${id} is not positioned in front of their tent.`);
-  });
+  for (let index = 0; index < angles.length; index += 1) {
+    const current = angles[index];
+    const next = angles[(index + 1) % angles.length];
+    const gap = index === angles.length - 1 ? next.angle + Math.PI * 2 - current.angle : next.angle - current.angle;
+    if (gap < 0.42) errors.push(`Friend tent ring has a cramped angular gap after ${current.id}.`);
+  }
+
+  for (let index = 0; index < tents.length; index += 1) {
+    const first = placementBounds(tents[index].placement);
+    for (const other of tents.slice(index + 1)) {
+      const clearance = boundsDistance(first, placementBounds(other.placement));
+      if (clearance < 42) errors.push(`Friend tents leave too little walking room: ${tents[index].id} / ${other.id} (${clearance.toFixed(1)} px).`);
+    }
+  }
+
+  const centralClearance = Math.min(...tents.map(({ placement }) => distanceToBounds(FRIEND_CAMP_CENTER, placementBounds(placement))));
+  if (centralClearance < 72) errors.push(`Friend tent circle leaves only ${centralClearance.toFixed(1)} px of central space.`);
+
+  const friendByTent: Record<string, string> = {
+    'tent-andre': 'andre',
+    'tent-rene': 'rene',
+    'tent-lars': 'lars',
+    'tent-danny': 'danny',
+  };
+  for (const [tentId, friendId] of Object.entries(friendByTent)) {
+    const npc = NPC_PLACEMENTS[friendId];
+    const entry = FRIEND_TENT_ENTRY_POINTS[tentId as keyof typeof FRIEND_TENT_ENTRY_POINTS];
+    if (pointDistance(npc, entry) > 36) errors.push(`${friendId} is not positioned at the inward entrance of their tent.`);
+    if (distanceToBounds(npc, placementBounds(OBJECT_PLACEMENTS[tentId])) > 86) errors.push(`${friendId} stands too far from their own tent.`);
+  }
 
   const stage = OBJECT_PLACEMENTS['festival-stage'];
   const party = OBJECT_PLACEMENTS.party;
@@ -356,9 +385,24 @@ function validateLogicalGroups(errors: string[]): void {
   if (!(OBJECT_PLACEMENTS['cove-shelter'].y < coveDock.y)) errors.push('Cove shelter must sit inland and north of the dock.');
 
   const campfire = LANDMARK_PLACEMENTS.campfire;
-  if (!(campfire.x > OBJECT_PLACEMENTS['tent-danny'].x + (OBJECT_PLACEMENTS['tent-danny'].width ?? 135))) {
-    errors.push('Campfire must sit beside, not inside, the tent row.');
-  }
+  if (pointDistance(campfire, FRIEND_CAMP_CENTER) > 12) errors.push('Campfire must remain in the centre of the friend tent circle.');
+}
+
+function validateQuestSupplyChain(errors: string[]): void {
+  const car = TAUCHER_CAR_POSITION;
+  const power = ARRIVAL_STORY_PLACEMENTS.powerBox;
+  const drinks = ARRIVAL_STORY_PLACEMENTS.drinks;
+  const tents = ARRIVAL_STORY_PLACEMENTS.tents;
+  const cable = ARRIVAL_STORY_PLACEMENTS.cable;
+  const beer = ARRIVAL_STORY_PLACEMENTS.firstBeer;
+
+  if (pointDistance(car, drinks) > 145) errors.push('Drink cargo must be unloaded beside the Taucherplatz car.');
+  if (pointDistance(car, cable) > 120) errors.push('Cable reel must be unloaded beside the Taucherplatz car.');
+  if (pointDistance(cable, power) > 105) errors.push('Cable reel must sit between the car and power box.');
+  if (pointDistance(car, tents) > 210) errors.push('Tent bags must be staged near the car and tent circle.');
+  if (pointDistance(drinks, beer) > 90) errors.push('First beer target must remain beside the drink stack and cooler.');
+  if (distanceToBounds(tents, placementBounds(OBJECT_PLACEMENTS['central-table'])) < 8) errors.push('Tent bags must not be placed inside the common table.');
+  if (distanceToBounds(cable, placementBounds(OBJECT_PLACEMENTS['central-bench'])) < 8) errors.push('Cable reel must not be hidden by the common bench.');
 }
 
 function validateEntrances(errors: string[]): void {
@@ -380,6 +424,10 @@ function validateEntrances(errors: string[]): void {
 
 function centerOfPlacement(placement: Placement): PlanPoint {
   return { x: placement.x + (placement.width ?? 0) / 2, y: placement.y + (placement.height ?? 0) / 2 };
+}
+
+function placementBounds(placement: Placement): Bounds {
+  return { x: placement.x, y: placement.y, width: placement.width ?? 1, height: placement.height ?? 1 };
 }
 
 function roadIntersectsBounds(road: BlueprintRoad, bounds: Bounds, padding: number): boolean {
@@ -404,6 +452,12 @@ function distanceToSegment(point: PlanPoint, from: PlanPoint, to: PlanPoint): nu
 function distanceToBounds(point: PlanPoint, bounds: Bounds): number {
   const dx = Math.max(bounds.x - point.x, 0, point.x - (bounds.x + bounds.width));
   const dy = Math.max(bounds.y - point.y, 0, point.y - (bounds.y + bounds.height));
+  return Math.hypot(dx, dy);
+}
+
+function boundsDistance(a: Bounds, b: Bounds): number {
+  const dx = Math.max(b.x - (a.x + a.width), a.x - (b.x + b.width), 0);
+  const dy = Math.max(b.y - (a.y + a.height), a.y - (b.y + b.height), 0);
   return Math.hypot(dx, dy);
 }
 
