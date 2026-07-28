@@ -7,9 +7,10 @@ import {
 } from './pixelArtLayer';
 
 describe('pixel art environment layer', () => {
-  it('uses a pinned HTTPS source and records the open license', () => {
+  it('uses a revision-pinned HTTPS source and records the open license', () => {
     expect(NINJA_ADVENTURE_ASSET.sourceUrl).toMatch(/^https:\/\/raw\.githubusercontent\.com\//);
-    expect(NINJA_ADVENTURE_ASSET.sourceUrl).not.toContain('/latest/');
+    expect(NINJA_ADVENTURE_ASSET.sourceRevision).toMatch(/^[0-9a-f]{40}$/);
+    expect(NINJA_ADVENTURE_ASSET.sourceUrl).toContain(NINJA_ADVENTURE_ASSET.sourceRevision);
     expect(NINJA_ADVENTURE_ASSET.license).toBe('CC0-1.0');
   });
 
