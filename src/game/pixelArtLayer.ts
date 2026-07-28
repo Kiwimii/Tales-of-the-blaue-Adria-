@@ -1,6 +1,7 @@
 export const NINJA_ADVENTURE_ASSET = {
   textureKey: 'cc0-ninja-adventure-village',
-  sourceUrl: 'https://raw.githubusercontent.com/pixel-boy/NinjaAdventure/main/content/map/tileset_village_abandoned.png',
+  sourceRevision: '6ac78232d5aedcc85ce5f27d060ea92366f7c24a',
+  sourceUrl: 'https://raw.githubusercontent.com/pixel-boy/NinjaAdventure/6ac78232d5aedcc85ce5f27d060ea92366f7c24a/content/map/tileset_village_abandoned.png',
   sourceWidth: 320,
   sourceHeight: 192,
   tileSize: 16,
