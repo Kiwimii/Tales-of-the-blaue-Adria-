@@ -21,27 +21,27 @@ let applied = false;
 export function applySprint89CampPlan(): void {
   if (applied) return;
 
-  assignPlacement('home-tent', { x: 80, y: 1040, width: 145, height: 120 });
-  assignPlacement('tent-andre', { x: 260, y: 900, width: 135, height: 105 });
-  assignPlacement('tent-rene', { x: 570, y: 900, width: 135, height: 105 });
-  assignPlacement('tent-lars', { x: 650, y: 1135, width: 135, height: 110 });
-  assignPlacement('tent-danny', { x: 280, y: 1150, width: 135, height: 105 });
+  assignPlacement('home-tent', { x: 80, y: 1060, width: 145, height: 120 });
+  assignPlacement('tent-andre', { x: 260, y: 990, width: 135, height: 105 });
+  assignPlacement('tent-rene', { x: 570, y: 990, width: 135, height: 105 });
+  assignPlacement('tent-lars', { x: 650, y: 1150, width: 135, height: 110 });
+  assignPlacement('tent-danny', { x: 280, y: 1160, width: 135, height: 105 });
 
   assignPlacement('central-table', { x: 490, y: 1170, width: 145, height: 72 });
-  assignPlacement('central-bench', { x: 95, y: 1210, width: 105, height: 38 });
+  assignPlacement('central-bench', { x: 980, y: 1220, width: 105, height: 38 });
   assignPlacement('central-flowerbed', { x: 1140, y: 1230, width: 190, height: 45 });
   assignPlacement('central-tree-2', { x: 1250, y: 930, width: 100, height: 112 });
   assignPlacement('tent-hedge-west', { x: 80, y: 890, width: 720, height: 24 });
   assignPlacement('tent-hedge-east', { x: 1000, y: 890, width: 320, height: 24 });
 
-  Object.assign(FRIEND_CAMP_CENTER, { x: 470, y: 1090 });
+  Object.assign(FRIEND_CAMP_CENTER, { x: 470, y: 1110 });
   Object.assign(TAUCHER_CAR_POSITION, { x: 1240, y: 1170 });
 
-  assignPoint(FRIEND_TENT_ENTRY_POINTS['home-tent'], { x: 225, y: 1100 });
-  assignPoint(FRIEND_TENT_ENTRY_POINTS['tent-andre'], { x: 360, y: 1025 });
-  assignPoint(FRIEND_TENT_ENTRY_POINTS['tent-rene'], { x: 610, y: 1025 });
-  assignPoint(FRIEND_TENT_ENTRY_POINTS['tent-lars'], { x: 625, y: 1180 });
-  assignPoint(FRIEND_TENT_ENTRY_POINTS['tent-danny'], { x: 425, y: 1135 });
+  assignPoint(FRIEND_TENT_ENTRY_POINTS['home-tent'], { x: 225, y: 1120 });
+  assignPoint(FRIEND_TENT_ENTRY_POINTS['tent-andre'], { x: 405, y: 1085 });
+  assignPoint(FRIEND_TENT_ENTRY_POINTS['tent-rene'], { x: 560, y: 1085 });
+  assignPoint(FRIEND_TENT_ENTRY_POINTS['tent-lars'], { x: 625, y: 1185 });
+  assignPoint(FRIEND_TENT_ENTRY_POINTS['tent-danny'], { x: 425, y: 1140 });
 
   assignPoint(NPC_PLACEMENTS.andre, FRIEND_TENT_ENTRY_POINTS['tent-andre']);
   assignPoint(NPC_PLACEMENTS.rene, FRIEND_TENT_ENTRY_POINTS['tent-rene']);
@@ -56,7 +56,7 @@ export function applySprint89CampPlan(): void {
   assignPoint(story.taucherplatz, TAUCHER_CAR_POSITION);
   assignPoint(story.powerBox, { x: 1290, y: 1080 });
   assignPoint(story.drinks, { x: 1130, y: 1210 });
-  assignPoint(story.tents, { x: 1080, y: 1005 });
+  assignPoint(story.tents, { x: 1110, y: 1020 });
   assignPoint(story.cable, { x: 1210, y: 1090 });
   assignPoint(story.firstBeer, { x: 1100, y: 1170 });
   assignPoint(story.homeDoor, FRIEND_TENT_ENTRY_POINTS['home-tent']);
