@@ -1,5 +1,6 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import { installAdvancedContent } from '../src/game/advancedContent';
+import { FRIEND_CAMP_CENTER, OBJECT_PLACEMENTS } from '../src/game/aerialCampgroundPlan';
 import { ARRIVAL_POSITIONS } from '../src/game/arrivalQuest';
 import { applyCampgroundBlueprint } from '../src/game/campgroundBlueprint';
 import {
@@ -43,10 +44,12 @@ describe('logical world access', () => {
     }
   });
 
-  it('places the campfire beside the tent row and east of the main walking line', () => {
+  it('keeps the tent circle west of the main path with a clear shared centre', () => {
     const central = WALKABLE_CORRIDORS.find((corridor) => corridor.id === 'central-main-path')!.bounds;
-    expect(CAMPFIRE_POSITION.x).toBeGreaterThan(central.x + central.width);
+    expect(CAMPFIRE_POSITION).toEqual(FRIEND_CAMP_CENTER);
+    expect(CAMPFIRE_POSITION.x).toBeLessThan(central.x);
     expect(CAMPFIRE_POSITION.y).toBeGreaterThan(980);
     expect(CAMPFIRE_POSITION.y).toBeLessThan(1280);
+    expect(OBJECT_PLACEMENTS['tent-lars'].x + (OBJECT_PLACEMENTS['tent-lars'].width ?? 0)).toBeLessThan(central.x);
   });
 });
