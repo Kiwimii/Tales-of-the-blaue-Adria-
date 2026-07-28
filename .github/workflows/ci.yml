@@ -13,7 +13,7 @@ permissions:
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -31,11 +31,11 @@ jobs:
           path: validation.log
           retention-days: 2
 
-  publish-next:
+  publish-builds:
     if: github.event_name == 'push' && github.actor != 'github-actions[bot]'
     needs: check
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     permissions:
       contents: write
     steps:
@@ -47,15 +47,17 @@ jobs:
       - run: npm ci
       - run: npm run build:preview
       - run: npm run validate:next
-      - name: Commit generated Next build
+      - run: npm run build:redesign
+      - run: npm run validate:redesign
+      - name: Commit generated browser builds
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -f docs/next
+          git add -f docs/next docs/redesign
           if git diff --cached --quiet; then
-            echo "Next build already current."
+            echo "Browser builds already current."
           else
-            git commit -m "Publish current Next build"
+            git commit -m "Publish current browser builds"
             git push
           fi
