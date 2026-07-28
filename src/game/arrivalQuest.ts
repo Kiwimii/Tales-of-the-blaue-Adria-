@@ -12,10 +12,10 @@ export const ARRIVAL_POSITIONS = {
   taucherplatz: { x: 1240, y: 1170 },
   powerBox: { x: 1290, y: 1080 },
   drinks: { x: 1130, y: 1210 },
-  tents: { x: 1080, y: 1005 },
+  tents: { x: 1110, y: 1020 },
   cable: { x: 1210, y: 1090 },
   firstBeer: { x: 1100, y: 1170 },
-  homeDoor: { x: 225, y: 1100 },
+  homeDoor: { x: 225, y: 1120 },
 } as const;
 
 export const ARRIVAL_UNLOAD_FLAGS = [
