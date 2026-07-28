@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  ARRIVAL_POSITIONS,
   arrivalObjective,
   arrivalStage,
   arrivalTarget,
@@ -27,7 +28,7 @@ function state(flags: Record<string, boolean> = {}, status: 'active' | 'complete
     flags,
     encounter: null,
     chronicle: [],
-    worldPosition: { x: 650, y: 1590 },
+    worldPosition: { ...ARRIVAL_POSITIONS.trunk },
     currentInterior: null,
     activityResults: {},
     clockLabel: '07:00',
@@ -40,7 +41,7 @@ function state(flags: Record<string, boolean> = {}, status: 'active' | 'complete
 describe('arrival quest line', () => {
   it('progresses in spatial order from trunk to first beer', () => {
     expect(arrivalStage(state())).toBe(0);
-    expect(arrivalTarget(state())).toEqual({ x: 650, y: 1590 });
+    expect(arrivalTarget(state())).toEqual(ARRIVAL_POSITIONS.trunk);
 
     const documents = state({ arrivalDocumentsFound: true });
     expect(arrivalStage(documents)).toBe(1);
@@ -58,12 +59,14 @@ describe('arrival quest line', () => {
     const power = state({ entryDebateWon: true, carParkedAtTaucherplatz: true });
     expect(arrivalStage(power)).toBe(6);
     expect(arrivalObjective(power)).toContain('Stromkasten');
+    expect(arrivalTarget(power)).toEqual(ARRIVAL_POSITIONS.powerBox);
   });
 
   it('separates an assigned socket from a physically connected cable', () => {
     const access = state({ powerAccessOrganized: true });
     expect(arrivalStage(access)).toBe(7);
     expect(access.flags.powerConnected).toBeUndefined();
+    expect(arrivalObjective(access)).toContain('Kabeltrommel');
   });
 
   it('counts three physical unloading tasks before the beer milestone', () => {
@@ -75,6 +78,7 @@ describe('arrival quest line', () => {
     expect(arrivalUnloadCount(unloading)).toBe(2);
     expect(arrivalStage(unloading)).toBe(7);
     expect(arrivalObjective(unloading)).toContain('(2/3)');
+    expect(arrivalTarget(unloading)).toEqual(ARRIVAL_POSITIONS.cable);
 
     const ready = state({
       powerAccessOrganized: true,
@@ -85,6 +89,7 @@ describe('arrival quest line', () => {
     });
     expect(arrivalStage(ready)).toBe(8);
     expect(arrivalObjective(ready)).toContain('erste Bier');
+    expect(arrivalTarget(ready)).toEqual(ARRIVAL_POSITIONS.firstBeer);
   });
 
   it('ends only after the first beer or a completed legacy entry quest', () => {
