@@ -1,12 +1,16 @@
 import Phaser from 'phaser';
+import { authorityAppearance, type AuthorityExpression, type AuthorityOutfit } from '../authorityAppearance';
 import { RELATIONSHIP_CHARACTERS } from '../content';
 import { gameStore } from '../state/GameStore';
 import { colorShade, seededFraction } from '../visuals';
 
 const ACCESSORY_BY_CHARACTER: Record<string, string> = {
-  gundula: 'brille', uli: 'cap', manni: 'bart', ronny: 'bart', andre: 'brille', rene: 'ohrring',
+  manni: 'bart', ronny: 'bart', andre: 'brille', rene: 'ohrring',
   lars: 'cap', danny: 'brille', gregor: 'bart', felix: 'ohrring', masl: 'cap', schubert: 'brille', schima: 'cap',
 };
+
+type CharacterOutfit = 'standard' | AuthorityOutfit;
+type CharacterExpression = 'neutral' | AuthorityExpression;
 
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -25,27 +29,34 @@ export class BootScene extends Phaser.Scene {
       profile?.bodyType ?? 'normal',
       profile?.accessory ?? 'keins',
       'player',
+      'standard',
+      'neutral',
     );
 
     const hairStyles = ['kurz', 'buzz', 'welle', 'cap'];
     for (const [index, character] of RELATIONSHIP_CHARACTERS.entries()) {
-      const shirt = Phaser.Display.Color.HexStringToColor(character.color).color;
+      const configured = authorityAppearance(character.id);
+      const baseShirt = Phaser.Display.Color.HexStringToColor(character.color).color;
+      const shirt = configured?.shirtColor ?? baseShirt;
       const tone = [0xf6c9a7, 0xd79b73, 0xb97955, 0x80533d][index % 4];
+      const defaultHairStyle = character.id === 'lars' || character.id === 'masl' || character.id === 'schima'
+        ? 'cap'
+        : hairStyles[Math.floor(seededFraction(character.id, 1) * hairStyles.length)];
       this.createCharacterTexture(
         `npc-${character.id}`,
         shirt,
         colorShade(shirt, 0.44),
         tone,
-        colorShade(shirt, 0.34),
-        character.id === 'uli' || character.id === 'lars' || character.id === 'masl' || character.id === 'schima'
-          ? 'cap'
-          : hairStyles[Math.floor(seededFraction(character.id, 1) * hairStyles.length)],
-        index % 4 === 0 ? 'breit' : index % 3 === 0 ? 'schmal' : 'normal',
-        ACCESSORY_BY_CHARACTER[character.id] ?? 'keins',
+        configured?.hairColor ?? colorShade(baseShirt, 0.34),
+        configured?.hairStyle ?? defaultHairStyle,
+        configured?.bodyType ?? (index % 4 === 0 ? 'breit' : index % 3 === 0 ? 'schmal' : 'normal'),
+        configured?.accessory ?? ACCESSORY_BY_CHARACTER[character.id] ?? 'keins',
         character.id,
+        configured?.outfit ?? 'standard',
+        configured?.expression ?? 'neutral',
       );
     }
-    this.createCharacterTexture('rival', 0xe4694f, 0x5c2018, 0xf3c8a8, 0x4a271f, 'welle', 'breit', 'bart', 'ronny');
+    this.createCharacterTexture('rival', 0xe4694f, 0x5c2018, 0xf3c8a8, 0x4a271f, 'welle', 'breit', 'bart', 'ronny', 'standard', 'neutral');
 
     const marker = this.make.graphics({ x: 0, y: 0 });
     marker.fillStyle(0x07151c, 0.28);
@@ -91,6 +102,8 @@ export class BootScene extends Phaser.Scene {
     bodyType: string,
     accessory: string,
     identity: string,
+    outfit: CharacterOutfit,
+    expression: CharacterExpression,
   ): void {
     const graphics = this.make.graphics({ x: 0, y: 0 });
     const bodyWidth = bodyType === 'breit' ? 28 : bodyType === 'schmal' ? 21 : 24;
@@ -112,22 +125,36 @@ export class BootScene extends Phaser.Scene {
 
     graphics.fillStyle(skinShade).fillRoundedRect(19, 20, 8, 7, 3);
     graphics.fillStyle(outline).fillRoundedRect(bodyLeft - 3, 23, bodyWidth + 6, 25, 8);
-    graphics.fillStyle(shirt).fillRoundedRect(bodyLeft, 24, bodyWidth, 22, 7);
-    graphics.fillStyle(shirtShade).fillRoundedRect(bodyLeft - 3, 25, 7, 12, 4).fillRoundedRect(bodyLeft + bodyWidth - 4, 25, 7, 12, 4);
-    graphics.fillStyle(skin).fillRoundedRect(bodyLeft - 4, 34, 6, 12, 3).fillRoundedRect(bodyLeft + bodyWidth - 2, 34, 6, 12, 3);
-    graphics.fillCircle(bodyLeft - 1, 46, 3.5).fillCircle(bodyLeft + bodyWidth + 1, 46, 3.5);
-    graphics.lineStyle(1.2, skinShade, 0.75).lineBetween(bodyLeft - 2, 44, bodyLeft + 1, 44).lineBetween(bodyLeft + bodyWidth - 1, 44, bodyLeft + bodyWidth + 2, 44);
+
+    if (outfit === 'tank-top') {
+      graphics.fillStyle(skin).fillCircle(bodyLeft + 2, 27, 5).fillCircle(bodyLeft + bodyWidth - 2, 27, 5);
+      graphics.fillRoundedRect(bodyLeft - 4, 27, 7, 19, 3).fillRoundedRect(bodyLeft + bodyWidth - 3, 27, 7, 19, 3);
+      graphics.fillCircle(bodyLeft - 1, 46, 3.5).fillCircle(bodyLeft + bodyWidth + 1, 46, 3.5);
+      graphics.fillStyle(shirt).fillRoundedRect(bodyLeft + 3, 24, bodyWidth - 6, 22, 6);
+      graphics.fillStyle(shirtShade).fillTriangle(19, 24, 23, 31, 27, 24);
+      graphics.lineStyle(1.3, colorShade(shirt, 1.2), 0.62).lineBetween(bodyLeft + 5, 28, bodyLeft + 5, 43).lineBetween(bodyLeft + bodyWidth - 5, 28, bodyLeft + bodyWidth - 5, 43);
+    } else {
+      graphics.fillStyle(shirt).fillRoundedRect(bodyLeft, 24, bodyWidth, 22, 7);
+      graphics.fillStyle(shirtShade).fillRoundedRect(bodyLeft - 3, 25, 7, 12, 4).fillRoundedRect(bodyLeft + bodyWidth - 4, 25, 7, 12, 4);
+      graphics.fillStyle(skin).fillRoundedRect(bodyLeft - 4, 34, 6, 12, 3).fillRoundedRect(bodyLeft + bodyWidth - 2, 34, 6, 12, 3);
+      graphics.fillCircle(bodyLeft - 1, 46, 3.5).fillCircle(bodyLeft + bodyWidth + 1, 46, 3.5);
+      graphics.lineStyle(1.2, skinShade, 0.75).lineBetween(bodyLeft - 2, 44, bodyLeft + 1, 44).lineBetween(bodyLeft + bodyWidth - 1, 44, bodyLeft + bodyWidth + 2, 44);
+    }
 
     graphics.fillStyle(colorShade(trousers, 0.72)).fillRoundedRect(bodyLeft, 43, bodyWidth, 5, 2);
     graphics.fillStyle(0xd9bd72).fillRoundedRect(bodyLeft + bodyWidth / 2 - 3, 43, 6, 4, 1);
 
-    if (pattern === 0) {
+    if (outfit === 'strict-jacket') {
+      graphics.fillStyle(colorShade(shirt, 0.58), 0.9).fillTriangle(bodyLeft + 2, 25, 23, 36, 23, 25).fillTriangle(bodyLeft + bodyWidth - 2, 25, 23, 36, 23, 25);
+      graphics.lineStyle(1.4, 0xf0e3c4, 0.75).lineBetween(23, 31, 23, 43);
+      graphics.fillStyle(0xe6d6b4).fillCircle(23, 35, 1.5).fillCircle(23, 40, 1.5);
+    } else if (outfit !== 'tank-top' && pattern === 0) {
       graphics.fillStyle(colorShade(shirt, 1.3), 0.72).fillRect(bodyLeft + 2, 30, bodyWidth - 4, 4).fillRect(bodyLeft + 2, 38, bodyWidth - 4, 3);
-    } else if (pattern === 1) {
+    } else if (outfit !== 'tank-top' && pattern === 1) {
       graphics.fillStyle(0xf0e4bd, 0.9).fillCircle(23, 34, 5).fillStyle(shirtShade).fillCircle(23, 34, 2);
-    } else if (pattern === 2) {
+    } else if (outfit !== 'tank-top' && pattern === 2) {
       graphics.fillStyle(colorShade(shirt, 1.22), 0.78).fillRoundedRect(bodyLeft + bodyWidth - 10, 29, 7, 7, 2);
-    } else {
+    } else if (outfit !== 'tank-top') {
       graphics.fillStyle(0xf0e1bb, 0.65).fillTriangle(18, 25, 23, 31, 28, 25);
     }
 
@@ -136,24 +163,45 @@ export class BootScene extends Phaser.Scene {
     graphics.fillCircle(12.5, 14, 3.2).fillCircle(33.5, 14, 3.2);
     graphics.fillStyle(skinShade, 0.7).fillEllipse(12.5, 14, 2, 3).fillEllipse(33.5, 14, 2, 3);
 
-    graphics.fillStyle(hair);
-    if (hairStyle === 'buzz') graphics.fillRoundedRect(13, 2, 20, 7, 4);
-    else if (hairStyle === 'cap') {
-      graphics.fillRoundedRect(11, 1, 25, 9, 4).fillRect(31, 8, 11, 3);
-      graphics.fillStyle(colorShade(shirt, 0.8)).fillRoundedRect(13, 2, 21, 5, 3);
-    } else if (hairStyle === 'welle') {
-      graphics.fillCircle(14, 5, 6).fillCircle(21, 3, 7).fillCircle(29, 4, 7).fillCircle(34, 8, 4);
-    } else graphics.fillRoundedRect(12, 2, 22, 8, 4).fillTriangle(12, 7, 16, 12, 18, 7);
-    graphics.fillStyle(colorShade(hair, 1.25), 0.55).fillRoundedRect(16, 3, 10, 2, 1);
+    if (hairStyle === 'spiky-white') {
+      graphics.fillStyle(hair).fillRoundedRect(12, 5, 22, 5, 2)
+        .fillTriangle(11, 8, 14, 0, 18, 8)
+        .fillTriangle(15, 7, 20, -1, 23, 8)
+        .fillTriangle(20, 7, 25, -2, 28, 8)
+        .fillTriangle(25, 7, 30, 0, 34, 9)
+        .fillTriangle(30, 9, 35, 3, 36, 11);
+      graphics.lineStyle(1, colorShade(hair, 0.72), 0.7).lineBetween(15, 5, 18, 1).lineBetween(22, 5, 25, 0).lineBetween(29, 6, 32, 2);
+    } else if (hairStyle === 'bald') {
+      graphics.lineStyle(1.1, skinShade, 0.72).beginPath().arc(23, 11, 8.5, Math.PI * 1.08, Math.PI * 1.92).strokePath();
+      graphics.fillStyle(colorShade(skin, 1.15), 0.24).fillEllipse(20, 8, 8, 3);
+    } else {
+      graphics.fillStyle(hair);
+      if (hairStyle === 'buzz') graphics.fillRoundedRect(13, 2, 20, 7, 4);
+      else if (hairStyle === 'cap') {
+        graphics.fillRoundedRect(11, 1, 25, 9, 4).fillRect(31, 8, 11, 3);
+        graphics.fillStyle(colorShade(shirt, 0.8)).fillRoundedRect(13, 2, 21, 5, 3);
+      } else if (hairStyle === 'welle') {
+        graphics.fillCircle(14, 5, 6).fillCircle(21, 3, 7).fillCircle(29, 4, 7).fillCircle(34, 8, 4);
+      } else graphics.fillRoundedRect(12, 2, 22, 8, 4).fillTriangle(12, 7, 16, 12, 18, 7);
+      graphics.fillStyle(colorShade(hair, 1.25), 0.55).fillRoundedRect(16, 3, 10, 2, 1);
+    }
 
-    graphics.lineStyle(1.2, colorShade(hair, 0.72), 0.9).lineBetween(16, 11, 21, 10).lineBetween(25, 10, 30, 11);
-    graphics.fillStyle(0xf7f5e9).fillEllipse(19, 14, 5, 3).fillEllipse(27, 14, 5, 3);
-    graphics.fillStyle(0x25312d).fillCircle(19, 14, 1.5).fillCircle(27, 14, 1.5);
+    if (expression === 'grim') {
+      graphics.lineStyle(2, 0x332520, 1).lineBetween(15, 10, 21, 12).lineBetween(25, 12, 31, 10);
+      graphics.fillStyle(0xf7f5e9).fillEllipse(19, 14, 5, 2.4).fillEllipse(27, 14, 5, 2.4);
+      graphics.fillStyle(0x1d2724).fillCircle(19.5, 14.3, 1.6).fillCircle(26.5, 14.3, 1.6);
+      graphics.lineStyle(1.5, 0x6b342f, 0.95).beginPath().moveTo(18, 20).lineTo(23, 22).lineTo(29, 20).strokePath();
+      graphics.lineStyle(1, skinShade, 0.55).lineBetween(15, 18, 18, 17).lineBetween(28, 17, 31, 18);
+    } else {
+      graphics.lineStyle(1.2, colorShade(hair, 0.72), 0.9).lineBetween(16, 11, 21, 10).lineBetween(25, 10, 30, 11);
+      graphics.fillStyle(0xf7f5e9).fillEllipse(19, 14, 5, 3).fillEllipse(27, 14, 5, 3);
+      graphics.fillStyle(0x25312d).fillCircle(19, 14, 1.5).fillCircle(27, 14, 1.5);
+      graphics.lineStyle(1.2, 0x7c433a, 0.8).beginPath().moveTo(19, 21).lineTo(23, 22).lineTo(28, 20).strokePath();
+    }
     graphics.lineStyle(1.2, skinShade, 0.85).lineBetween(23, 14, 22, 18).lineBetween(22, 18, 25, 18);
-    graphics.lineStyle(1.2, 0x7c433a, 0.8).beginPath().moveTo(19, 21).lineTo(23, 22).lineTo(28, 20).strokePath();
 
     if (accessory === 'brille') {
-      graphics.lineStyle(1.6, 0x172321, 1).strokeRoundedRect(15, 11, 7, 6, 2).strokeRoundedRect(24, 11, 7, 6, 2).lineBetween(22, 14, 24, 14);
+      graphics.lineStyle(1.8, 0x172321, 1).strokeRoundedRect(14.5, 10.5, 8, 7, 2).strokeRoundedRect(23.5, 10.5, 8, 7, 2).lineBetween(22.5, 14, 23.5, 14);
     } else if (accessory === 'bart') {
       graphics.fillStyle(hair, 0.9).fillTriangle(15, 18, 31, 18, 23, 27).fillStyle(skin).fillTriangle(20, 19, 26, 19, 23, 22);
     } else if (accessory === 'ohrring') {
@@ -175,9 +223,13 @@ export class BootScene extends Phaser.Scene {
     const leftHandX = bodyLeft - 2;
     const rightHandX = bodyLeft + bodyWidth + 2;
     if (identity === 'gundula') {
-      g.fillStyle(0x7c5c3a).fillRoundedRect(leftHandX - 7, 33, 10, 16, 2).fillStyle(0xf2e7c9).fillRect(leftHandX - 5, 35, 6, 11);
+      g.fillStyle(0x6b4930).fillRoundedRect(leftHandX - 8, 31, 12, 19, 2)
+        .fillStyle(0xf2e7c9).fillRect(leftHandX - 6, 33, 8, 14)
+        .lineStyle(1, 0x9b3029, 0.9).lineBetween(leftHandX - 4, 36, leftHandX, 36).lineBetween(leftHandX - 4, 40, leftHandX, 40);
     } else if (identity === 'uli') {
-      g.lineStyle(1.5, 0xd8d5c5).lineBetween(rightHandX, 43, rightHandX + 5, 48).strokeCircle(rightHandX + 7, 50, 3);
+      g.lineStyle(1.7, 0xd8d5c5).lineBetween(rightHandX, 42, rightHandX + 5, 48).strokeCircle(rightHandX + 7, 50, 3)
+        .strokeCircle(rightHandX + 12, 48, 2.5);
+      g.lineStyle(1.2, 0x17211f, 0.8).lineBetween(bodyLeft + 4, 35, bodyLeft + bodyWidth - 4, 35);
     } else if (identity === 'manni') {
       g.fillStyle(0xf4f1e7).fillCircle(rightHandX + 4, 44, 5).fillStyle(0xb7b2a6).fillCircle(rightHandX + 4, 44, 2);
     } else if (identity === 'ronny') {
