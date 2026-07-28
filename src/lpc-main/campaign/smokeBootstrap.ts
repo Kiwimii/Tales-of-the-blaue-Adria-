@@ -1,6 +1,12 @@
 const query = new URLSearchParams(location.search);
+const saveKey = 'tales-blaue-adria-lpc-main-v1';
+const metaKey = 'tales-blaue-adria-lpc-campaign-meta-v2';
+const releaseMarker = 'tales-blaue-adria-lpc-campaign-release';
+const releaseVersion = 'sprints-1-6-v1';
+
 if (query.get('smoke') === '1') {
-  localStorage.setItem('tales-blaue-adria-lpc-main-v1', JSON.stringify({
+  localStorage.setItem(releaseMarker, releaseVersion);
+  localStorage.setItem(saveKey, JSON.stringify({
     version: 3,
     mode: 'world',
     profile: {
@@ -25,11 +31,15 @@ if (query.get('smoke') === '1') {
     currentInterior: null,
     activityResults: {},
   }));
-  localStorage.setItem('tales-blaue-adria-lpc-campaign-meta-v2', JSON.stringify({
+  localStorage.setItem(metaKey, JSON.stringify({
     version: 2,
     introSeen: true,
     questStage: 'arrival',
     learnedAttacks: ['classic-high-five'],
     equippedAttacks: ['classic-high-five'],
   }));
+} else if (localStorage.getItem(releaseMarker) !== releaseVersion) {
+  localStorage.removeItem(saveKey);
+  localStorage.removeItem(metaKey);
+  localStorage.setItem(releaseMarker, releaseVersion);
 }
