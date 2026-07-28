@@ -22,10 +22,10 @@ export function applySprint89CampPlan(): void {
   if (applied) return;
 
   assignPlacement('home-tent', { x: 80, y: 1060, width: 145, height: 120 });
-  assignPlacement('tent-andre', { x: 260, y: 990, width: 135, height: 105 });
+  assignPlacement('tent-andre', { x: 270, y: 960, width: 135, height: 105 });
   assignPlacement('tent-rene', { x: 570, y: 990, width: 135, height: 105 });
   assignPlacement('tent-lars', { x: 650, y: 1150, width: 135, height: 110 });
-  assignPlacement('tent-danny', { x: 280, y: 1160, width: 135, height: 105 });
+  assignPlacement('tent-danny', { x: 275, y: 1160, width: 135, height: 105 });
 
   assignPlacement('central-table', { x: 490, y: 1170, width: 145, height: 72 });
   assignPlacement('central-bench', { x: 980, y: 1220, width: 105, height: 38 });
@@ -38,10 +38,10 @@ export function applySprint89CampPlan(): void {
   Object.assign(TAUCHER_CAR_POSITION, { x: 1240, y: 1170 });
 
   assignPoint(FRIEND_TENT_ENTRY_POINTS['home-tent'], { x: 225, y: 1120 });
-  assignPoint(FRIEND_TENT_ENTRY_POINTS['tent-andre'], { x: 405, y: 1085 });
+  assignPoint(FRIEND_TENT_ENTRY_POINTS['tent-andre'], { x: 415, y: 1075 });
   assignPoint(FRIEND_TENT_ENTRY_POINTS['tent-rene'], { x: 560, y: 1085 });
   assignPoint(FRIEND_TENT_ENTRY_POINTS['tent-lars'], { x: 625, y: 1185 });
-  assignPoint(FRIEND_TENT_ENTRY_POINTS['tent-danny'], { x: 425, y: 1140 });
+  assignPoint(FRIEND_TENT_ENTRY_POINTS['tent-danny'], { x: 420, y: 1145 });
 
   assignPoint(NPC_PLACEMENTS.andre, FRIEND_TENT_ENTRY_POINTS['tent-andre']);
   assignPoint(NPC_PLACEMENTS.rene, FRIEND_TENT_ENTRY_POINTS['tent-rene']);
