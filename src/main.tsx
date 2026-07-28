@@ -7,6 +7,7 @@ import './styles.css';
 import './mobileFocusOverrides.css';
 import './graphicsOptions.css';
 import './questTracking.css';
+import './mobileInvisibleAction.css';
 
 const root = document.getElementById('root');
 
