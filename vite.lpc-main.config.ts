@@ -5,6 +5,14 @@ export default defineConfig({
   root: 'lpc-main',
   base: '/Tales-of-the-blaue-Adria-/lpc-main/',
   publicDir: false,
+  plugins: [
+    {
+      name: 'lpc-main-bootstrap-entry',
+      transformIndexHtml(html) {
+        return html.replace('../src/lpc-main/main.ts', '../src/lpc-main/bootstrap.ts');
+      },
+    },
+  ],
   server: {
     fs: { allow: [resolve(process.cwd())] },
   },
