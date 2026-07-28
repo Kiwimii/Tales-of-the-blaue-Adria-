@@ -40,7 +40,7 @@ assert(stylesheet.includes('.graphics-options-panel'), 'Sprint 87 graphics optio
 assert(stylesheet.includes('.quest-tracking-panel'), 'Sprint 88 selectable quest list is missing from the production CSS.');
 assert(stylesheet.includes('.quest-hud-destination'), 'Sprint 88 tracked destination feedback is missing from the production CSS.');
 assert(stylesheet.includes('.mobile-action-zone') && stylesheet.includes('width:50%'), 'Sprint 89 invisible right-side action surface is missing from production CSS.');
-assert(stylesheet.includes('background:transparent'), 'Sprint 89 mobile action surface must remain visually transparent.');
+assert(stylesheet.includes('background-color:transparent') && stylesheet.includes('background-image:none'), 'Sprint 89 mobile action surface must remain visually transparent.');
 
 const gameBundle = javascript
   .map((file) => readFileSync(resolve(output, 'assets', file), 'utf8'))
