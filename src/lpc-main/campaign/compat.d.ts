@@ -11,10 +11,8 @@ declare namespace Phaser.Cameras.Scene2D {
 }
 
 declare namespace Phaser.Geom {
-  class Point {
+  class Point extends Phaser.Math.Vector2 {
     constructor(x: number, y: number);
-    x: number;
-    y: number;
   }
 }
 
