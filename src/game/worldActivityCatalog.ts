@@ -52,7 +52,7 @@ export const WORLD_ACTIVITY_CATALOG: readonly WorldActivityDefinition[] = [
     host: { kind: 'object', id: 'beach-table', maxDistance: 80 },
   },
   {
-    id: 'tent-hedge-relief', sceneKey: 'hedge-pee', regionId: 'central', x: 1240, y: 925, radius: 96,
+    id: 'tent-hedge-relief', sceneKey: 'hedge-pee', regionId: 'central', x: 1240, y: 935, radius: 96,
     label: 'HECKE', prompt: 'In die Hecke brunzen', completedFlag: 'hedgeRelieved', requiresFirstBeer: true,
     host: { kind: 'object', id: 'tent-hedge-east', maxDistance: 55 },
   },
