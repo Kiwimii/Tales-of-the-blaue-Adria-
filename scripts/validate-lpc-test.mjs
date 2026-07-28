@@ -10,7 +10,7 @@ const files = readdirSync(assetDirectory);
 const scripts = files.filter((file) => file.endsWith('.js'));
 const styles = files.filter((file) => file.endsWith('.css'));
 
-assert(scripts.length === 1, `Expected one LPC test script bundle, found ${scripts.length}.`);
+assert(scripts.length >= 1 && scripts.length <= 2, `Expected bootstrap and optional lazy LPC chunk, found ${scripts.length}.`);
 assert(styles.length === 1, `Expected one LPC test stylesheet, found ${styles.length}.`);
 assert(!files.some((file) => file.endsWith('.map')), 'LPC test must not publish source maps.');
 assert(html.includes('LPC CHARACTER TEST'), 'LPC build identity is missing.');
@@ -27,10 +27,10 @@ assert(javascript.includes('raw.githubusercontent.com/LiberatedPixelCup'), 'Revi
 assert(stylesheet.includes('.character-roster') && stylesheet.includes('.profile-panel'), 'Character comparison UI is missing.');
 assert(stylesheet.includes('image-rendering:pixelated') || stylesheet.includes('image-rendering: pixelated'), 'Pixel rendering rule is missing.');
 
-const scriptSize = statSync(resolve(assetDirectory, scripts[0])).size;
-assert(scriptSize < 2_200_000, `LPC test bundle is unexpectedly large: ${Math.round(scriptSize / 1024)} kB.`);
+const scriptSize = scripts.reduce((sum, file) => sum + statSync(resolve(assetDirectory, file)).size, 0);
+assert(scriptSize < 2_200_000, `LPC test bundles are unexpectedly large: ${Math.round(scriptSize / 1024)} kB.`);
 
-console.log(`LPC test validation passed: ${Math.round(scriptSize / 1024)} kB script bundle.`);
+console.log(`LPC test validation passed: ${Math.round(scriptSize / 1024)} kB across ${scripts.length} script bundle(s).`);
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
