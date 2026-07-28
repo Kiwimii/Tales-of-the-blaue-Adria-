@@ -13,7 +13,7 @@ permissions:
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 14
+    timeout-minutes: 16
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -35,7 +35,7 @@ jobs:
     if: github.event_name == 'push' && github.actor != 'github-actions[bot]'
     needs: check
     runs-on: ubuntu-latest
-    timeout-minutes: 14
+    timeout-minutes: 16
     permissions:
       contents: write
     steps:
@@ -51,12 +51,14 @@ jobs:
       - run: npm run validate:redesign
       - run: npm run build:lpc-test
       - run: npm run validate:lpc-test
+      - run: npm run build:lpc-main
+      - run: npm run validate:lpc-main
       - name: Commit generated browser builds
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -f docs/next docs/redesign docs/lpc-test
+          git add -f docs/next docs/redesign docs/lpc-test docs/lpc-main
           if git diff --cached --quiet; then
             echo "Browser builds already current."
           else

@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#10261f" />
+    <meta name="description" content="Tales of the Blaue Adria – spielbarer LPC-Konzeptbuild mit erweitertem Animationssystem." />
+    <title>Tales of the Blaue Adria · LPC Concept Build</title>
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div class="brand"><span>LPC CONCEPT BUILD</span><strong>Tales of the Blaue Adria</strong></div>
+        <nav>
+          <a href="../next/">Aktueller Build</a>
+          <a href="../lpc-test/">Figurentest</a>
+          <button id="reset-save" type="button">Spielstand löschen</button>
+        </nav>
+      </header>
+
+      <section class="layout">
+        <aside class="panel left-panel">
+          <section class="quest-card">
+            <span>AKTIVE QUEST</span>
+            <strong id="quest-title">Rein in den Wahnsinn</strong>
+            <p id="objective-text"></p>
+          </section>
+          <div class="status-line"><strong id="time-label"></strong><span id="condition-label"></span><b id="money-label"></b></div>
+          <section><h2>Bedürfnisse</h2><div id="needs-list" class="meter-list"></div></section>
+          <section><h2>Wochenendwerte</h2><div id="metrics-list" class="meter-list"></div></section>
+          <section><h2>Inventar</h2><div id="inventory-list" class="inventory-grid"></div></section>
+          <div class="quick-actions"><button id="quick-rest" type="button">60 Min. ruhen</button><button id="quick-toilet" type="button">Toilette</button></div>
+        </aside>
+
+        <section class="game-column">
+          <div class="game-frame">
+            <div id="lpc-main-game" class="game-mount" tabindex="0" aria-label="Spielbarer LPC-Konzeptbuild"></div>
+            <div id="interaction-prompt" class="interaction-prompt" hidden><kbd>E</kbd><span id="interaction-text">Interagieren</span></div>
+            <div class="mobile-controls" aria-label="Mobile Steuerung">
+              <div class="dpad">
+                <button type="button" data-direction="up" aria-label="Nach oben">▲</button>
+                <button type="button" data-direction="left" aria-label="Nach links">◀</button>
+                <button type="button" data-direction="down" aria-label="Nach unten">▼</button>
+                <button type="button" data-direction="right" aria-label="Nach rechts">▶</button>
+              </div>
+              <button id="mobile-action" class="action-button" type="button">AKTION</button>
+            </div>
+          </div>
+          <div id="completion-card" class="completion-card" hidden></div>
+          <section class="animation-lab">
+            <div><span>EIGENE ERWEITERUNGEN</span><strong>Animationen live testen</strong></div>
+            <div class="animation-buttons">
+              <button type="button" data-animation="idle">Atmen</button>
+              <button type="button" data-animation="talk">Reden</button>
+              <button type="button" data-animation="wave">Winken</button>
+              <button type="button" data-animation="drink">Trinken</button>
+              <button type="button" data-animation="cheer">Jubeln</button>
+              <button type="button" data-animation="stagger">Schwanken</button>
+              <button type="button" data-animation="hit">Treffer</button>
+              <button type="button" data-animation="sit">Sitzen</button>
+              <button type="button" data-animation="carry">Tragen</button>
+              <button type="button" data-animation="phone">Handy</button>
+            </div>
+          </section>
+        </section>
+
+        <aside class="panel right-panel">
+          <section><h2>Figuren und Beziehungen</h2><div id="relationship-list" class="relationship-list"></div></section>
+          <section><h2>Team</h2><div id="team-list" class="team-list"></div></section>
+          <section><h2>Wochenendchronik</h2><div id="chronicle-list" class="chronicle-list"></div></section>
+          <section class="concept-scope">
+            <h2>In diesem Build</h2>
+            <p>Charaktererstellung · Einkauf · Einlass · 13 Figuren · Beziehungen · Inventar · Bedürfnisse · Quests · Duell · Flip Cup · Beer Pong · Flunkyball · Erholung</p>
+          </section>
+        </aside>
+      </section>
+    </main>
+
+    <section id="setup-overlay" class="overlay setup-overlay">
+      <div class="setup-card">
+        <span class="eyebrow">LPC MAIN MIGRATION V1</span>
+        <h1>Das komplette Spielgefühl auf neuer Figurenbasis</h1>
+        <p>Dieser Build nutzt den echten Spielzustand, erweitert die LPC-Laufanimationen und verbindet sie mit dem bisherigen Wochenendkonzept.</p>
+        <div class="setup-grid">
+          <fieldset>
+            <legend>Deine Figur</legend>
+            <label>Name<input id="player-name" value="André" maxlength="18" /></label>
+            <label>Körper<select id="body-type"><option value="normal">Normal</option><option value="schmal">Schmal</option><option value="breit">Breit</option></select></label>
+            <label>Frisur<select id="hair-style"><option value="kurz">Kurz</option><option value="welle">Welle</option><option value="buzz">Buzz Cut</option><option value="cap">Cap</option></select></label>
+            <label>Accessoire<select id="accessory"><option value="keins">Keins</option><option value="brille">Brille</option><option value="bart">Bart</option><option value="ohrring">Ohrring</option></select></label>
+            <label>Eigenschaft<select id="trait"><option value="hilfsbereit">Hilfsbereit</option><option value="charmant">Charmant</option><option value="direkt">Direkt</option><option value="chaotisch">Chaotisch</option><option value="beobachtend">Beobachtend</option></select></label>
+            <div class="color-row">
+              <label>Haut<input id="skin-tone" type="color" value="#d9a67e" /></label>
+              <label>Haare<input id="hair-color" type="color" value="#4a3224" /></label>
+              <label>Shirt<input id="shirt-color" type="color" value="#e5ad43" /></label>
+              <label>Shorts<input id="shorts-color" type="color" value="#294954" /></label>
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend>Supermarkt · 25 € Budget</legend>
+            <div class="cart-grid">
+              <label>💧 Wasser <small>3 €</small><input id="cart-wasser" data-cart type="number" min="0" max="6" value="1" /></label>
+              <label>🌭 Würste <small>6 €</small><input id="cart-wuerste" data-cart type="number" min="0" max="4" value="1" /></label>
+              <label>🍺 Bier <small>4 €</small><input id="cart-bier" data-cart type="number" min="0" max="8" value="1" /></label>
+              <label>🥥 Batida <small>10 €</small><input id="cart-batida" data-cart type="number" min="0" max="3" value="0" /></label>
+              <label>🥨 Chips <small>3 €</small><input id="cart-chips" data-cart type="number" min="0" max="4" value="1" /></label>
+              <label>☕ Kaffee <small>4 €</small><input id="cart-kaffee" data-cart type="number" min="0" max="4" value="0" /></label>
+              <label>🧻 Klopapier <small>2 €</small><input id="cart-klopapier" data-cart type="number" min="0" max="2" value="1" /></label>
+              <label>💊 Tablette <small>4 €</small><input id="cart-tablette" data-cart type="number" min="0" max="3" value="0" /></label>
+            </div>
+            <div class="cart-total"><span>Gesamt</span><strong id="setup-total">18 € / 25 €</strong></div>
+          </fieldset>
+        </div>
+        <p id="setup-error" class="setup-error"></p>
+        <div class="setup-actions"><button id="continue-save" type="button" hidden>Spielstand fortsetzen</button><button id="start-weekend" type="button">Wochenende starten</button></div>
+      </div>
+    </section>
+
+    <section id="dialog-overlay" class="overlay" hidden>
+      <div class="dialog-card">
+        <div id="dialog-portrait" class="portrait">AJ</div>
+        <div><span id="dialog-role"></span><h2 id="dialog-name"></h2><p id="dialog-text"></p><button id="dialog-close" type="button">Weiter</button></div>
+      </div>
+    </section>
+
+    <section id="encounter-overlay" class="overlay" hidden>
+      <div class="encounter-card">
+        <span>SOZIALE PROBE</span><h2 id="encounter-name"></h2><p id="encounter-intro"></p>
+        <div id="encounter-result" class="encounter-result" hidden></div>
+        <div id="encounter-options" class="encounter-options"></div>
+        <button id="encounter-close" class="text-button" type="button">Abbrechen</button>
+      </div>
+    </section>
+
+    <section id="activity-overlay" class="overlay" hidden>
+      <div class="activity-card">
+        <span>SPIELBARE AKTIVITÄT</span><h2 id="activity-title"></h2><p id="activity-copy"></p>
+        <div class="timing-track"><i id="activity-target"></i><b id="activity-pointer"></b></div>
+        <button id="activity-action" type="button">STOPP</button>
+        <div id="activity-result" class="activity-result" hidden></div>
+        <button id="activity-close" class="text-button" type="button">Zurück in die Welt</button>
+      </div>
+    </section>
+
+    <div id="toast" class="toast" role="status"></div>
+    <script type="module" src="../src/lpc-main/main.ts"></script>
+  </body>
+</html>
