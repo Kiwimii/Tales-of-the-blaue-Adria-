@@ -10,11 +10,11 @@ const files = readdirSync(assetDirectory);
 const scripts = files.filter((file) => file.endsWith('.js'));
 const styles = files.filter((file) => file.endsWith('.css'));
 
-assert(scripts.length >= 1 && scripts.length <= 4, `Expected one to four LPC main script chunks, found ${scripts.length}.`);
-assert(styles.length === 1, `Expected one LPC main stylesheet, found ${styles.length}.`);
-assert(!files.some((file) => file.endsWith('.map')), 'LPC main build must not publish source maps.');
-assert(html.includes('LPC CONCEPT BUILD'), 'LPC main build identity is missing.');
-assert(html.includes('/Tales-of-the-blaue-Adria-/lpc-main/assets/'), 'LPC main build uses the wrong base path.');
+assert(scripts.length >= 1 && scripts.length <= 6, `Expected one to six LPC campaign script chunks, found ${scripts.length}.`);
+assert(styles.length === 1, `Expected one LPC campaign stylesheet, found ${styles.length}.`);
+assert(!files.some((file) => file.endsWith('.map')), 'LPC campaign build must not publish source maps.');
+assert(html.includes('LPC CAMPAIGN BUILD'), 'LPC campaign build identity is missing.');
+assert(html.includes('/Tales-of-the-blaue-Adria-/lpc-main/assets/'), 'LPC campaign build uses the wrong base path.');
 assert(html.includes('../next/') && html.includes('../lpc-test/'), 'Comparison links are missing.');
 
 const javascript = scripts.map((file) => readFileSync(resolve(assetDirectory, file), 'utf8')).join('\n');
@@ -22,23 +22,27 @@ const stylesheet = styles.map((file) => readFileSync(resolve(assetDirectory, fil
 
 for (const marker of [
   'tales-blaue-adria-lpc-main-v1',
-  'gundula-entry',
-  'manni-paper',
+  'tales-blaue-adria-lpc-campaign-meta-v2',
+  'entry-authority',
+  'ronnyBattle',
   'flipCup',
   'beerPong',
   'flunkyball',
-  'stagger',
-  'carry',
-  'phone',
+  'hedgePee',
+  'maslHole',
+  'cup-eye-contact',
+  'classic-high-five',
   'raw.githubusercontent.com/LiberatedPixelCup',
-]) assert(javascript.includes(marker), `Missing LPC main runtime marker: ${marker}`);
+]) assert(javascript.includes(marker), `Missing LPC campaign runtime marker: ${marker}`);
 
-assert(stylesheet.includes('.animation-buttons') && stylesheet.includes('.relationship-list'), 'LPC main system UI is missing.');
-assert(stylesheet.includes('image-rendering: pixelated') || stylesheet.includes('image-rendering:pixelated'), 'Pixel rendering rule is missing.');
+for (const marker of ['.intro-page', '.shop-items', '.battle-moves', '.romance-list', '.mobile-controls']) {
+  assert(stylesheet.includes(marker), `Missing LPC campaign stylesheet marker: ${marker}`);
+}
+assert(stylesheet.includes('image-rendering:pixelated') || stylesheet.includes('image-rendering: pixelated'), 'Pixel rendering rule is missing.');
 
 const totalSize = scripts.reduce((sum, file) => sum + statSync(resolve(assetDirectory, file)).size, 0);
-assert(totalSize < 2_800_000, `LPC main JavaScript is unexpectedly large: ${Math.round(totalSize / 1024)} kB.`);
-console.log(`LPC main validation passed: ${Math.round(totalSize / 1024)} kB across ${scripts.length} script chunk(s).`);
+assert(totalSize < 3_600_000, `LPC campaign JavaScript is unexpectedly large: ${Math.round(totalSize / 1024)} kB.`);
+console.log(`LPC campaign validation passed: ${Math.round(totalSize / 1024)} kB across ${scripts.length} script chunk(s).`);
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
