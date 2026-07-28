@@ -20,9 +20,9 @@ if (!Object.prototype.hasOwnProperty.call(cameraPrototype, 'rotation')) {
   Object.defineProperty(cameraPrototype, 'rotation', { configurable: true, writable: true, value: 0 });
 }
 
-const geom = Phaser.Geom as typeof Phaser.Geom & { Point?: new (x: number, y: number) => { x: number; y: number } };
+const geom = Phaser.Geom as typeof Phaser.Geom & { Point?: typeof Phaser.Math.Vector2 };
 if (!geom.Point) {
-  geom.Point = class Point {
-    constructor(public x: number, public y: number) {}
+  geom.Point = class Point extends Phaser.Math.Vector2 {
+    constructor(x: number, y: number) { super(x, y); }
   };
 }
