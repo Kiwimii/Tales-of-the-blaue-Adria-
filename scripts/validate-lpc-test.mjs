@@ -10,7 +10,10 @@ const files = readdirSync(assetDirectory);
 const scripts = files.filter((file) => file.endsWith('.js'));
 const styles = files.filter((file) => file.endsWith('.css'));
 
-assert(scripts.length >= 1 && scripts.length <= 2, `Expected bootstrap and optional lazy LPC chunk, found ${scripts.length}.`);
+assert(scripts.length === 3, `Expected bootstrap, game logic and Phaser chunks, found ${scripts.length}.`);
+assert(scripts.some((file) => file.startsWith('index-')), 'LPC bootstrap chunk is missing.');
+assert(scripts.some((file) => file.startsWith('main-')), 'LPC game-logic chunk is missing.');
+assert(scripts.some((file) => file.startsWith('phaser.esm-')), 'Dedicated Phaser chunk is missing.');
 assert(styles.length === 1, `Expected one LPC test stylesheet, found ${styles.length}.`);
 assert(!files.some((file) => file.endsWith('.map')), 'LPC test must not publish source maps.');
 assert(html.includes('LPC CHARACTER TEST'), 'LPC build identity is missing.');
@@ -30,7 +33,7 @@ assert(stylesheet.includes('image-rendering:pixelated') || stylesheet.includes('
 const scriptSize = scripts.reduce((sum, file) => sum + statSync(resolve(assetDirectory, file)).size, 0);
 assert(scriptSize < 2_200_000, `LPC test bundles are unexpectedly large: ${Math.round(scriptSize / 1024)} kB.`);
 
-console.log(`LPC test validation passed: ${Math.round(scriptSize / 1024)} kB across ${scripts.length} script bundle(s).`);
+console.log(`LPC test validation passed: ${Math.round(scriptSize / 1024)} kB across ${scripts.length} script bundles.`);
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
