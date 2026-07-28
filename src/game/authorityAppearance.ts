@@ -1,3 +1,5 @@
+import { RELATIONSHIP_CHARACTERS } from './content';
+
 export type AuthorityExpression = 'grim';
 export type AuthorityOutfit = 'strict-jacket' | 'tank-top';
 
@@ -31,6 +33,22 @@ export const AUTHORITY_APPEARANCE: Record<'gundula' | 'uli', AuthorityAppearance
     shirtColor: 0x353b38,
   },
 };
+
+const AUTHORITY_TONE = {
+  gundula: {
+    nickname: 'Die Platzordnung auf zwei Beinen',
+    line: '„Was genau glaubst du, warum ich dich so ansehe?“ Das Klemmbrett ist bereits geöffnet.',
+  },
+  uli: {
+    nickname: 'Der Schrankenblock',
+    line: '„Nein.“ Er sagt es, bevor du überhaupt gefragt hast, und sortiert dabei seinen Schlüsselbund.',
+  },
+} as const;
+
+for (const character of RELATIONSHIP_CHARACTERS) {
+  if (character.id !== 'gundula' && character.id !== 'uli') continue;
+  Object.assign(character, AUTHORITY_TONE[character.id]);
+}
 
 export function authorityAppearance(id: string): AuthorityAppearance | null {
   return id === 'gundula' || id === 'uli' ? AUTHORITY_APPEARANCE[id] : null;
