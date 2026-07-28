@@ -24,7 +24,8 @@ describe('Sprint 89 experience', () => {
     expect(css).toContain('.mobile-action-zone');
     expect(css).toMatch(/\.mobile-action-zone\s*\{[\s\S]*?width:\s*50%/);
     expect(css).toMatch(/\.mobile-action-zone\s*\{[\s\S]*?height:\s*100%/);
-    expect(css).toMatch(/\.mobile-action-zone\s*\{[\s\S]*?background:\s*transparent/);
+    expect(css).toMatch(/\.mobile-action-zone\s*\{[\s\S]*?background-color:\s*transparent/);
+    expect(css).toMatch(/\.mobile-action-zone\s*\{[\s\S]*?background-image:\s*none/);
     expect(css).not.toContain('pointer-events: none');
     expect(css).toContain('.mobile-action-zone > *');
   });
