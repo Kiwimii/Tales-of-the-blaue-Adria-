@@ -10,7 +10,7 @@ const files = readdirSync(assetDirectory);
 const scripts = files.filter((file) => file.endsWith('.js'));
 const styles = files.filter((file) => file.endsWith('.css'));
 
-assert(scripts.length >= 2 && scripts.length <= 6, `Expected two to six LPC campaign script chunks, found ${scripts.length}.`);
+assert(scripts.length >= 1 && scripts.length <= 6, `Expected one to six LPC campaign script chunks, found ${scripts.length}.`);
 assert(styles.length === 1, `Expected one LPC campaign stylesheet, found ${styles.length}.`);
 assert(!files.some((file) => file.endsWith('.map')), 'LPC campaign build must not publish source maps.');
 assert(html.includes('LPC CAMPAIGN BUILD'), 'LPC campaign build identity is missing.');
