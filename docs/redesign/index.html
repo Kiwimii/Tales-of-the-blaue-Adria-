@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#10251f" />
+    <meta name="description" content="Tales of the Blaue Adria – eigenständiger Redesign-Testbuild." />
+    <title>Tales of the Blaue Adria · Redesign</title>
+    <script type="module" crossorigin src="/Tales-of-the-blaue-Adria-/redesign/assets/index-vVV-gGq0.js"></script>
+    <link rel="stylesheet" crossorigin href="/Tales-of-the-blaue-Adria-/redesign/assets/index-CMDKar2X.css">
+  </head>
+  <body>
+    <main class="redesign-shell">
+      <header class="topbar">
+        <div class="brand-block">
+          <span class="build-badge">REDESIGN TESTBUILD</span>
+          <strong>Tales of the Blaue Adria</strong>
+        </div>
+        <nav class="build-links" aria-label="Build-Auswahl">
+          <a href="../next/">Aktueller Build</a>
+          <button id="reset-progress" type="button">Teststand zurücksetzen</button>
+        </nav>
+      </header>
+
+      <section class="game-stage" aria-label="Spielbereich">
+        <div id="redesign-game" class="game-mount" aria-label="Redesign-Spiel"></div>
+
+        <div class="hud-layer" aria-live="polite">
+          <section class="objective-card">
+            <span id="quest-kicker">ANKOMMEN</span>
+            <strong id="quest-title">Ankommen</strong>
+            <p id="quest-objective">Redesign wird geladen …</p>
+          </section>
+
+          <section class="status-card">
+            <div><span>ZEIT</span><strong id="world-time">16:40</strong></div>
+            <div><span>FORTSCHRITT</span><strong id="quest-progress">0 / 5</strong></div>
+          </section>
+
+          <section id="inventory-card" class="inventory-card" aria-label="Inventar"></section>
+
+          <div id="interaction-prompt" class="interaction-prompt" hidden>
+            <kbd>E</kbd>
+            <span id="interaction-label">Interagieren</span>
+          </div>
+        </div>
+
+        <section id="dialog" class="dialog" hidden aria-modal="true" role="dialog">
+          <div class="dialog-portrait" id="dialog-portrait">A</div>
+          <div class="dialog-content">
+            <span id="dialog-role">CAMPINGPLATZ</span>
+            <strong id="dialog-title">Hinweis</strong>
+            <p id="dialog-body"></p>
+            <button id="dialog-close" type="button">Weiter</button>
+          </div>
+        </section>
+
+        <section id="intro" class="intro-panel">
+          <span class="build-badge">SPIELBARER DESIGN-VERSUCH</span>
+          <h1>Eine neue visuelle Richtung</h1>
+          <p>Eigene Karte, konsistentes Pixel-Art-System, vollständiger kurzer Questablauf und separate Speicherung. Der bestehende Build bleibt unverändert.</p>
+          <div class="intro-features">
+            <span>Rezeption</span><span>Zeltkreis</span><span>Servicehof</span><span>Festwiese</span><span>Strand</span>
+          </div>
+          <button id="start-redesign" type="button">Redesign betreten</button>
+        </section>
+
+        <div class="mobile-controls" aria-label="Mobile Steuerung">
+          <div class="dpad">
+            <button type="button" data-direction="up" aria-label="Nach oben">▲</button>
+            <button type="button" data-direction="left" aria-label="Nach links">◀</button>
+            <button type="button" data-direction="down" aria-label="Nach unten">▼</button>
+            <button type="button" data-direction="right" aria-label="Nach rechts">▶</button>
+          </div>
+          <button id="mobile-action" class="mobile-action" type="button">AKTION</button>
+        </div>
+      </section>
+
+      <footer class="build-note">
+        <strong>Testziel:</strong> Nicht jedes bestehende Minispiel ist hier bereits nachgebaut. Dieser zweite Build prüft bewusst zuerst Weltgestaltung, Lesbarkeit, Stimmung und Kerninteraktion als zusammenhängende neue Richtung.
+      </footer>
+    </main>
+
+  </body>
+</html>
