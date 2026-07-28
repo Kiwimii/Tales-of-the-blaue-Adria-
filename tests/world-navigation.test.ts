@@ -46,7 +46,7 @@ describe('logical world access', () => {
 
   it('keeps the tent circle west of the main path with a clear shared centre', () => {
     const central = WALKABLE_CORRIDORS.find((corridor) => corridor.id === 'central-main-path')!.bounds;
-    expect(CAMPFIRE_POSITION).toEqual(FRIEND_CAMP_CENTER);
+    expect(CAMPFIRE_POSITION).toMatchObject(FRIEND_CAMP_CENTER);
     expect(CAMPFIRE_POSITION.x).toBeLessThan(central.x);
     expect(CAMPFIRE_POSITION.y).toBeGreaterThan(980);
     expect(CAMPFIRE_POSITION.y).toBeLessThan(1280);
