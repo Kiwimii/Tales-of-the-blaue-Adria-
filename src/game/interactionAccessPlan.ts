@@ -11,10 +11,38 @@ export interface InteractionAccessPath {
 
 export const INTERACTION_ACCESS_PATHS: readonly InteractionAccessPath[] = [
   {
-    id: 'tent-front-walk',
-    from: { x: 150, y: 1160 },
-    to: { x: 820, y: 1160 },
-    width: 42,
+    id: 'tent-circle-west-entry',
+    from: { x: 210, y: 1120 },
+    to: { x: 650, y: 1120 },
+    width: 38,
+    surface: 'gravel',
+  },
+  {
+    id: 'tent-circle-east-service',
+    from: { x: 650, y: 1120 },
+    to: { x: 1320, y: 1120 },
+    width: 38,
+    surface: 'gravel',
+  },
+  {
+    id: 'tent-circle-north-gap',
+    from: { x: 650, y: 950 },
+    to: { x: 650, y: 1120 },
+    width: 34,
+    surface: 'gravel',
+  },
+  {
+    id: 'tent-circle-south-gap',
+    from: { x: 650, y: 1120 },
+    to: { x: 650, y: 1270 },
+    width: 34,
+    surface: 'gravel',
+  },
+  {
+    id: 'home-tent-door-spur',
+    from: { x: 210, y: 1110 },
+    to: { x: 212, y: 1160 },
+    width: 32,
     surface: 'gravel',
   },
 ] as const;
