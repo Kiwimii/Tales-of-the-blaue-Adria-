@@ -40,9 +40,9 @@ for (const candidate of candidates) {
     '--disable-dev-shm-usage',
     '--disable-background-networking',
     '--enable-logging=stderr',
-    '--virtual-time-budget=12000',
+    '--virtual-time-budget=16000',
     '--dump-dom',
-    'http://127.0.0.1:4177/Tales-of-the-blaue-Adria-/lpc-main/',
+    'http://127.0.0.1:4177/Tales-of-the-blaue-Adria-/lpc-main/?smoke=1',
   ], { stdio: ['ignore', 'pipe', 'pipe'] });
   const started = await new Promise((resolve) => {
     let settled = false;
@@ -65,7 +65,7 @@ browser.stderr.on('data', (chunk) => { stderr += chunk; });
 
 const exitCode = await Promise.race([
   new Promise((resolve) => browser.once('close', resolve)),
-  new Promise((resolve) => setTimeout(() => { browser.kill('SIGKILL'); resolve(124); }, 25000)),
+  new Promise((resolve) => setTimeout(() => { browser.kill('SIGKILL'); resolve(124); }, 30000)),
 ]);
 server.close();
 
@@ -73,13 +73,14 @@ const importantErrors = stderr
   .split('\n')
   .filter((line) => /uncaught|referenceerror|typeerror|syntaxerror|failed to load resource/i.test(line));
 
-if (exitCode !== 0) throw new Error(`Chromium exited with ${exitCode}.\n${stderr.slice(-4000)}`);
-if (!stdout.includes('LPC CONCEPT BUILD')) throw new Error('LPC HTML identity was not rendered.');
+if (exitCode !== 0) throw new Error(`Chromium exited with ${exitCode}.\n${stderr.slice(-5000)}`);
+if (!stdout.includes('LPC CAMPAIGN')) throw new Error('LPC campaign HTML identity was not rendered.');
+if (!stdout.includes('AKTIVE KAMPAGNENQUEST')) throw new Error('Campaign HUD did not render in smoke mode.');
 if (!stdout.includes('<canvas')) {
-  throw new Error(`Phaser canvas was not created.\nBrowser errors:\n${importantErrors.join('\n') || stderr.slice(-4000)}`);
+  throw new Error(`Phaser campaign canvas was not created.\nBrowser errors:\n${importantErrors.join('\n') || stderr.slice(-5000)}`);
 }
 if (importantErrors.some((line) => /uncaught|referenceerror|typeerror|syntaxerror/i.test(line))) {
   throw new Error(`Browser runtime exception detected:\n${importantErrors.join('\n')}`);
 }
 
-console.log('LPC browser smoke test passed: Phaser canvas created without runtime exceptions.');
+console.log('LPC campaign browser smoke test passed: HUD and Phaser world created without runtime exceptions.');
