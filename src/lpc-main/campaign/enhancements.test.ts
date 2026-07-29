@@ -52,7 +52,7 @@ describe('campaign sprint 7-18 enhancements', () => {
   it('contains invisible controls, battle staging and reduced-motion fallbacks', () => {
     const css = readFileSync(resolve(root, 'src/lpc-main/campaign/enhancements.css'), 'utf8');
     for (const marker of [
-      '.invisible-joystick-zone', '.mobile-context-action', '.cinematic-battle-stage',
+      '.mobile-move-zone', '.mobile-context-action', '.cinematic-battle-stage',
       '.world-atmosphere', '.campaign-reduced-motion', '.mobile-panel-sheet',
     ]) expect(css).toContain(marker);
   });
