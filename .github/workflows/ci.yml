@@ -19,6 +19,8 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -33,8 +35,16 @@ jobs:
           name: validation-log
           path: validation.log
           retention-days: 2
+      - name: Upload validated LPC browser build
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lpc-main-browser-build
+          path: docs/lpc-main
+          retention-days: 2
+          if-no-files-found: error
       - name: Commit validated browser builds
-        if: success() && github.event_name == 'push'
+        if: success()
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
@@ -44,5 +54,5 @@ jobs:
             echo "Browser builds already current."
           else
             git commit -m "Publish current browser builds"
-            git push
+            git push origin "HEAD:${GITHUB_HEAD_REF:-${GITHUB_REF_NAME}}"
           fi

@@ -37,10 +37,16 @@ for (const candidate of candidates) {
     '--headless=new',
     '--no-sandbox',
     '--disable-gpu',
+    '--enable-unsafe-swiftshader',
     '--disable-dev-shm-usage',
     '--disable-background-networking',
+    '--disable-extensions',
+    '--disable-sync',
+    '--no-first-run',
+    '--no-default-browser-check',
+    '--run-all-compositor-stages-before-draw',
     '--enable-logging=stderr',
-    '--virtual-time-budget=16000',
+    '--virtual-time-budget=9000',
     '--dump-dom',
     'http://127.0.0.1:4177/Tales-of-the-blaue-Adria-/lpc-main/?smoke=1',
   ], { stdio: ['ignore', 'pipe', 'pipe'] });
@@ -65,7 +71,7 @@ browser.stderr.on('data', (chunk) => { stderr += chunk; });
 
 const exitCode = await Promise.race([
   new Promise((resolve) => browser.once('close', resolve)),
-  new Promise((resolve) => setTimeout(() => { browser.kill('SIGKILL'); resolve(124); }, 30000)),
+  new Promise((resolve) => setTimeout(() => { browser.kill('SIGKILL'); resolve(124); }, 45000)),
 ]);
 server.close();
 
@@ -76,6 +82,8 @@ const importantErrors = stderr
 if (exitCode !== 0) throw new Error(`Chromium exited with ${exitCode}.\n${stderr.slice(-5000)}`);
 if (!stdout.includes('LPC CAMPAIGN')) throw new Error('LPC campaign HTML identity was not rendered.');
 if (!stdout.includes('AKTIVE KAMPAGNENQUEST')) throw new Error('Campaign HUD did not render in smoke mode.');
+if (!stdout.includes('mobile-move-zone')) throw new Error('Invisible mobile joystick zone did not render.');
+if (!stdout.includes('cinematic-battle-stage')) throw new Error('Cinematic battle presentation did not initialize.');
 if (!stdout.includes('<canvas')) {
   throw new Error(`Phaser campaign canvas was not created.\nBrowser errors:\n${importantErrors.join('\n') || stderr.slice(-5000)}`);
 }
@@ -83,4 +91,4 @@ if (importantErrors.some((line) => /uncaught|referenceerror|typeerror|syntaxerro
   throw new Error(`Browser runtime exception detected:\n${importantErrors.join('\n')}`);
 }
 
-console.log('LPC campaign browser smoke test passed: HUD and Phaser world created without runtime exceptions.');
+console.log('LPC campaign browser smoke test passed: mobile controls, battle staging and Phaser world rendered without runtime exceptions.');
