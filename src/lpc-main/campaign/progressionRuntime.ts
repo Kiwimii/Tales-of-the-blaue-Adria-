@@ -2,25 +2,8 @@ import { GameStore, type StorageAdapter } from '../../game/state/GameStore';
 import { COMBAT_MOVES } from '../../game/combatMoves';
 import type { CombatMoveId, GameSnapshot } from '../../game/types';
 import { campaignMeta } from './metaStore';
-import {
-  ANECDOTES,
-  COMPANION_ACTIONS,
-  branchLabel,
-  weekendRank,
-  type AnecdoteId,
-  type AttackBranch,
-} from './progression';
-import {
-  CAMPAIGN_OPPONENTS,
-  applyActiveCompanion,
-  armSignatureAttack,
-  battlePrediction,
-  createBattle,
-  currentCampaignBattle,
-  resolveBattleTurn,
-  setBattleProgressionContext,
-  type BattleState,
-} from './battleEngine';
+import { ANECDOTES, COMPANION_ACTIONS, branchLabel, weekendRank, type AnecdoteId, type AttackBranch } from './progression';
+import { CAMPAIGN_OPPONENTS, applyActiveCompanion, armSignatureAttack, battlePrediction, createBattle, currentCampaignBattle, resolveBattleTurn, setBattleProgressionContext, type BattleState } from './battleEngine';
 import './progression.css';
 
 const SAVE_KEY = 'tales-blaue-adria-lpc-main-v1';
@@ -33,6 +16,8 @@ class NamespacedStorage implements StorageAdapter {
 let finalBattle: BattleState | undefined;
 let patchQueued = false;
 let inferenceLock = false;
+const observerOptions: MutationObserverInit = { childList: true, subtree: true, characterData: true };
+const observer = new MutationObserver(() => queuePatch());
 
 campaignMeta.subscribe((meta) => {
   setBattleProgressionContext(campaignMeta.progressionContext());
@@ -43,14 +28,12 @@ campaignMeta.subscribe((meta) => {
 window.addEventListener('lpc-campaign-attack-use', ((event: CustomEvent<{ id: CombatMoveId; success: boolean }>) => {
   campaignMeta.recordAttackUse(event.detail.id, event.detail.success);
 }) as EventListener);
-
 window.addEventListener('lpc-campaign-battle-state', ((event: CustomEvent<BattleState>) => {
   patchBattle(event.detail);
   if (event.detail.finished && event.detail.won && event.detail.opponentId === 'ronny') campaignMeta.recordBattleVictory('ronny');
 }) as EventListener);
 
-const observer = new MutationObserver(() => queuePatch());
-observer.observe(document.documentElement, { childList: true, subtree: true, characterData: true });
+observer.observe(document.documentElement, observerOptions);
 window.addEventListener('load', () => queuePatch());
 queuePatch();
 
@@ -59,28 +42,30 @@ function inferProgression(meta: ReturnType<typeof campaignMeta.snapshot>): void 
   try {
     if (meta.questStage === 'reunion' && meta.firstBeerOpened && meta.activeTeam.length >= 1) campaignMeta.setStage('free-weekend', 'Die Gruppe ist wieder vollständig genug, um Entscheidungen kollektiv falsch zu treffen. Das freie Wochenende beginnt.');
     const thresholds: Record<string, { score: number; anecdote: AnecdoteId }> = {
-      flipCup: { score: 112, anecdote: 'all-at-once' },
-      beerPong: { score: 108, anecdote: 'bank-shot' },
-      flunkyball: { score: 145, anecdote: 'stop-means-stop' },
-      maslHole: { score: 255, anecdote: 'masl-tunnel' },
+      flipCup: { score: 112, anecdote: 'all-at-once' }, beerPong: { score: 108, anecdote: 'bank-shot' }, flunkyball: { score: 145, anecdote: 'stop-means-stop' }, maslHole: { score: 255, anecdote: 'masl-tunnel' },
     };
     for (const [id, rule] of Object.entries(thresholds)) if ((meta.miniResults[id]?.best ?? 0) >= rule.score) campaignMeta.unlockAnecdote(rule.anecdote);
     if (meta.flags.hedgeRelieved && meta.suspicion < 15) campaignMeta.unlockAnecdote('hedge-silent');
     if (meta.flags.hedgeCaught) campaignMeta.unlockAnecdote('gundula-noted');
-    campaignMeta.setFlag('progression-v3-online', true);
+    if (!meta.flags['progression-v3-online']) campaignMeta.setFlag('progression-v3-online', true);
   } finally { inferenceLock = false; }
 }
 
 function queuePatch(): void {
   if (patchQueued) return;
   patchQueued = true;
-  queueMicrotask(() => {
+  window.setTimeout(() => {
     patchQueued = false;
-    patchHud();
-    patchCampfireModal();
-    patchQuestBoard();
-    const state = currentCampaignBattle(); if (state) patchBattle(state);
-  });
+    observer.disconnect();
+    try {
+      patchHud();
+      patchCampfireModal();
+      patchQuestBoard();
+      const state = currentCampaignBattle(); if (state) patchBattle(state);
+    } finally {
+      observer.observe(document.documentElement, observerOptions);
+    }
+  }, 16);
 }
 
 function patchHud(): void {
@@ -90,18 +75,19 @@ function patchHud(): void {
     const badge = document.createElement('em'); badge.className = 'rank-badge'; badge.innerHTML = '<small>RUF</small><strong></strong>'; stats.append(badge);
   }
   const rank = weekendRank(campaignMeta.snapshot().weekendScore);
-  const rankStrong = stats?.querySelector<HTMLElement>('.rank-badge strong'); if (rankStrong) rankStrong.textContent = rank.label;
-
+  const rankStrong = stats?.querySelector<HTMLElement>('.rank-badge strong'); if (rankStrong && rankStrong.textContent !== rank.label) rankStrong.textContent = rank.label;
   const meta = campaignMeta.snapshot();
   document.querySelectorAll<HTMLButtonElement>('[data-attack-toggle]').forEach((button) => {
     const id = button.dataset.attackToggle as CombatMoveId; const mastery = meta.attackMastery[id]; const small = button.querySelector('small');
-    if (small) small.textContent = `${meta.equippedAttacks.includes(id) ? 'ausgerüstet' : 'gelernt'} · M${mastery?.level ?? 1} · ${branchLabel(mastery?.branch)}`;
+    const text = `${meta.equippedAttacks.includes(id) ? 'ausgerüstet' : 'gelernt'} · M${mastery?.level ?? 1} · ${branchLabel(mastery?.branch)}`;
+    if (small && small.textContent !== text) small.textContent = text;
   });
   const attackList = document.getElementById('attack-list');
   if (attackList) {
     let anecdotes = attackList.parentElement?.querySelector<HTMLElement>('.anecdote-hud');
     if (!anecdotes) { anecdotes = document.createElement('div'); anecdotes.className = 'anecdote-hud'; attackList.parentElement?.append(anecdotes); }
-    anecdotes.innerHTML = `<b>Anekdoten ${meta.equippedAnecdotes.length}/2</b>${meta.equippedAnecdotes.map((id) => `<span>${escapeHtml(ANECDOTES[id].label)}</span>`).join('') || '<small>Noch keine ausgerüstet.</small>'}`;
+    const html = `<b>Anekdoten ${meta.equippedAnecdotes.length}/2</b>${meta.equippedAnecdotes.map((id) => `<span>${escapeHtml(ANECDOTES[id].label)}</span>`).join('') || '<small>Noch keine ausgerüstet.</small>'}`;
+    if (anecdotes.innerHTML !== html) anecdotes.innerHTML = html;
   }
 }
 
@@ -131,7 +117,7 @@ function patchQuestBoard(): void {
 
 function patchBattle(state: BattleState): void {
   const modal = document.getElementById('battle-modal'); if (!modal || modal.hidden) return;
-  const round = document.getElementById('battle-round'); if (round) round.textContent = `Runde ${state.round} · ${state.phaseLabel} · Momentum ${'●'.repeat(state.momentum)}${'○'.repeat(3 - state.momentum)}`;
+  const round = document.getElementById('battle-round'); const roundText = `Runde ${state.round} · ${state.phaseLabel} · Momentum ${'●'.repeat(state.momentum)}${'○'.repeat(3 - state.momentum)}`; if (round && round.textContent !== roundText) round.textContent = roundText;
   updateBattleBars(state);
   const moves = document.getElementById('battle-moves'); if (!moves || state.finished) return;
   moves.querySelectorAll('.progression-support,.signature-button').forEach((node) => node.remove());
@@ -158,11 +144,11 @@ function updateBattleBars(state: BattleState): void {
   const playerValue = document.getElementById('battle-player-value'); const enemyValue = document.getElementById('battle-enemy-value');
   if (playerValue) playerValue.textContent = `${Math.round(state.player.frustration)} / ${state.player.maxFrustration}`;
   if (enemyValue) enemyValue.textContent = `${Math.round(state.enemy.frustration)} / ${state.enemy.maxFrustration}`;
-  const log = document.getElementById('battle-log'); if (log) log.innerHTML = state.log.slice().reverse().map((line, i) => `<p class="${i === 0 ? 'latest' : ''}">${escapeHtml(line)}</p>`).join('');
+  const log = document.getElementById('battle-log'); const html = state.log.slice().reverse().map((line, i) => `<p class="${i === 0 ? 'latest' : ''}">${escapeHtml(line)}</p>`).join(''); if (log && log.innerHTML !== html) log.innerHTML = html;
 }
 
 function startFinalBattle(): void {
-  document.getElementById('generic-modal')?.setAttribute('hidden', '');
+  const generic = document.getElementById('generic-modal'); if (generic) generic.hidden = true;
   const battle = document.getElementById('battle-modal'); if (!battle) return; battle.hidden = false; document.body.classList.add('campaign-modal-open');
   finalBattle = createBattle('sunday-inspection', campaignMeta.progressionContext()); renderFinalBattle(); animate('gundula', 'point'); animate('uli', 'carry');
 }
@@ -171,8 +157,7 @@ function renderFinalBattle(): void {
   const state = finalBattle; if (!state) return; const opponent = CAMPAIGN_OPPONENTS['sunday-inspection'];
   const title = document.getElementById('battle-title'); if (title) title.textContent = `${opponent.name} · ${opponent.title}`;
   updateBattleBars(state); patchBattle(state);
-  const close = document.getElementById('battle-close') as HTMLButtonElement | null;
-  const moves = document.getElementById('battle-moves'); if (!moves) return;
+  const close = document.getElementById('battle-close') as HTMLButtonElement | null; const moves = document.getElementById('battle-moves'); if (!moves) return;
   if (state.finished) {
     moves.innerHTML = `<div class="battle-finish ${state.won ? 'won' : 'lost'}"><strong>${state.won ? 'WOCHENENDE BESTANDEN' : 'KAUTION GEFÄHRDET'}</strong><p>${state.won ? 'Das Abschlussprotokoll endet ohne Nachforderung.' : 'Die Abnahme kann erneut vorbereitet und versucht werden.'}</p></div>`;
     if (close) close.hidden = false; if (state.won) campaignMeta.winFinalBattle(); return;
