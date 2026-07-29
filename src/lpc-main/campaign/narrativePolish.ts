@@ -22,9 +22,9 @@ const variants: Record<string, string[][]> = {
     ['Jeder Artikel ist eine spätere Lösung oder ein besser verpacktes Problem.', 'Der Kassenbon dokumentiert Entscheidungen, die später niemand getroffen haben will.'],
   ],
   authority: [
-    ['Gundula führt Regeln nicht aus. Sie verkörpert sie.', 'Ulis Schlüsselbund enthält vermutlich auch Schlüssel für Gebäude, die noch gar nicht gebaut wurden.'],
-    ['Vor der Schranke wartet kein Empfangskomitee, sondern eine zweiköpfige Zuständigkeitsprüfung.', 'Widerspruch verlängert das Gespräch. Zustimmung macht beide misstrauisch.'],
-    ['Gundula besitzt ein Klemmbrett. Uli besitzt Zeit. Beides arbeitet gegen euch.', 'Die erste Bossarena ist asphaltiert und offiziell ein Zufahrtsbereich.'],
+    ['Gundula sitzt hinter dem Klemmbrett wie eine angeschickerte Königin ohne Königreich.', 'Uli bewacht die Schranke, als hätte er sie persönlich im Krieg erobert.'],
+    ['Beide wollen dich nicht verstehen. Sie wollen sehen, ob du klein beigibst, mitpöbelst oder ihr Ego schneller fütterst als sie ihr Bier.', 'Wer „passt, Chef“ glaubwürdig sagt, kommt hier weiter als mit drei korrekten Formularen.'],
+    ['Die erste Bossarena riecht nach Asphalt, Schlüsselbund und Frühschoppen.', 'Ihre größte Stärke ist Lautstärke. Ihre größte Schwäche ist jede Form von Bewunderung mit Getränk.'],
   ],
   reservation: [
     ['Vier nahezu gleiche Namen stehen auf der Liste. Nur einer führt nicht zu einer Familie im Ruhebereich.', 'Falsches Lesen kostet Minuten. Lautes falsches Lesen kostet zusätzlich Würde.'],

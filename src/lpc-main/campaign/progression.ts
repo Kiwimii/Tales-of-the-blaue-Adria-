@@ -47,25 +47,33 @@ export function masteryAccuracy(state?: AttackMasteryState): number { if (!state
 export function branchLabel(branch?: AttackBranch): string { return branch === 'impact' ? 'Wirkung' : branch === 'control' ? 'Kontrolle' : 'Spezialisierung offen'; }
 export function opponentPhase(opponentId: ProgressionOpponentId, enemyRatio: number): { id: string; label: string; description: string } {
   const phase = enemyRatio < .34 ? 1 : enemyRatio < .7 ? 2 : 3;
-  if (opponentId === 'entry-authority') { if (phase === 1) return { id: 'formal-control', label: 'Formale Kontrolle', description: 'Freundlichkeit und Zustimmung brechen das Verfahren.' }; if (phase === 2) return { id: 'suspicion', label: 'Misstrauen', description: 'Team, Charme und Unterbrechung gewinnen an Wert.' }; return { id: 'control-loss', label: 'Kontrollverlust', description: 'Chaos wirkt stark, Fehler werden sofort protokolliert.' }; }
+  if (opponentId === 'entry-authority') {
+    if (phase === 1) return { id: 'schranken-gockel', label: 'Schranken-Gockelmodus', description: 'Gundula und Uli bauen sich grimmig auf. Ego, Zustimmung, Bier und kumpelhafte Nähe bringen sie schnell aus dem Konzept.' };
+    if (phase === 2) return { id: 'angeschickerte-stichelei', label: 'Angeschickerte Stichelei', description: 'Der Ton wird persönlicher und pöbelnder. Witz, Teamdruck, Beer Pong und gemeinsame Feindbilder treffen besonders gut.' };
+    return { id: 'gekraenkte-platzherrschaft', label: 'Gekränkte Platzherrschaft', description: 'Ihre Autorität kippt in lautes Aufspielen. Chaos, Gruppenspott und absurde Legenden zerstören den Rest der Fassade.' };
+  }
   if (opponentId === 'ronny') { if (phase === 1) return { id: 'monologue', label: 'Monolog', description: 'Unterbrechung und trockener Witz treffen gut.' }; if (phase === 2) return { id: 'defense', label: 'Begriffsverteidigung', description: 'Logik und Fremdscham öffnen Lücken.' }; return { id: 'contradiction-collapse', label: 'Widerspruchskollaps', description: 'Logik-/Witzkombos können den Kampf beenden.' }; }
   if (phase === 1) return { id: 'inspection', label: 'Platzabnahme', description: 'Müll, Aufbau und offene Quests werden gegen dich verwendet.' };
   if (phase === 2) return { id: 'witnesses', label: 'Zeugenaussagen', description: 'Beziehungen, Ruf und Anekdoten entscheiden.' };
   return { id: 'deposit', label: 'Kaution und Abreise', description: 'Alle Folgen laufen im Abschlussprotokoll zusammen.' };
 }
 export function phaseMultiplier(opponentId: ProgressionOpponentId, phaseId: string, tag: CombatMoveTag): number {
-  if (opponentId === 'entry-authority') { if (phaseId === 'formal-control') return tag === 'rapport' || tag === 'submission' ? 1.22 : tag === 'logic' ? .78 : 1; if (phaseId === 'suspicion') return tag === 'team' || tag === 'charm' || tag === 'wit' ? 1.18 : tag === 'submission' ? .78 : 1; return tag === 'chaos' ? 1.32 : tag === 'guard' ? .82 : 1; }
+  if (opponentId === 'entry-authority') {
+    if (phaseId === 'schranken-gockel') return tag === 'rapport' || tag === 'submission' || tag === 'drink' ? 1.3 : tag === 'logic' ? .62 : 1;
+    if (phaseId === 'angeschickerte-stichelei') return tag === 'team' || tag === 'charm' || tag === 'wit' || tag === 'drink' ? 1.24 : tag === 'logic' ? .75 : 1;
+    return tag === 'chaos' || tag === 'team' || tag === 'charm' ? 1.36 : tag === 'guard' ? .82 : tag === 'logic' ? .7 : 1;
+  }
   if (opponentId === 'ronny') { if (phaseId === 'monologue') return tag === 'wit' ? 1.25 : tag === 'submission' ? .72 : 1; if (phaseId === 'defense') return tag === 'logic' || tag === 'style' ? 1.2 : 1; return tag === 'logic' || tag === 'wit' ? 1.28 : tag === 'rapport' ? .75 : 1; }
   if (phaseId === 'inspection') return tag === 'logic' || tag === 'guard' ? 1.18 : tag === 'chaos' ? .72 : 1;
   if (phaseId === 'witnesses') return tag === 'team' || tag === 'rapport' || tag === 'charm' ? 1.24 : 1;
   return tag === 'wit' || tag === 'chaos' ? 1.22 : tag === 'submission' ? .8 : 1;
 }
 export function comboBonus(previousTag: CombatMoveTag | undefined, nextTag: CombatMoveTag): { multiplier: number; label: string } {
-  if (previousTag === 'rapport' && nextTag === 'logic') return { multiplier: 1.16, label: 'OFFENE TÜR → LOGIK' };
-  if (previousTag === 'submission' && nextTag === 'wit') return { multiplier: 1.22, label: 'LEERLAUF → KONTER' };
-  if (previousTag === 'logic' && nextTag === 'wit') return { multiplier: 1.28, label: 'WIDERSPRUCH → POINTE' };
-  if (previousTag === 'charm' && nextTag === 'team') return { multiplier: 1.3, label: 'FIXIERT → GRUPPENDRUCK' };
-  if (previousTag === 'guard' && nextTag === 'drink') return { multiplier: 1.17, label: 'AUSSITZEN → FRIEDENSANGEBOT' };
-  if (previousTag === 'team' && nextTag === 'chaos') return { multiplier: 1.26, label: 'PUBLIKUM → ESKALATION' };
+  if (previousTag === 'rapport' && nextTag === 'logic') return { multiplier: 1.16, label: 'NACKENKLATSCHER → BIERDECKEL' };
+  if (previousTag === 'submission' && nextTag === 'wit') return { multiplier: 1.22, label: 'CHEF-RECHT → PÖBELKONTER' };
+  if (previousTag === 'logic' && nextTag === 'wit') return { multiplier: 1.28, label: 'BIERDECKEL → EIN-WORT-KONTER' };
+  if (previousTag === 'charm' && nextTag === 'team') return { multiplier: 1.3, label: 'PONG-DUELL → JAWOLL-CHEF-CHOR' };
+  if (previousTag === 'guard' && nextTag === 'drink') return { multiplier: 1.17, label: 'BIERBANK → FRIEDENSBIER' };
+  if (previousTag === 'team' && nextTag === 'chaos') return { multiplier: 1.26, label: 'PUBLIKUM → PLATZLEGENDE' };
   return { multiplier: 1, label: '' };
 }
