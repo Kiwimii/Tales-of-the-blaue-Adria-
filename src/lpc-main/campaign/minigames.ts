@@ -70,7 +70,7 @@ function exposeSmokeDiagnostics(director: MinigameDirector, root: HTMLElement): 
   global.__lpcMinigameDirector = director;
   global.__lpcMinigameDebug = {
     start(id: MiniGameId): void { director.start(id); },
-    begin(): void { root.querySelector<HTMLButtonElement>('[data-mini-start]')?.click(); },
+    begin(): void { root.querySelector<HTMLButtonElement>('.mini-start')?.click(); },
     close(): void { root.querySelector<HTMLButtonElement>('[data-mini-close]')?.click(); },
     skipCountdown(): void { if (internal.runtime) internal.runtime.countdown = 0; },
     setState(values: Record<string, unknown>): void { if (internal.runtime) Object.assign(internal.runtime.state, values); },
