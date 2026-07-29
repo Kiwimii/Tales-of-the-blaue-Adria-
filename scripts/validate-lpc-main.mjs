@@ -37,8 +37,9 @@ for (const marker of [
   'raw.githubusercontent.com/LiberatedPixelCup',
   'Calinou/kenney-particle-pack',
   'Kenney CC0 Particle Pack',
-  'buildUniqueFlipLineup',
+  'Wurfart gilt bis zur Landung',
   'lpc-campaign-minigame-closed',
+  'lpc-campaign-world-input-restored',
 ]) assert(javascript.includes(marker), `Missing LPC campaign runtime marker: ${marker}`);
 
 for (const marker of [
