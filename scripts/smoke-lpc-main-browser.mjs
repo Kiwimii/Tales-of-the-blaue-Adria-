@@ -81,7 +81,7 @@ try {
 
     const runtimeErrors = stderr.split('\n').filter((line) => /uncaught|referenceerror|typeerror|syntaxerror/i.test(line));
     if (runtimeErrors.length) throw new Error(`Browser runtime exception detected:\n${runtimeErrors.join('\n')}`);
-    console.log('LPC campaign browser smoke test passed: world, mobile controls, battles, hardened minigame input and CC0/fallback VFX rendered without runtime exceptions.');
+    console.log('LPC campaign browser smoke test passed: world input, mobile controls, battles, hardened minigame input and CC0/fallback VFX rendered without runtime exceptions.');
   } finally {
     session.close();
   }
@@ -140,9 +140,14 @@ async function exerciseMinigames(session) {
 
   const cleanup = await evaluate(session, `(() => {
     const debug = window.__lpcMinigameDebug;
+    document.body.classList.add('campaign-modal-open');
     debug.close();
     const state = debug.snapshot();
-    return document.querySelector('#minigame-modal')?.hidden === true && state.pointerCount === 0 && state.holding === false && state.pausedClass === false;
+    return document.querySelector('#minigame-modal')?.hidden === true
+      && state.pointerCount === 0
+      && state.holding === false
+      && state.pausedClass === false
+      && document.body.classList.contains('campaign-modal-open') === false;
   })()`);
 
   return {
@@ -154,7 +159,7 @@ async function exerciseMinigames(session) {
     pongModeLocked: pongLock === true,
     flunkyHoldReleased: flunkyRelease === true,
     maslActionWorks: maslTransition === true,
-    cleanupComplete: cleanup === true,
+    worldInputRestored: cleanup === true,
   };
 }
 
