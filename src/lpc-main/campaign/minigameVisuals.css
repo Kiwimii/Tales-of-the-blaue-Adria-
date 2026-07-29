@@ -1,0 +1,97 @@
+.minigame-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 900 / 430;
+  margin: 15px 0;
+  overflow: hidden;
+  border: 1px solid rgba(255, 241, 202, .2);
+  border-radius: 15px;
+  background: #10251d;
+  box-shadow: inset 0 1px rgba(255,255,255,.04), 0 18px 42px rgba(0,0,0,.3);
+  isolation: isolate;
+}
+
+.minigame-stage > canvas {
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  max-height: none !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+}
+
+.minigame-stage > canvas:not(.minigame-vfx-canvas) {
+  z-index: 1;
+  touch-action: none;
+}
+
+.minigame-vfx-canvas {
+  z-index: 2;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+.minigame-vfx-badge {
+  position: absolute;
+  z-index: 4;
+  right: 9px;
+  bottom: 8px;
+  padding: 3px 6px;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 6px;
+  color: rgba(255,241,202,.55);
+  background: rgba(4,15,11,.56);
+  font-size: 7px;
+  font-weight: 900;
+  letter-spacing: .12em;
+  pointer-events: none;
+}
+
+.minigame-modal[data-mini-game='flipCup'] .minigame-stage {
+  box-shadow: inset 0 0 55px rgba(237,196,93,.08), 0 18px 42px rgba(0,0,0,.3);
+}
+
+.minigame-modal[data-mini-game='beerPong'] .minigame-stage {
+  box-shadow: inset 0 0 65px rgba(117,191,209,.1), 0 18px 42px rgba(0,0,0,.3);
+}
+
+.minigame-modal[data-mini-game='flunkyball'] .minigame-stage {
+  box-shadow: inset 0 0 60px rgba(117,198,140,.09), 0 18px 42px rgba(0,0,0,.3);
+}
+
+.minigame-modal[data-mini-game='hedgePee'] .minigame-stage {
+  box-shadow: inset 0 0 70px rgba(143,203,120,.12), 0 18px 42px rgba(0,0,0,.3);
+}
+
+.minigame-modal[data-mini-game='maslHole'] .minigame-stage {
+  box-shadow: inset 0 0 80px rgba(179,146,211,.13), 0 18px 42px rgba(0,0,0,.3);
+}
+
+.minigame-modal[data-vfx-assets='loaded'] .minigame-vfx-badge::before {
+  content: '● ';
+  color: #7bd29b;
+}
+
+.minigame-modal[data-vfx-assets='fallback'] .minigame-vfx-badge::before {
+  content: '○ ';
+  color: #efbd5e;
+}
+
+.ux-reduced-motion .minigame-vfx-canvas {
+  opacity: .58;
+}
+
+@media (max-width: 680px) {
+  .minigame-stage {
+    margin: 10px 0;
+    border-radius: 11px;
+  }
+
+  .minigame-vfx-badge {
+    right: 6px;
+    bottom: 5px;
+    opacity: .72;
+  }
+}
