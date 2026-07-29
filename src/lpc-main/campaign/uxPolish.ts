@@ -11,13 +11,7 @@ interface UxPreferences {
 }
 
 const UX_KEY = 'tales-blaue-adria-ux-v2';
-const DEFAULT_PREFERENCES: UxPreferences = {
-  highContrast: false,
-  largeText: false,
-  reducedMotion: false,
-  compactHud: false,
-};
-
+const DEFAULT_PREFERENCES: UxPreferences = { highContrast: false, largeText: false, reducedMotion: false, compactHud: false };
 let preferences = loadPreferences();
 let lastFocused: HTMLElement | null = null;
 let patchScheduled = false;
@@ -32,10 +26,7 @@ function bootWhenReady(): void {
     return true;
   };
   if (boot()) return;
-  const observer = new MutationObserver(() => {
-    if (!boot()) return;
-    observer.disconnect();
-  });
+  const observer = new MutationObserver(() => { if (boot()) observer.disconnect(); });
   observer.observe(document.documentElement, { childList: true, subtree: true });
 }
 
@@ -58,13 +49,9 @@ function installTopbarTools(): void {
   if (!topbar) return;
   const buildLabel = topbar.querySelector<HTMLElement>('.brand span');
   if (buildLabel) buildLabel.textContent = 'LPC CAMPAIGN · UX / DIALOGUE UPDATE';
-
   const tools = document.createElement('div');
   tools.className = 'ux-topbar-tools';
-  tools.innerHTML = `
-    <span class="save-indicator" aria-live="polite"><i></i><b>Gespeichert</b></span>
-    <button type="button" data-ux-help aria-label="Bedienungshilfe öffnen">?</button>
-    <button type="button" data-ux-settings aria-label="Darstellung einstellen">⚙</button>`;
+  tools.innerHTML = '<span class="save-indicator" aria-live="polite"><i></i><b>Gespeichert</b></span><button type="button" data-ux-help aria-label="Bedienungshilfe öffnen">?</button><button type="button" data-ux-settings aria-label="Darstellung einstellen">⚙</button>';
   topbar.querySelector('nav')?.before(tools);
   tools.querySelector<HTMLButtonElement>('[data-ux-settings]')?.addEventListener('click', openSettings);
   tools.querySelector<HTMLButtonElement>('[data-ux-help]')?.addEventListener('click', openHelp);
@@ -83,7 +70,6 @@ function installPanelDisclosure(): void {
     button.innerHTML = `<span>${escapeHtml(title)}</span><i>⌄</i>`;
     heading.replaceWith(button);
     [...section.children].filter((child) => child !== button).forEach((child) => child.classList.add('panel-disclosure-content'));
-
     const key = `panel:${title.toLowerCase()}`;
     const collapsed = localStorage.getItem(key) === 'closed';
     section.classList.toggle('collapsed', collapsed);
@@ -106,12 +92,8 @@ function installMobileTabs(): void {
     const tabs = document.createElement('nav');
     tabs.className = 'mobile-hud-tabs';
     tabs.setAttribute('aria-label', 'HUD-Bereiche');
-    tabs.innerHTML = `
-      <button type="button" data-hud-tab="status" class="active">Status</button>
-      <button type="button" data-hud-tab="social">Sozial</button>
-      <button type="button" data-hud-tab="progress">Fortschritt</button>`;
+    tabs.innerHTML = '<button type="button" data-hud-tab="status" class="active">Status</button><button type="button" data-hud-tab="social">Sozial</button><button type="button" data-hud-tab="progress">Fortschritt</button>';
     sheet.querySelector('header')?.after(tabs);
-
     const activate = (id: string): void => {
       tabs.querySelectorAll<HTMLButtonElement>('button').forEach((button) => button.classList.toggle('active', button.dataset.hudTab === id));
       content.querySelectorAll<HTMLElement>('.panel > section, .panel > .quick-actions').forEach((section) => {
@@ -124,25 +106,18 @@ function installMobileTabs(): void {
       const button = (event.target as HTMLElement).closest<HTMLButtonElement>('[data-hud-tab]');
       if (button?.dataset.hudTab) activate(button.dataset.hudTab);
     });
-    const contentObserver = new MutationObserver(() => activate(tabs.querySelector<HTMLButtonElement>('.active')?.dataset.hudTab ?? 'status'));
-    contentObserver.observe(content, { childList: true, subtree: false });
+    new MutationObserver(() => activate(tabs.querySelector<HTMLButtonElement>('.active')?.dataset.hudTab ?? 'status')).observe(content, { childList: true, subtree: false });
     activate('status');
     return true;
   };
   if (setup()) return;
-  const observer = new MutationObserver(() => {
-    if (!setup()) return;
-    observer.disconnect();
-  });
+  const observer = new MutationObserver(() => { if (setup()) observer.disconnect(); });
   observer.observe(document.documentElement, { childList: true, subtree: true });
 }
 
 function installModalExperience(): void {
-  const modals = ['generic-modal', 'battle-modal', 'minigame-modal']
-    .map((id) => document.getElementById(id))
-    .filter((modal): modal is HTMLElement => Boolean(modal));
+  const modals = ['generic-modal', 'battle-modal', 'minigame-modal'].map((id) => document.getElementById(id)).filter((modal): modal is HTMLElement => Boolean(modal));
   if (!modals.length) return;
-
   const sync = (): void => {
     if (patching) return;
     for (const modal of modals) {
@@ -159,21 +134,16 @@ function installModalExperience(): void {
     }
     schedulePatch();
   };
-
   const observer = new MutationObserver(sync);
   modals.forEach((modal) => observer.observe(modal, { attributes: true, attributeFilter: ['hidden'], childList: true, subtree: true, characterData: true }));
   document.addEventListener('keydown', (event) => {
-    const open = modals.find((modal) => !modal.hidden);
     const utility = [...document.querySelectorAll<HTMLElement>('.ux-utility-modal')].find((modal) => !modal.hidden);
-    const active = utility ?? open;
+    const active = utility ?? modals.find((modal) => !modal.hidden);
     if (!active) return;
-    if (event.key === 'Escape') {
-      const close = active.querySelector<HTMLButtonElement>('.modal-x, [data-mini-close], #battle-close:not([hidden]), [data-ux-close]');
-      close?.click();
-    }
+    if (event.key === 'Escape') active.querySelector<HTMLButtonElement>('.modal-x, [data-mini-close], #battle-close:not([hidden]), [data-ux-close]')?.click();
     if (event.key === 'Tab') trapFocus(event, active);
-    if (/^[1-9]$/.test(event.key) && open?.id === 'generic-modal') {
-      const buttons = [...open.querySelectorAll<HTMLButtonElement>('#modal-options > button:not(:disabled)')];
+    if (/^[1-9]$/.test(event.key) && active.id === 'generic-modal') {
+      const buttons = [...active.querySelectorAll<HTMLButtonElement>('#modal-options > button:not(:disabled)')];
       buttons[Number(event.key) - 1]?.click();
     }
   });
@@ -185,35 +155,19 @@ function patchDialogueModal(): void {
   const title = document.getElementById('modal-title');
   const copy = document.getElementById('modal-copy');
   if (!modal || modal.hidden || !title || !copy) return;
-
   const voice = Object.values(CHARACTER_VOICES).find((entry) => entry.name === title.textContent?.trim());
   const existing = modal.querySelector<HTMLElement>('.dialogue-persona');
-  if (!voice) {
-    existing?.remove();
-    modal.classList.remove('character-dialogue');
-    return;
-  }
-
-  modal.classList.add('character-dialogue');
+  if (!voice) { existing?.remove(); modal.classList.remove('character-dialogue'); return; }
   const summary = voiceSummary(voice.id);
   if (!summary) return;
+  modal.classList.add('character-dialogue');
   const baseRelation = activeCampaignStore()?.snapshot().relationships[voice.id] ?? 0;
   const metaRelation = campaignMeta.snapshot().relationshipBonus[voice.id] ?? 0;
   const total = Math.max(-100, Math.min(100, baseRelation + metaRelation));
   const mood = total >= 30 ? 'vertraut' : total >= 10 ? 'offen' : total >= 0 ? 'neutral' : total >= -20 ? 'skeptisch' : 'angespannt';
   const profile = existing ?? document.createElement('aside');
   profile.className = 'dialogue-persona';
-  profile.innerHTML = `
-    <div class="dialogue-portrait" style="--portrait:${portraitColor(voice.id)}"><b>${escapeHtml(summary.portrait)}</b></div>
-    <div class="dialogue-persona-copy">
-      <small>${escapeHtml(summary.role)}</small><strong>${escapeHtml(summary.name)}</strong>
-      <p>${escapeHtml(summary.cadence)}</p>
-      <div class="dialogue-tags">${summary.values.slice(0, 3).map((value) => `<span>${escapeHtml(value)}</span>`).join('')}</div>
-    </div>
-    <div class="dialogue-relation">
-      <span>Beziehung</span><div><i style="width:${Math.max(0, Math.min(100, total + 50))}%"></i></div>
-      <b>${total >= 0 ? '+' : ''}${total}</b><em>${mood}</em>
-    </div>`;
+  profile.innerHTML = `<div class="dialogue-portrait" style="--portrait:${portraitColor(voice.id)}"><b>${escapeHtml(voice.portrait)}</b></div><div class="dialogue-persona-copy"><small>${escapeHtml(summary.role)}</small><strong>${escapeHtml(voice.name)}</strong><p>${escapeHtml(summary.cadence)}</p><div class="dialogue-tags">${summary.values.slice(0, 3).map((value) => `<span>${escapeHtml(value)}</span>`).join('')}</div></div><div class="dialogue-relation"><span>Beziehung</span><div><i style="width:${Math.max(0, Math.min(100, total + 50))}%"></i></div><b>${total >= 0 ? '+' : ''}${total}</b><em>${mood}</em></div>`;
   if (!existing) copy.before(profile);
 }
 
@@ -241,7 +195,6 @@ function installCriticalStatusBanner(): void {
   banner.className = 'critical-status-banner';
   banner.hidden = true;
   frame.append(banner);
-
   const update = (): void => {
     const snapshot = activeCampaignStore()?.snapshot();
     if (!snapshot) return;
@@ -286,13 +239,7 @@ function installSaveFeedback(): void {
 }
 
 function openSettings(): void {
-  const panel = ensureUtilityModal('ux-settings-modal', 'Darstellung', `
-    <div class="ux-setting-list">
-      ${settingToggle('highContrast', 'Hoher Kontrast', 'Stärkere Kanten und klarere Zustandsfarben')}
-      ${settingToggle('largeText', 'Größere Schrift', 'Dialoge, Hinweise und Menüs werden vergrößert')}
-      ${settingToggle('reducedMotion', 'Reduzierte Bewegung', 'Weniger Kameraführung und UI-Animationen')}
-      ${settingToggle('compactHud', 'Kompaktes Desktop-HUD', 'Seitenteile schmaler, Weltbereich größer')}
-    </div>`);
+  const panel = ensureUtilityModal('ux-settings-modal', 'Darstellung', `<div class="ux-setting-list">${settingToggle('highContrast', 'Hoher Kontrast', 'Stärkere Kanten und klarere Zustandsfarben')}${settingToggle('largeText', 'Größere Schrift', 'Dialoge, Hinweise und Menüs werden vergrößert')}${settingToggle('reducedMotion', 'Reduzierte Bewegung', 'Weniger Kameraführung und UI-Animationen')}${settingToggle('compactHud', 'Kompaktes Desktop-HUD', 'Seitenteile schmaler, Weltbereich größer')}</div>`);
   panel.querySelectorAll<HTMLInputElement>('[data-ux-pref]').forEach((input) => input.addEventListener('change', () => {
     const key = input.dataset.uxPref as keyof UxPreferences;
     preferences = { ...preferences, [key]: input.checked };
@@ -302,15 +249,7 @@ function openSettings(): void {
 }
 
 function openHelp(): void {
-  ensureUtilityModal('ux-help-modal', 'Bedienung und Orientierung', `
-    <div class="ux-help-grid">
-      <section><b>WELT</b><p><kbd>WASD</kbd> oder unsichtbarer Joystick links. <kbd>E</kbd> oder Aktionsknopf rechts.</p></section>
-      <section><b>HUD</b><p><kbd>H</kbd> öffnet das mobile HUD. Bereiche sind in Status, Sozial und Fortschritt gegliedert.</p></section>
-      <section><b>DIALOGE</b><p><kbd>1–9</kbd> wählt sichtbare Optionen. Risiko, Ton und mögliche Wirkung stehen an der Auswahl.</p></section>
-      <section><b>MINISPIELE</b><p>Jedes Spiel startet mit eigener Steuerungserklärung. Hilfe, Pause und Wiederholung bleiben erreichbar.</p></section>
-      <section><b>FORTSCHRITT</b><p>Gespräche, Minispiele und Kämpfe verändern Beziehungen, Ruf, Hilfen, Meisterschaft und Finale.</p></section>
-      <section><b>SPEICHERN</b><p>Relevante Entscheidungen werden automatisch lokal gespeichert.</p></section>
-    </div>`);
+  ensureUtilityModal('ux-help-modal', 'Bedienung und Orientierung', '<div class="ux-help-grid"><section><b>WELT</b><p><kbd>WASD</kbd> oder unsichtbarer Joystick links. <kbd>E</kbd> oder Aktionsknopf rechts.</p></section><section><b>HUD</b><p><kbd>H</kbd> öffnet das mobile HUD. Bereiche sind in Status, Sozial und Fortschritt gegliedert.</p></section><section><b>DIALOGE</b><p><kbd>1–9</kbd> wählt sichtbare Optionen. Risiko, Ton und Wirkung stehen an der Auswahl.</p></section><section><b>MINISPIELE</b><p>Jedes Spiel startet mit Steuerungserklärung. Hilfe, Pause und Wiederholung bleiben erreichbar.</p></section><section><b>FORTSCHRITT</b><p>Gespräche, Minispiele und Kämpfe verändern Beziehungen, Ruf, Hilfen, Meisterschaft und Finale.</p></section><section><b>SPEICHERN</b><p>Relevante Entscheidungen werden automatisch lokal gespeichert.</p></section></div>');
 }
 
 function ensureUtilityModal(id: string, title: string, body: string): HTMLElement {
@@ -320,7 +259,7 @@ function ensureUtilityModal(id: string, title: string, body: string): HTMLElemen
     modal.id = id;
     modal.className = 'ux-utility-modal';
     modal.hidden = true;
-    modal.innerHTML = `<article><button type="button" class="modal-x" data-ux-close>×</button><span>UX / ACCESSIBILITY</span><h2></h2><div class="ux-utility-body"></div></article>`;
+    modal.innerHTML = '<article><button type="button" class="modal-x" data-ux-close>×</button><span>UX / ACCESSIBILITY</span><h2></h2><div class="ux-utility-body"></div></article>';
     document.body.append(modal);
     modal.querySelector<HTMLButtonElement>('[data-ux-close]')?.addEventListener('click', () => closeUtilityModal(modal!));
     modal.addEventListener('click', (event) => { if (event.target === modal) closeUtilityModal(modal!); });
@@ -335,8 +274,7 @@ function ensureUtilityModal(id: string, title: string, body: string): HTMLElemen
 
 function closeUtilityModal(modal: HTMLElement): void {
   modal.hidden = true;
-  const otherOpen = [...document.querySelectorAll<HTMLElement>('.modal, .ux-utility-modal')].some((entry) => !entry.hidden);
-  document.body.classList.toggle('campaign-modal-open', otherOpen);
+  document.body.classList.toggle('campaign-modal-open', [...document.querySelectorAll<HTMLElement>('.modal, .ux-utility-modal')].some((entry) => !entry.hidden));
 }
 
 function settingToggle(key: keyof UxPreferences, label: string, copy: string): string {
@@ -362,13 +300,8 @@ function schedulePatch(): void {
   requestAnimationFrame(() => {
     patchScheduled = false;
     patching = true;
-    try {
-      patchDialogueModal();
-      patchChoiceButtons();
-      installPanelDisclosure();
-    } finally {
-      patching = false;
-    }
+    try { patchDialogueModal(); patchChoiceButtons(); installPanelDisclosure(); }
+    finally { patching = false; }
   });
 }
 
@@ -383,8 +316,7 @@ function focusFirst(root: HTMLElement): void {
 }
 
 function trapFocus(event: KeyboardEvent, root: HTMLElement): void {
-  const focusable = [...root.querySelectorAll<HTMLElement>('button:not(:disabled), [href], input:not(:disabled), select:not(:disabled), [tabindex]:not([tabindex="-1"])')]
-    .filter((node) => !node.hidden && node.offsetParent !== null);
+  const focusable = [...root.querySelectorAll<HTMLElement>('button:not(:disabled), [href], input:not(:disabled), select:not(:disabled), [tabindex]:not([tabindex="-1"])')].filter((node) => !node.hidden && node.offsetParent !== null);
   if (!focusable.length) return;
   const first = focusable[0];
   const last = focusable[focusable.length - 1];
