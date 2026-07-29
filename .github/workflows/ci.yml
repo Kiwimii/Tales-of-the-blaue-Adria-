@@ -33,6 +33,14 @@ jobs:
           name: validation-log
           path: validation.log
           retention-days: 2
+      - name: Upload validated LPC browser build
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lpc-main-browser-build
+          path: docs/lpc-main
+          retention-days: 2
+          if-no-files-found: error
       - name: Commit validated browser builds
         if: success() && github.event_name == 'push'
         shell: bash
