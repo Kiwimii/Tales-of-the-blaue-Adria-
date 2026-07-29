@@ -34,7 +34,7 @@ export function installMinigameHardening(): void {
 
   patchFlipCupLineup(prototype);
   patchHoldInput(prototype);
-  patchBeerPongModeLock(prototype);
+  patchPrimaryActionRouting(prototype);
   patchPointerCleanup(prototype);
   patchAnimationLifecycle(prototype);
   patchStopCleanup(prototype);
@@ -48,6 +48,11 @@ export function buildUniqueFlipLineup(activeTeam: string[]): string[] {
 
 export function canChangeBeerPongMode(phase: string): boolean {
   return phase === 'ready';
+}
+
+export function shouldIgnorePrimaryAction(id: MiniGameId, phase: string): boolean {
+  if (id === 'beerPong') return !canChangeBeerPongMode(phase);
+  return id === 'flunkyball' && phase === 'attack-drink';
 }
 
 export function minigameHardeningSnapshot(director: unknown): Record<string, unknown> {
@@ -128,12 +133,14 @@ function patchHoldInput(prototype: DirectorPrototype): void {
   };
 }
 
-function patchBeerPongModeLock(prototype: DirectorPrototype): void {
+function patchPrimaryActionRouting(prototype: DirectorPrototype): void {
   const original = prototype.primaryAction;
   prototype.primaryAction = function primaryActionHardened(this: InternalDirector): void {
     const runtime = this.runtime;
-    if (runtime?.id === 'beerPong' && !canChangeBeerPongMode(String(runtime.state.phase))) {
-      this.feedback('BALL IN DER LUFT', 'Wurfart gilt bis zur Landung', 'neutral', false);
+    if (!runtime) return original.call(this);
+    const phase = String(runtime.state.phase);
+    if (shouldIgnorePrimaryAction(runtime.id, phase)) {
+      if (runtime.id === 'beerPong') this.feedback('BALL IN DER LUFT', 'Wurfart gilt bis zur Landung', 'neutral', false);
       return;
     }
     original.call(this);
