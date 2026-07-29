@@ -21,7 +21,9 @@ export class BattlePresentation {
   private previousPlayer = 0;
   private previousEnemy = 0;
   private locked = false;
+  private wasOpen = false;
   private observer: MutationObserver;
+  private timers: number[] = [];
 
   constructor(private readonly elements: BattlePresentationElements) {
     this.stage = document.createElement('section');
@@ -49,13 +51,19 @@ export class BattlePresentation {
 
     this.elements.moves.addEventListener('click', this.onMove, true);
     this.observer = new MutationObserver(() => this.sync());
-    this.observer.observe(elements.modal, { attributes: true, childList: true, subtree: true, characterData: true });
+    this.observer.observe(elements.modal, { attributes: true, attributeFilter: ['hidden'] });
+    this.observer.observe(elements.title, { childList: true, subtree: true, characterData: true });
+    this.observer.observe(elements.round, { childList: true, subtree: true, characterData: true });
+    this.observer.observe(elements.playerBar, { attributes: true, attributeFilter: ['style'] });
+    this.observer.observe(elements.enemyBar, { attributes: true, attributeFilter: ['style'] });
+    this.observer.observe(elements.log, { childList: true, subtree: true, characterData: true });
     this.sync();
   }
 
   destroy(): void {
     this.observer.disconnect();
     this.elements.moves.removeEventListener('click', this.onMove, true);
+    this.timers.forEach((timer) => window.clearTimeout(timer));
     this.stage.remove();
   }
 
@@ -68,7 +76,7 @@ export class BattlePresentation {
     this.elements.modal.classList.add('battle-resolving');
     this.elements.moves.setAttribute('aria-busy', 'true');
     this.playMove(move);
-    window.setTimeout(() => {
+    this.delay(() => {
       this.playerFigure.className = 'battle-sprite battle-sprite-player';
       this.enemyFigure.className = `battle-sprite battle-sprite-enemy ${enemyClass(this.elements.title.textContent ?? '')}`;
       this.effect.className = 'battle-impact';
@@ -76,6 +84,7 @@ export class BattlePresentation {
       this.elements.moves.removeAttribute('aria-busy');
       this.phase.textContent = 'WÄHLE EINE ATTACKE';
       this.locked = false;
+      this.sync();
     }, 1150);
   };
 
@@ -86,12 +95,12 @@ export class BattlePresentation {
     this.effect.classList.add(`impact-${motion}`);
     hapticForMove(move);
 
-    window.setTimeout(() => {
+    this.delay(() => {
       this.enemyFigure.classList.add('motion-hit');
       this.elements.modal.classList.add('battle-camera-hit');
       this.phase.textContent = 'WIRKUNG WIRD BERECHNET';
     }, motion === 'argue' || motion === 'agree' ? 420 : 310);
-    window.setTimeout(() => {
+    this.delay(() => {
       this.enemyFigure.classList.remove('motion-hit');
       this.enemyFigure.classList.add('motion-counter');
       this.phase.textContent = 'GEGNERISCHER KONTER';
@@ -101,23 +110,32 @@ export class BattlePresentation {
   private sync(): void {
     const isOpen = !this.elements.modal.hidden;
     this.stage.hidden = !isOpen;
-    if (!isOpen) return;
+    if (!isOpen) {
+      this.wasOpen = false;
+      return;
+    }
 
     const title = this.elements.title.textContent ?? '';
     const enemyName = title.split('·')[0]?.trim() || 'GEGENSEITE';
-    requireElement(this.stage, '.battle-side-enemy .battle-name').textContent = enemyName.toUpperCase();
-    requireElement(this.stage, '.battle-side-player .battle-name').textContent = 'DU & TEAM';
-    this.enemyFigure.className = `battle-sprite battle-sprite-enemy ${enemyClass(title)}`;
+    setText(requireElement(this.stage, '.battle-side-enemy .battle-name'), enemyName.toUpperCase());
+    setText(requireElement(this.stage, '.battle-side-player .battle-name'), 'DU & TEAM');
+    if (!this.locked) this.enemyFigure.className = `battle-sprite battle-sprite-enemy ${enemyClass(title)}`;
     this.stage.classList.toggle('authority-battle', /Gundula|Uli|Platzordnung/i.test(title));
     this.stage.classList.toggle('ronny-battle', /Ronny/i.test(title));
     this.stage.dataset.round = this.elements.round.textContent?.replace(/\D/g, '') || '1';
 
     const player = parseBar(this.elements.playerBar);
     const enemy = parseBar(this.elements.enemyBar);
-    if (enemy > this.previousEnemy && this.previousEnemy >= 0) this.floatDamage(enemy - this.previousEnemy, 'enemy');
-    if (player > this.previousPlayer && this.previousPlayer >= 0) this.floatDamage(player - this.previousPlayer, 'player');
-    this.previousPlayer = player;
-    this.previousEnemy = enemy;
+    if (!this.wasOpen) {
+      this.previousPlayer = player;
+      this.previousEnemy = enemy;
+      this.wasOpen = true;
+    } else {
+      if (enemy > this.previousEnemy) this.floatDamage(enemy - this.previousEnemy, 'enemy');
+      if (player > this.previousPlayer) this.floatDamage(player - this.previousPlayer, 'player');
+      this.previousPlayer = player;
+      this.previousEnemy = enemy;
+    }
 
     const latest = this.elements.log.querySelector('.latest')?.textContent ?? '';
     this.stage.dataset.result = /gewonnen|schranke|frustriert genug/i.test(latest) ? 'win' : /rückzug|100|niederlage/i.test(latest) ? 'loss' : 'active';
@@ -129,8 +147,16 @@ export class BattlePresentation {
     label.className = `battle-floating-number ${side}`;
     label.textContent = `+${Math.round(amount)} FRUST`;
     this.stage.append(label);
-    window.setTimeout(() => label.remove(), 1000);
+    this.delay(() => label.remove(), 1000);
     if (amount >= 20) this.elements.modal.classList.add('battle-camera-critical');
+  }
+
+  private delay(callback: () => void, milliseconds: number): void {
+    const timer = window.setTimeout(() => {
+      this.timers = this.timers.filter((entry) => entry !== timer);
+      callback();
+    }, milliseconds);
+    this.timers.push(timer);
   }
 }
 
@@ -166,6 +192,10 @@ function hapticForMove(move: CombatMoveId): void {
   if (move === 'total-exaggeration' || move === 'synchronised-cheer') navigator.vibrate([20, 35, 35]);
   else if (move === 'camping-chair-block') navigator.vibrate([12, 40, 12]);
   else navigator.vibrate(18);
+}
+
+function setText(element: HTMLElement, value: string): void {
+  if (element.textContent !== value) element.textContent = value;
 }
 
 function requireElement<T extends HTMLElement = HTMLElement>(root: ParentNode, selector: string): T {
