@@ -74,9 +74,14 @@ try {
     const readiness = await waitForCampaignState(session, 22000);
     const missing = Object.entries(readiness).filter(([, value]) => value !== true).map(([key]) => key);
     if (missing.length) throw new Error(`Campaign browser smoke state is incomplete: ${missing.join(', ')}`);
+
+    const minigameState = await exerciseMinigames(session);
+    const failed = Object.entries(minigameState).filter(([, value]) => value !== true).map(([key]) => key);
+    if (failed.length) throw new Error(`Minigame browser smoke state is incomplete: ${failed.join(', ')}. State: ${JSON.stringify(minigameState)}`);
+
     const runtimeErrors = stderr.split('\n').filter((line) => /uncaught|referenceerror|typeerror|syntaxerror/i.test(line));
     if (runtimeErrors.length) throw new Error(`Browser runtime exception detected:\n${runtimeErrors.join('\n')}`);
-    console.log('LPC campaign browser smoke test passed: mobile controls, battle staging and Phaser world rendered through DevTools without runtime exceptions.');
+    console.log('LPC campaign browser smoke test passed: world, mobile controls, battles, hardened minigame input and CC0/fallback VFX rendered without runtime exceptions.');
   } finally {
     session.close();
   }
@@ -84,6 +89,73 @@ try {
   browser.kill('SIGKILL');
   server.close();
   rmSync(profile, { recursive: true, force: true });
+}
+
+async function exerciseMinigames(session) {
+  await evaluate(session, `(() => {
+    const debug = window.__lpcMinigameDebug;
+    if (!debug) return false;
+    debug.start('beerPong');
+    debug.begin();
+    debug.skipCountdown();
+    return true;
+  })()`);
+  const pongOpen = await waitForExpression(session, `(() => ({
+    modal: document.querySelector('#minigame-modal')?.hidden === false,
+    stage: Boolean(document.querySelector('.minigame-stage')),
+    vfx: Boolean(document.querySelector('.minigame-vfx-canvas')),
+    action: document.querySelector('[data-mini-action]')?.disabled === false,
+    assets: ['loading','loaded','fallback'].includes(document.querySelector('#minigame-modal')?.dataset.vfxAssets ?? '')
+  }))()`, 9000);
+
+  const pongLock = await evaluate(session, `(() => {
+    const debug = window.__lpcMinigameDebug;
+    debug.setState({ phase: 'flight', mode: 'direct' });
+    debug.action();
+    const state = debug.snapshot();
+    return state.phase === 'flight' && state.mode === 'direct';
+  })()`);
+
+  const flunkyRelease = await evaluate(session, `(() => {
+    const debug = window.__lpcMinigameDebug;
+    debug.start('flunkyball');
+    debug.begin();
+    debug.skipCountdown();
+    debug.setState({ phase: 'attack-drink', holding: false });
+    debug.holdAndRelease(92);
+    debug.action();
+    const state = debug.snapshot();
+    return state.phase === 'attack-drink' && state.holding === false && state.pointerCount === 0;
+  })()`);
+
+  const maslTransition = await evaluate(session, `(() => {
+    const debug = window.__lpcMinigameDebug;
+    debug.start('maslHole');
+    debug.begin();
+    debug.skipCountdown();
+    debug.setState({ phase: 'seal', seal: 1, stableTime: 700 });
+    debug.action();
+    return debug.snapshot().phase === 'pull';
+  })()`);
+
+  const cleanup = await evaluate(session, `(() => {
+    const debug = window.__lpcMinigameDebug;
+    debug.close();
+    const state = debug.snapshot();
+    return document.querySelector('#minigame-modal')?.hidden === true && state.pointerCount === 0 && state.holding === false && state.pausedClass === false;
+  })()`);
+
+  return {
+    pongModal: pongOpen.modal === true,
+    visualStage: pongOpen.stage === true,
+    vfxCanvas: pongOpen.vfx === true,
+    actionEnabled: pongOpen.action === true,
+    assetFallbackSafe: pongOpen.assets === true,
+    pongModeLocked: pongLock === true,
+    flunkyHoldReleased: flunkyRelease === true,
+    maslActionWorks: maslTransition === true,
+    cleanupComplete: cleanup === true,
+  };
 }
 
 async function waitForTarget(port, expectedUrl, timeoutMs) {
@@ -110,15 +182,33 @@ async function waitForCampaignState(session, timeoutMs) {
     hud: document.body?.innerText.includes('AKTIVE KAMPAGNENQUEST') ?? false,
     joystick: Boolean(document.querySelector('.mobile-move-zone')),
     battleStage: Boolean(document.querySelector('.cinematic-battle-stage')),
-    canvas: Boolean(document.querySelector('canvas'))
+    canvas: Boolean(document.querySelector('canvas')),
+    minigameDirector: Boolean(window.__lpcMinigameDebug),
+    vfxLayer: Boolean(document.querySelector('.minigame-vfx-canvas'))
   }))()`;
   while (Date.now() < deadline) {
-    const response = await session.command('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: false });
-    latest = response?.result?.result?.value ?? {};
-    if (Object.values(latest).length === 5 && Object.values(latest).every(Boolean)) return latest;
+    latest = await evaluate(session, expression);
+    if (Object.values(latest).length === 7 && Object.values(latest).every(Boolean)) return latest;
     await delay(300);
   }
   throw new Error(`Campaign DOM was not ready before timeout. State: ${JSON.stringify(latest)}\n${stderr.slice(-5000)}`);
+}
+
+async function waitForExpression(session, expression, timeoutMs) {
+  const deadline = Date.now() + timeoutMs;
+  let latest;
+  while (Date.now() < deadline) {
+    latest = await evaluate(session, expression);
+    if (latest && Object.values(latest).every(Boolean)) return latest;
+    await delay(160);
+  }
+  throw new Error(`Browser expression did not become true. State: ${JSON.stringify(latest)}`);
+}
+
+async function evaluate(session, expression) {
+  const response = await session.command('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: true });
+  if (response?.result?.exceptionDetails) throw new Error(`Runtime.evaluate failed: ${response.result.exceptionDetails.text}`);
+  return response?.result?.result?.value;
 }
 
 async function connectDevTools(url) {
