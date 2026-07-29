@@ -168,7 +168,6 @@ export function installContextAction(button: HTMLButtonElement, prompt: HTMLElem
 }
 
 function onActionDown(event: PointerEvent): void {
-  event.preventDefault();
   vibrate(12);
   (event.currentTarget as HTMLElement).classList.add('pressed');
   window.setTimeout(() => (event.currentTarget as HTMLElement)?.classList.remove('pressed'), 140);
