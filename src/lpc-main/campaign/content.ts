@@ -7,7 +7,9 @@ import {
   type PlanPoint,
 } from '../../game/aerialCampgroundPlan';
 import { applySprint89CampPlan } from '../../game/sprint89CampPlan';
+import { installAuthorityOverhaul } from './authorityOverhaul';
 
+installAuthorityOverhaul();
 applySprint89CampPlan();
 
 export type CampaignInteractionKind = 'story' | 'service' | 'minigame' | 'landmark';
@@ -52,7 +54,7 @@ export const CAMPAIGN_CHARACTER_BY_ID = Object.fromEntries(CAMPAIGN_CHARACTERS.m
 export const STORY_INTERACTIONS: CampaignInteraction[] = [
   point('trunk', 'Kofferraum öffnen', 'story', ARRIVAL_STORY_PLACEMENTS.trunk, 105),
   point('reservationBoard', 'Reservierung am Schwarzen Brett', 'story', ARRIVAL_STORY_PLACEMENTS.reservationBoard, 100),
-  point('gundula', 'Gundula und Uli überzeugen', 'story', ARRIVAL_STORY_PLACEMENTS.gundula, 115),
+  point('gundula', 'Gundula und Uli auf ihre Seite ziehen', 'story', ARRIVAL_STORY_PLACEMENTS.gundula, 115),
   point('taucherplatz', 'Wagen am Taucherplatz', 'story', ARRIVAL_STORY_PLACEMENTS.taucherplatz, 120, true),
   point('powerBox', 'Stromkasten verbinden', 'story', ARRIVAL_STORY_PLACEMENTS.powerBox, 105, true),
   point('drinks', 'Getränke ausladen', 'story', ARRIVAL_STORY_PLACEMENTS.drinks, 90, true),
