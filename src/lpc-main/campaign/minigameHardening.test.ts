@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   buildUniqueFlipLineup,
   canChangeBeerPongMode,
+  shouldIgnorePrimaryAction,
 } from './minigameHardening';
 import { visualEffectForFeedback } from './minigameVisuals';
 
@@ -20,6 +21,12 @@ describe('minigame hardening', () => {
     expect(canChangeBeerPongMode('ready')).toBe(true);
     expect(canChangeBeerPongMode('flight')).toBe(false);
     expect(canChangeBeerPongMode('result')).toBe(false);
+  });
+
+  it('ignores the synthetic click created after releasing the Flunkyball drink hold', () => {
+    expect(shouldIgnorePrimaryAction('flunkyball', 'attack-drink')).toBe(true);
+    expect(shouldIgnorePrimaryAction('flunkyball', 'defense-run')).toBe(false);
+    expect(shouldIgnorePrimaryAction('maslHole', 'seal')).toBe(false);
   });
 
   it('maps important feedback to distinct visual effects', () => {
