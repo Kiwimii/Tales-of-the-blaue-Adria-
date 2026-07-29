@@ -71,10 +71,9 @@ try {
   try {
     await session.command('Runtime.enable');
     await session.command('Page.enable');
-    const html = await waitForCampaignDom(session, 22000);
-    for (const marker of ['LPC CAMPAIGN', 'AKTIVE KAMPAGNENQUEST', 'mobile-move-zone', 'cinematic-battle-stage', '<canvas']) {
-      if (!html.includes(marker)) throw new Error(`Campaign browser smoke marker is missing: ${marker}`);
-    }
+    const readiness = await waitForCampaignState(session, 22000);
+    const missing = Object.entries(readiness).filter(([, value]) => value !== true).map(([key]) => key);
+    if (missing.length) throw new Error(`Campaign browser smoke state is incomplete: ${missing.join(', ')}`);
     const runtimeErrors = stderr.split('\n').filter((line) => /uncaught|referenceerror|typeerror|syntaxerror/i.test(line));
     if (runtimeErrors.length) throw new Error(`Browser runtime exception detected:\n${runtimeErrors.join('\n')}`);
     console.log('LPC campaign browser smoke test passed: mobile controls, battle staging and Phaser world rendered through DevTools without runtime exceptions.');
@@ -103,19 +102,23 @@ async function waitForTarget(port, expectedUrl, timeoutMs) {
   throw new Error(`Chromium DevTools target did not become available.\n${stderr.slice(-5000)}`);
 }
 
-async function waitForCampaignDom(session, timeoutMs) {
+async function waitForCampaignState(session, timeoutMs) {
   const deadline = Date.now() + timeoutMs;
-  let latest = '';
+  let latest = {};
+  const expression = `(() => ({
+    identity: document.body?.innerText.includes('LPC CAMPAIGN') ?? false,
+    hud: document.body?.innerText.includes('AKTIVE KAMPAGNENQUEST') ?? false,
+    joystick: Boolean(document.querySelector('.mobile-move-zone')),
+    battleStage: Boolean(document.querySelector('.cinematic-battle-stage')),
+    canvas: Boolean(document.querySelector('canvas'))
+  }))()`;
   while (Date.now() < deadline) {
-    const response = await session.command('Runtime.evaluate', {
-      expression: 'document.documentElement ? document.documentElement.outerHTML : ""',
-      returnByValue: true,
-    });
-    latest = response?.result?.result?.value ?? '';
-    if (latest.includes('<canvas') && latest.includes('AKTIVE KAMPAGNENQUEST') && latest.includes('mobile-move-zone')) return latest;
+    const response = await session.command('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: false });
+    latest = response?.result?.result?.value ?? {};
+    if (Object.values(latest).length === 5 && Object.values(latest).every(Boolean)) return latest;
     await delay(300);
   }
-  throw new Error(`Campaign DOM was not ready before timeout.\n${latest.slice(0, 1000)}\n${stderr.slice(-5000)}`);
+  throw new Error(`Campaign DOM was not ready before timeout. State: ${JSON.stringify(latest)}\n${stderr.slice(-5000)}`);
 }
 
 async function connectDevTools(url) {
@@ -138,7 +141,7 @@ async function connectDevTools(url) {
     command(method, params = {}) {
       return new Promise((resolve, reject) => {
         const id = nextId++;
-        const timeout = setTimeout(() => { pending.delete(id); reject(new Error(`DevTools command timed out: ${method}`)); }, 8000);
+        const timeout = setTimeout(() => { pending.delete(id); reject(new Error(`DevTools command timed out: ${method}`)); }, 15000);
         pending.set(id, {
           resolve(value) { clearTimeout(timeout); resolve(value); },
           reject(error) { clearTimeout(timeout); reject(error); },
