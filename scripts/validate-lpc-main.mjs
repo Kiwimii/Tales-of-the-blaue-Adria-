@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -14,8 +14,10 @@ assert(scripts.length >= 1 && scripts.length <= 6, `Expected one to six LPC camp
 assert(styles.length === 1, `Expected one LPC campaign stylesheet, found ${styles.length}.`);
 assert(!files.some((file) => file.endsWith('.map')), 'LPC campaign build must not publish source maps.');
 assert(html.includes('LPC CAMPAIGN BUILD'), 'LPC campaign build identity is missing.');
+assert(html.includes('lpc-minigame-art-bugfix-v1'), 'Minigame art and hardening release marker is missing.');
 assert(html.includes('/Tales-of-the-blaue-Adria-/lpc-main/assets/'), 'LPC campaign build uses the wrong base path.');
 assert(html.includes('../next/') && html.includes('../lpc-test/'), 'Comparison links are missing.');
+assert(existsSync(resolve(root, 'THIRD_PARTY_ASSETS.md')), 'Third-party CC0 asset documentation is missing.');
 
 const javascript = scripts.map((file) => readFileSync(resolve(assetDirectory, file), 'utf8')).join('\n');
 const stylesheet = styles.map((file) => readFileSync(resolve(assetDirectory, file), 'utf8')).join('\n');
@@ -33,16 +35,29 @@ for (const marker of [
   'cup-eye-contact',
   'classic-high-five',
   'raw.githubusercontent.com/LiberatedPixelCup',
+  'Calinou/kenney-particle-pack',
+  'Kenney CC0 Particle Pack',
+  'Wurfart gilt bis zur Landung',
+  'lpc-campaign-minigame-closed',
+  'lpc-campaign-world-input-restored',
 ]) assert(javascript.includes(marker), `Missing LPC campaign runtime marker: ${marker}`);
 
-for (const marker of ['.intro-page', '.shop-items', '.battle-moves', '.romance-list', '.mobile-controls']) {
-  assert(stylesheet.includes(marker), `Missing LPC campaign stylesheet marker: ${marker}`);
-}
+for (const marker of [
+  '.intro-page',
+  '.shop-items',
+  '.battle-moves',
+  '.romance-list',
+  '.mobile-controls',
+  '.minigame-stage',
+  '.minigame-vfx-canvas',
+  '.minigame-vfx-badge',
+]) assert(stylesheet.includes(marker), `Missing LPC campaign stylesheet marker: ${marker}`);
+
 assert(stylesheet.includes('image-rendering:pixelated') || stylesheet.includes('image-rendering: pixelated'), 'Pixel rendering rule is missing.');
 
 const totalSize = scripts.reduce((sum, file) => sum + statSync(resolve(assetDirectory, file)).size, 0);
-assert(totalSize < 3_600_000, `LPC campaign JavaScript is unexpectedly large: ${Math.round(totalSize / 1024)} kB.`);
-console.log(`LPC campaign validation passed: ${Math.round(totalSize / 1024)} kB across ${scripts.length} script chunk(s).`);
+assert(totalSize < 3_750_000, `LPC campaign JavaScript is unexpectedly large: ${Math.round(totalSize / 1024)} kB.`);
+console.log(`LPC campaign validation passed: ${Math.round(totalSize / 1024)} kB across ${scripts.length} script chunk(s), including hardened minigames and CC0/fallback VFX.`);
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);

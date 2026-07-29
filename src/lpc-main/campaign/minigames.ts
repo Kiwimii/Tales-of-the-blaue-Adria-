@@ -12,6 +12,14 @@ import {
   currentMinigameContext,
   stageMinigameOutcome,
 } from './campaignRuntime';
+import {
+  installMinigameHardening,
+  minigameHardeningSnapshot,
+} from './minigameHardening';
+import { installMinigameVisuals } from './minigameVisuals';
+
+installMinigameHardening();
+installMinigameCloseBridge();
 
 export { activeAssist, difficultyLabel };
 export type { MiniGameContext, MiniGameId, MiniGameOutcome, MiniGameQuality };
@@ -27,5 +35,52 @@ export class MinigameDirector extends EnhancedMinigameDirector {
       },
       currentMinigameContext,
     );
+
+    installMinigameVisuals(root);
+    root.querySelector<HTMLButtonElement>('[data-mini-close]')?.addEventListener('click', () => {
+      window.dispatchEvent(new CustomEvent('lpc-campaign-minigame-closed'));
+    });
+    exposeSmokeDiagnostics(this, root);
   }
+}
+
+let closeBridgeInstalled = false;
+function installMinigameCloseBridge(): void {
+  if (closeBridgeInstalled) return;
+  closeBridgeInstalled = true;
+  window.addEventListener('lpc-campaign-minigame-closed', () => {
+    const modalOpen = ['generic-modal', 'battle-modal', 'minigame-modal']
+      .map((id) => document.getElementById(id))
+      .some((modal) => Boolean(modal && !modal.hidden));
+    document.body.classList.toggle('campaign-modal-open', modalOpen);
+    const prompt = document.getElementById('interaction-prompt');
+    const promptText = document.getElementById('interaction-text')?.textContent?.trim();
+    if (prompt && !modalOpen) prompt.hidden = !promptText;
+    window.dispatchEvent(new CustomEvent('lpc-campaign-world-input-restored'));
+  });
+}
+
+function exposeSmokeDiagnostics(director: MinigameDirector, root: HTMLElement): void {
+  if (new URLSearchParams(location.search).get('smoke') !== '1') return;
+  const internal = director as unknown as {
+    runtime?: { countdown: number; state: Record<string, any> };
+    primaryAction: () => void;
+  };
+  const global = window as unknown as Record<string, unknown>;
+  global.__lpcMinigameDirector = director;
+  global.__lpcMinigameDebug = {
+    start(id: MiniGameId): void { director.start(id); },
+    begin(): void { root.querySelector<HTMLButtonElement>('.mini-start')?.click(); },
+    close(): void { root.querySelector<HTMLButtonElement>('[data-mini-close]')?.click(); },
+    skipCountdown(): void { if (internal.runtime) internal.runtime.countdown = 0; },
+    setState(values: Record<string, unknown>): void { if (internal.runtime) Object.assign(internal.runtime.state, values); },
+    action(): void { internal.primaryAction(); },
+    holdAndRelease(pointerId = 91): void {
+      const button = root.querySelector<HTMLButtonElement>('[data-mini-action]');
+      if (!button) return;
+      button.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerId }));
+      window.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerId }));
+    },
+    snapshot(): Record<string, unknown> { return minigameHardeningSnapshot(director); },
+  };
 }
