@@ -36,6 +36,9 @@ export class MinigameDirector extends EnhancedMinigameDirector {
     );
 
     installMinigameVisuals(root);
+    root.querySelector<HTMLButtonElement>('[data-mini-close]')?.addEventListener('click', () => {
+      window.dispatchEvent(new CustomEvent('lpc-campaign-minigame-closed'));
+    });
     exposeSmokeDiagnostics(this, root);
   }
 }
