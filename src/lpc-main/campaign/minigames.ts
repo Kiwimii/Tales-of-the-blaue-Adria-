@@ -19,6 +19,7 @@ import {
 import { installMinigameVisuals } from './minigameVisuals';
 
 installMinigameHardening();
+installMinigameCloseBridge();
 
 export { activeAssist, difficultyLabel };
 export type { MiniGameContext, MiniGameId, MiniGameOutcome, MiniGameQuality };
@@ -41,6 +42,22 @@ export class MinigameDirector extends EnhancedMinigameDirector {
     });
     exposeSmokeDiagnostics(this, root);
   }
+}
+
+let closeBridgeInstalled = false;
+function installMinigameCloseBridge(): void {
+  if (closeBridgeInstalled) return;
+  closeBridgeInstalled = true;
+  window.addEventListener('lpc-campaign-minigame-closed', () => {
+    const modalOpen = ['generic-modal', 'battle-modal', 'minigame-modal']
+      .map((id) => document.getElementById(id))
+      .some((modal) => Boolean(modal && !modal.hidden));
+    document.body.classList.toggle('campaign-modal-open', modalOpen);
+    const prompt = document.getElementById('interaction-prompt');
+    const promptText = document.getElementById('interaction-text')?.textContent?.trim();
+    if (prompt && !modalOpen) prompt.hidden = !promptText;
+    window.dispatchEvent(new CustomEvent('lpc-campaign-world-input-restored'));
+  });
 }
 
 function exposeSmokeDiagnostics(director: MinigameDirector, root: HTMLElement): void {
