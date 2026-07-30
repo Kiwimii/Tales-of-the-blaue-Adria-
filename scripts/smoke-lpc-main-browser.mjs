@@ -33,24 +33,12 @@ const candidates = [process.env.CHROME_BIN, 'google-chrome', 'chromium', 'chromi
 let browser;
 for (const candidate of candidates) {
   browser = spawn(candidate, [
-    '--headless=new',
-    '--no-sandbox',
-    '--disable-gpu',
-    '--enable-unsafe-swiftshader',
-    '--disable-dev-shm-usage',
-    '--disable-background-networking',
-    '--disable-component-update',
-    '--disable-component-extensions-with-background-pages',
-    '--disable-default-apps',
-    '--disable-extensions',
-    '--disable-sync',
+    '--headless=new', '--no-sandbox', '--disable-gpu', '--enable-unsafe-swiftshader', '--disable-dev-shm-usage',
+    '--disable-background-networking', '--disable-component-update', '--disable-component-extensions-with-background-pages',
+    '--disable-default-apps', '--disable-extensions', '--disable-sync',
     '--disable-features=MediaRouter,Translate,OptimizationGuideModelDownloading,OptimizationHints,PushMessaging,Notifications,BackgroundSync,PeriodicBackgroundSync',
-    '--no-first-run',
-    '--no-default-browser-check',
-    '--mute-audio',
-    `--remote-debugging-port=${debuggingPort}`,
-    `--user-data-dir=${profile}`,
-    pageUrl,
+    '--no-first-run', '--no-default-browser-check', '--mute-audio',
+    `--remote-debugging-port=${debuggingPort}`, `--user-data-dir=${profile}`, pageUrl,
   ], { stdio: ['ignore', 'ignore', 'pipe'] });
   const started = await new Promise((resolve) => {
     let settled = false;
@@ -71,21 +59,13 @@ try {
   try {
     await session.command('Runtime.enable');
     await session.command('Page.enable');
-    const readiness = await waitForCampaignState(session, 22000);
-    const missing = Object.entries(readiness).filter(([, value]) => value !== true).map(([key]) => key);
-    if (missing.length) throw new Error(`Campaign browser smoke state is incomplete: ${missing.join(', ')}`);
-
-    const codexState = await exerciseCodex(session);
-    const codexFailed = Object.entries(codexState).filter(([, value]) => value !== true).map(([key]) => key);
-    if (codexFailed.length) throw new Error(`Codex browser smoke state is incomplete: ${codexFailed.join(', ')}. State: ${JSON.stringify(codexState)}`);
-
-    const minigameState = await exerciseMinigames(session);
-    const failed = Object.entries(minigameState).filter(([, value]) => value !== true).map(([key]) => key);
-    if (failed.length) throw new Error(`Minigame browser smoke state is incomplete: ${failed.join(', ')}. State: ${JSON.stringify(minigameState)}`);
-
+    assertState('Campaign', await waitForCampaignState(session, 24000));
+    assertState('Codex', await exerciseCodex(session));
+    assertState('Weekend arc', await exerciseWeekendArc(session));
+    assertState('Minigame', await exerciseMinigames(session));
     const runtimeErrors = stderr.split('\n').filter((line) => /uncaught|referenceerror|typeerror|syntaxerror/i.test(line));
     if (runtimeErrors.length) throw new Error(`Browser runtime exception detected:\n${runtimeErrors.join('\n')}`);
-    console.log('LPC campaign browser smoke test passed: world input, searchable codex, mobile controls, battles, hardened minigame input and CC0/fallback VFX rendered without runtime exceptions.');
+    console.log('LPC campaign browser smoke test passed: world input, eleven-category codex, Friday/Saturday arc, both songs, brawl, Secret Millionaire, mobile controls, minigames and VFX rendered without runtime exceptions.');
   } finally {
     session.close();
   }
@@ -95,131 +75,138 @@ try {
   rmSync(profile, { recursive: true, force: true });
 }
 
+function assertState(label, state) {
+  const failed = Object.entries(state).filter(([, value]) => value !== true).map(([key]) => key);
+  if (failed.length) throw new Error(`${label} browser smoke state is incomplete: ${failed.join(', ')}. State: ${JSON.stringify(state)}`);
+}
+
 async function exerciseCodex(session) {
   const opened = await evaluate(session, `(() => {
     const button = document.querySelector('#open-codex');
     if (!(button instanceof HTMLButtonElement)) return false;
-    button.click();
-    return true;
+    button.click(); return true;
   })()`);
-  if (!opened) return { button: false };
-
+  if (!opened) return { codexButton: false };
   const visible = await waitForExpression(session, `(() => ({
-    modal: document.querySelector('#campaign-codex')?.hidden === false,
-    categories: document.querySelectorAll('[data-codex-category]').length === 10,
-    entries: document.querySelectorAll('[data-codex-entry]').length >= 4,
-    detail: document.querySelector('#codex-detail')?.textContent?.includes('Spielablauf') ?? false,
-    locked: document.body.classList.contains('campaign-modal-open')
+    codexModal: document.querySelector('#campaign-codex')?.hidden === false,
+    elevenCategories: document.querySelectorAll('[data-codex-category]').length === 11,
+    categoryEntries: document.querySelectorAll('[data-codex-entry]').length >= 4,
+    initialDetail: document.querySelector('#codex-detail')?.textContent?.includes('Spielablauf') ?? false,
+    worldInputLocked: document.body.classList.contains('campaign-modal-open')
   }))()`, 9000);
-
   const search = await evaluate(session, `(() => {
     const input = document.querySelector('#codex-search');
     if (!(input instanceof HTMLInputElement)) return false;
-    input.value = 'Beer-Pong-Zwangsduell';
-    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.value = 'Secret Millionär'; input.dispatchEvent(new Event('input', { bubbles: true }));
     const first = document.querySelector('[data-codex-entry]');
     if (!(first instanceof HTMLButtonElement)) return false;
     first.click();
     return {
-      result: document.querySelectorAll('[data-codex-entry]').length >= 1,
-      text: document.querySelector('#codex-detail')?.textContent?.includes('Beer-Pong-Zwangsduell') ?? false,
-      source: document.querySelector('#codex-detail')?.textContent?.includes('src/game/combatMoves.ts') ?? false
+      searchResult: document.querySelectorAll('[data-codex-entry]').length >= 1,
+      searchDetail: document.querySelector('#codex-detail')?.textContent?.includes('Secret Millionär') ?? false,
+      sourcePathVisible: document.querySelector('#codex-detail')?.textContent?.includes('weekendArc') ?? false
     };
   })()`);
-
   const closed = await evaluate(session, `(() => {
-    const close = document.querySelector('#codex-close');
-    if (!(close instanceof HTMLButtonElement)) return false;
-    close.click();
+    document.querySelector('#codex-close')?.click();
     return document.querySelector('#campaign-codex')?.hidden === true
-      && document.body.classList.contains('campaign-codex-open') === false
-      && document.body.classList.contains('campaign-modal-open') === false;
+      && !document.body.classList.contains('campaign-codex-open')
+      && !document.body.classList.contains('campaign-modal-open');
   })()`);
+  return { codexButton: opened === true, ...visible, ...(search || {}), worldInputRestoredAfterCodex: closed === true };
+}
 
-  return {
-    codexButton: opened === true,
-    codexModal: visible.modal === true,
-    tenCategories: visible.categories === true,
-    categoryEntries: visible.entries === true,
-    initialDetail: visible.detail === true,
-    worldInputLocked: visible.locked === true,
-    searchResult: search?.result === true,
-    searchDetail: search?.text === true,
-    sourcePathVisible: search?.source === true,
-    worldInputRestoredAfterCodex: closed === true,
-  };
+async function exerciseWeekendArc(session) {
+  const song = await evaluate(session, `(() => {
+    const debug = window.__lpcWeekendArcDebug;
+    if (!debug) return false;
+    debug.showSong();
+    const text = document.querySelector('#weekend-arc-content')?.textContent ?? '';
+    return {
+      arcButton: Boolean(document.querySelector('#open-weekend-arc')),
+      arcModal: document.querySelector('#weekend-arc-modal')?.hidden === false,
+      farewellSong: text.includes('Es ist vorbei') && text.includes('Masl unsere letzte Chance'),
+      fullLyrics: text.includes('Wie kann man mit Bier im Mund schreien?') && text.includes('Bis zwölf ist Zeit'),
+      lockedDuringArc: document.body.classList.contains('campaign-modal-open')
+    };
+  })()`);
+  await evaluate(session, `window.__lpcWeekendArcDebug.close()`);
+
+  const brawl = await evaluate(session, `(() => {
+    const debug = window.__lpcWeekendArcDebug;
+    debug.showBrawl();
+    const before = document.querySelectorAll('.brawl-fighter').length;
+    document.querySelector('[data-brawl="punch"]')?.click();
+    return {
+      brawlArena: Boolean(document.querySelector('.brawl-arena')),
+      fourFighters: before === 4,
+      fourActions: document.querySelectorAll('[data-brawl]').length === 4,
+      brawlLog: document.querySelector('.arc-log')?.textContent?.length > 20
+    };
+  })()`);
+  await evaluate(session, `window.__lpcWeekendArcDebug.close()`);
+
+  const secret = await evaluate(session, `(() => {
+    const debug = window.__lpcWeekendArcDebug;
+    debug.showSecret();
+    const firstQuestion = document.querySelector('[data-secret-question]');
+    if (firstQuestion instanceof HTMLButtonElement) firstQuestion.click();
+    return {
+      secretRoster: document.querySelectorAll('.secret-candidate').length === 12,
+      secretObservations: document.querySelectorAll('.secret-observations p').length === 3,
+      questionButtons: document.querySelectorAll('[data-secret-question]').length === 12,
+      accusationButtons: document.querySelectorAll('[data-secret-accuse]').length === 12,
+      hiddenRoleNotPrinted: !(document.querySelector('#weekend-arc-content')?.textContent ?? '').includes('masl ist der geheime Millionär')
+    };
+  })()`);
+  const closed = await evaluate(session, `(() => {
+    window.__lpcWeekendArcDebug.close();
+    return document.querySelector('#weekend-arc-modal')?.hidden === true
+      && !document.body.classList.contains('weekend-arc-open')
+      && !document.body.classList.contains('campaign-modal-open');
+  })()`);
+  return { ...(song || {}), ...(brawl || {}), ...(secret || {}), worldInputRestoredAfterArc: closed === true };
 }
 
 async function exerciseMinigames(session) {
   await evaluate(session, `(() => {
     const debug = window.__lpcMinigameDebug;
     if (!debug) return false;
-    debug.start('beerPong');
-    debug.begin();
-    debug.skipCountdown();
-    return true;
+    debug.start('beerPong'); debug.begin(); debug.skipCountdown(); return true;
   })()`);
   const pongOpen = await waitForExpression(session, `(() => ({
-    modal: document.querySelector('#minigame-modal')?.hidden === false,
-    stage: Boolean(document.querySelector('.minigame-stage')),
-    vfx: Boolean(document.querySelector('.minigame-vfx-canvas')),
-    action: document.querySelector('[data-mini-action]')?.disabled === false,
-    assets: ['loading','loaded','fallback'].includes(document.querySelector('#minigame-modal')?.dataset.vfxAssets ?? '')
+    pongModal: document.querySelector('#minigame-modal')?.hidden === false,
+    visualStage: Boolean(document.querySelector('.minigame-stage')),
+    vfxCanvas: Boolean(document.querySelector('.minigame-vfx-canvas')),
+    actionEnabled: document.querySelector('[data-mini-action]')?.disabled === false,
+    assetFallbackSafe: ['loading','loaded','fallback'].includes(document.querySelector('#minigame-modal')?.dataset.vfxAssets ?? '')
   }))()`, 9000);
-
-  const pongLock = await evaluate(session, `(() => {
+  const pongModeLocked = await evaluate(session, `(() => {
     const debug = window.__lpcMinigameDebug;
-    debug.setState({ phase: 'flight', mode: 'direct' });
-    debug.action();
-    const state = debug.snapshot();
-    return state.phase === 'flight' && state.mode === 'direct';
+    debug.setState({ phase: 'flight', mode: 'direct' }); debug.action();
+    const state = debug.snapshot(); return state.phase === 'flight' && state.mode === 'direct';
   })()`);
-
-  const flunkyRelease = await evaluate(session, `(() => {
+  const flunkyHoldReleased = await evaluate(session, `(() => {
     const debug = window.__lpcMinigameDebug;
-    debug.start('flunkyball');
-    debug.begin();
-    debug.skipCountdown();
-    debug.setState({ phase: 'attack-drink', holding: false });
-    debug.holdAndRelease(92);
-    debug.action();
-    const state = debug.snapshot();
-    return state.phase === 'attack-drink' && state.holding === false && state.pointerCount === 0;
+    debug.start('flunkyball'); debug.begin(); debug.skipCountdown();
+    debug.setState({ phase: 'attack-drink', holding: false }); debug.holdAndRelease(92); debug.action();
+    const state = debug.snapshot(); return state.phase === 'attack-drink' && state.holding === false && state.pointerCount === 0;
   })()`);
-
-  const maslTransition = await evaluate(session, `(() => {
+  const maslActionWorks = await evaluate(session, `(() => {
     const debug = window.__lpcMinigameDebug;
-    debug.start('maslHole');
-    debug.begin();
-    debug.skipCountdown();
-    debug.setState({ phase: 'seal', seal: 1, stableTime: 700 });
-    debug.action();
+    debug.start('maslHole'); debug.begin(); debug.skipCountdown();
+    debug.setState({ phase: 'seal', seal: 1, stableTime: 700 }); debug.action();
     return debug.snapshot().phase === 'pull';
   })()`);
-
   const cleanup = await evaluate(session, `(() => {
     const debug = window.__lpcMinigameDebug;
-    document.body.classList.add('campaign-modal-open');
-    debug.close();
+    document.body.classList.add('campaign-modal-open'); debug.close();
     const state = debug.snapshot();
     return document.querySelector('#minigame-modal')?.hidden === true
-      && state.pointerCount === 0
-      && state.holding === false
-      && state.pausedClass === false
-      && document.body.classList.contains('campaign-modal-open') === false;
+      && state.pointerCount === 0 && state.holding === false && state.pausedClass === false
+      && !document.body.classList.contains('campaign-modal-open');
   })()`);
-
-  return {
-    pongModal: pongOpen.modal === true,
-    visualStage: pongOpen.stage === true,
-    vfxCanvas: pongOpen.vfx === true,
-    actionEnabled: pongOpen.action === true,
-    assetFallbackSafe: pongOpen.assets === true,
-    pongModeLocked: pongLock === true,
-    flunkyHoldReleased: flunkyRelease === true,
-    maslActionWorks: maslTransition === true,
-    worldInputRestored: cleanup === true,
-  };
+  return { ...pongOpen, pongModeLocked: pongModeLocked === true, flunkyHoldReleased: flunkyHoldReleased === true, maslActionWorks: maslActionWorks === true, worldInputRestored: cleanup === true };
 }
 
 async function waitForTarget(port, expectedUrl, timeoutMs) {
@@ -250,11 +237,14 @@ async function waitForCampaignState(session, timeoutMs) {
     minigameDirector: Boolean(window.__lpcMinigameDebug),
     vfxLayer: Boolean(document.querySelector('.minigame-vfx-canvas')),
     codexButton: Boolean(document.querySelector('#open-codex')),
-    codexModal: Boolean(document.querySelector('#campaign-codex'))
+    codexModal: Boolean(document.querySelector('#campaign-codex')),
+    arcButton: Boolean(document.querySelector('#open-weekend-arc')),
+    arcModal: Boolean(document.querySelector('#weekend-arc-modal')),
+    arcDebug: Boolean(window.__lpcWeekendArcDebug)
   }))()`;
   while (Date.now() < deadline) {
     latest = await evaluate(session, expression);
-    if (Object.values(latest).length === 9 && Object.values(latest).every(Boolean)) return latest;
+    if (Object.values(latest).length === 12 && Object.values(latest).every(Boolean)) return latest;
     await delay(300);
   }
   throw new Error(`Campaign DOM was not ready before timeout. State: ${JSON.stringify(latest)}\n${stderr.slice(-5000)}`);
@@ -289,8 +279,7 @@ async function connectDevTools(url) {
   socket.addEventListener('message', (event) => {
     const message = JSON.parse(String(event.data));
     if (!message.id || !pending.has(message.id)) return;
-    const entry = pending.get(message.id);
-    pending.delete(message.id);
+    const entry = pending.get(message.id); pending.delete(message.id);
     if (message.error) entry.reject(new Error(message.error.message)); else entry.resolve(message);
   });
   return {
@@ -298,10 +287,7 @@ async function connectDevTools(url) {
       return new Promise((resolve, reject) => {
         const id = nextId++;
         const timeout = setTimeout(() => { pending.delete(id); reject(new Error(`DevTools command timed out: ${method}`)); }, 15000);
-        pending.set(id, {
-          resolve(value) { clearTimeout(timeout); resolve(value); },
-          reject(error) { clearTimeout(timeout); reject(error); },
-        });
+        pending.set(id, { resolve(value) { clearTimeout(timeout); resolve(value); }, reject(error) { clearTimeout(timeout); reject(error); } });
         socket.send(JSON.stringify({ id, method, params }));
       });
     },

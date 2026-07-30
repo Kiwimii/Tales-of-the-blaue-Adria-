@@ -20,9 +20,12 @@ import { installMinigameVisuals } from './minigameVisuals';
 
 installMinigameHardening();
 installMinigameCloseBridge();
+installExternalStartBridge();
 
 export { activeAssist, difficultyLabel };
 export type { MiniGameContext, MiniGameId, MiniGameOutcome, MiniGameQuality };
+
+let activeDirector: MinigameDirector | undefined;
 
 export class MinigameDirector extends EnhancedMinigameDirector {
   constructor(root: HTMLElement, onOutcome: (outcome: MiniGameOutcome) => void) {
@@ -32,10 +35,12 @@ export class MinigameDirector extends EnhancedMinigameDirector {
         stageMinigameOutcome(outcome);
         applyMinigameRuntimeEffects(outcome);
         onOutcome(outcome);
+        window.dispatchEvent(new CustomEvent<MiniGameOutcome>('lpc-campaign-minigame-outcome', { detail: structuredClone(outcome) }));
       },
       currentMinigameContext,
     );
 
+    activeDirector = this;
     installMinigameVisuals(root);
     root.querySelector<HTMLButtonElement>('[data-mini-close]')?.addEventListener('click', () => {
       window.dispatchEvent(new CustomEvent('lpc-campaign-minigame-closed'));
@@ -44,12 +49,23 @@ export class MinigameDirector extends EnhancedMinigameDirector {
   }
 }
 
+let externalStartBridgeInstalled = false;
+function installExternalStartBridge(): void {
+  if (externalStartBridgeInstalled) return;
+  externalStartBridgeInstalled = true;
+  window.addEventListener('lpc-campaign-start-minigame', ((event: CustomEvent<MiniGameId>) => {
+    if (!activeDirector || !event.detail) return;
+    activeDirector.start(event.detail);
+    document.body.classList.add('campaign-modal-open');
+  }) as EventListener);
+}
+
 let closeBridgeInstalled = false;
 function installMinigameCloseBridge(): void {
   if (closeBridgeInstalled) return;
   closeBridgeInstalled = true;
   window.addEventListener('lpc-campaign-minigame-closed', () => {
-    const modalOpen = ['generic-modal', 'battle-modal', 'minigame-modal']
+    const modalOpen = ['generic-modal', 'battle-modal', 'minigame-modal', 'weekend-arc-modal']
       .map((id) => document.getElementById(id))
       .some((modal) => Boolean(modal && !modal.hidden));
     document.body.classList.toggle('campaign-modal-open', modalOpen);

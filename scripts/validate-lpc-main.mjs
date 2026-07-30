@@ -10,11 +10,11 @@ const files = readdirSync(assetDirectory);
 const scripts = files.filter((file) => file.endsWith('.js'));
 const styles = files.filter((file) => file.endsWith('.css'));
 
-assert(scripts.length >= 1 && scripts.length <= 6, `Expected one to six LPC campaign script chunks, found ${scripts.length}.`);
+assert(scripts.length >= 1 && scripts.length <= 8, `Expected one to eight LPC campaign script chunks, found ${scripts.length}.`);
 assert(styles.length === 1, `Expected one LPC campaign stylesheet, found ${styles.length}.`);
 assert(!files.some((file) => file.endsWith('.map')), 'LPC campaign build must not publish source maps.');
 assert(html.includes('LPC CAMPAIGN BUILD'), 'LPC campaign build identity is missing.');
-assert(html.includes('lpc-in-game-codex-v1'), 'In-game codex release marker is missing.');
+assert(html.includes('lpc-weekend-arc-v1'), 'Connected weekend arc release marker is missing.');
 assert(html.includes('/Tales-of-the-blaue-Adria-/lpc-main/assets/'), 'LPC campaign build uses the wrong base path.');
 assert(html.includes('../next/') && html.includes('../lpc-test/'), 'Comparison links are missing.');
 assert(existsSync(resolve(root, 'THIRD_PARTY_ASSETS.md')), 'Third-party CC0 asset documentation is missing.');
@@ -40,6 +40,8 @@ for (const marker of [
   'Wurfart gilt bis zur Landung',
   'lpc-campaign-minigame-closed',
   'lpc-campaign-world-input-restored',
+  'lpc-campaign-start-minigame',
+  'lpc-campaign-minigame-outcome',
   'Kumpel-Nackenklatscher',
   'Beer-Pong-Zwangsduell',
   'Schranken-Gockelmodus',
@@ -51,6 +53,16 @@ for (const marker of [
   'Exakt programmierte Regeln',
   'Wochenendwert',
   'Manipulierbare Platzleitung',
+  'Wochenendbogen',
+  'FREITAG · TRINKSPIEL-OLYMPIADE',
+  'SAMSTAG · 08:00 UHR',
+  'FAUSTRECHT AN DER SCHRANKE',
+  'SECRET MILLIONÄR · RUNDE',
+  'Goodbye Adria - nicht!',
+  'Masl unsere letzte Chance',
+  'earlyEvictionEnding',
+  'fridayOlympiadComplete',
+  'secretMillionaireComplete',
   'src/lpc-main/campaign/minigamesV2.ts',
 ]) assert(javascript.includes(marker), `Missing LPC campaign runtime marker: ${marker}`);
 
@@ -68,13 +80,18 @@ for (const marker of [
   '.codex-entry-list',
   '.codex-detail',
   '.codex-table-wrap',
+  '.weekend-arc-modal',
+  '.olympiad-discipline',
+  '.song-lyrics',
+  '.brawl-arena',
+  '.secret-roster',
 ]) assert(stylesheet.includes(marker), `Missing LPC campaign stylesheet marker: ${marker}`);
 
 assert(stylesheet.includes('image-rendering:pixelated') || stylesheet.includes('image-rendering: pixelated'), 'Pixel rendering rule is missing.');
 
 const totalSize = scripts.reduce((sum, file) => sum + statSync(resolve(assetDirectory, file)).size, 0);
-assert(totalSize < 4_250_000, `LPC campaign JavaScript is unexpectedly large: ${Math.round(totalSize / 1024)} kB.`);
-console.log(`LPC campaign validation passed: ${Math.round(totalSize / 1024)} kB across ${scripts.length} script chunk(s), including the searchable system-derived codex, grim authority states, absurd attacks, hardened minigames and CC0/fallback VFX.`);
+assert(totalSize < 4_900_000, `LPC campaign JavaScript is unexpectedly large: ${Math.round(totalSize / 1024)} kB.`);
+console.log(`LPC campaign validation passed: ${Math.round(totalSize / 1024)} kB across ${scripts.length} script chunk(s), including Friday Olympics, persistent night noise, Saturday eviction/brawl, both full André songs, Secret Millionaire, the searchable codex, hardened minigames and CC0/fallback VFX.`);
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);

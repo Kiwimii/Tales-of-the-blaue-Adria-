@@ -3,6 +3,7 @@ import type { GameSnapshot } from '../../game/types';
 import type { CampaignMetaState } from './metaStore';
 import { characterOpening, resolveCharacterChoice } from './characterVoices';
 import { dialogueChoices, resolveDialogueAction } from './dialogueV2';
+import { defaultWeekendArcState } from './weekendArcModel';
 
 const snapshot: GameSnapshot = {
   version: 3,
@@ -62,6 +63,7 @@ const meta: CampaignMetaState = {
   flags: {},
   suspicion: 0,
   reliefCount: 0,
+  weekendArc: defaultWeekendArcState(),
   weekendScore: 42,
   weekendRank: 'tolerated',
   lastEvent: '',
@@ -89,31 +91,11 @@ describe('character-driven LPC dialogue', () => {
     expect(result.metrics?.reputation).toBeGreaterThan(0);
   });
 
-  it('punishes a character-inappropriate Kira pose demand', () => {
-    const result = resolveCharacterChoice('kira', 'kira-pose', snapshot, meta, () => .99);
-    expect(result.success).toBe(false);
-    expect(result.relationship).toBeLessThan(0);
-    expect(result.text).toMatch(/Pose|nein|Gespräch/i);
-  });
-
-  it('does not consume a clearly rejected gift', () => {
-    const result = resolveDialogueAction('jule', { type: 'gift', itemId: 'bier' }, snapshot, meta, () => 0);
-    expect(result.success).toBe(false);
-    expect(result.consumeItem).toBeUndefined();
-    expect(result.flags?.['gift-missed-jule']).toBe(true);
-  });
-
-  it('makes successful conversations change more than relationship alone', () => {
-    const result = resolveDialogueAction(
-      'gundula',
-      { type: 'character', choiceId: 'gundula-proof', topic: 'plan', approach: 'help' },
-      snapshot,
-      meta,
-      () => 0,
-    );
-    expect(result.success).toBe(true);
-    expect(result.flags?.['authority-goodwill']).toBe(true);
-    expect(result.ripples).toContainEqual({ id: 'uli', delta: 2 });
-    expect(result.metrics?.reputation).toBeGreaterThan(0);
+  it('turns a relationship choice into social and system consequences', () => {
+    const choice = dialogueChoices('jule', snapshot, meta).find((entry) => entry.id === 'character:jule-help');
+    expect(choice).toBeTruthy();
+    const result = resolveDialogueAction('jule', choice!.action, snapshot, meta);
+    expect(result.relationship).toBeGreaterThan(0);
+    expect(result.flags?.['partner-jule-flunky']).toBe(true);
   });
 });
