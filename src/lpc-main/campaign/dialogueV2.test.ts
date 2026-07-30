@@ -36,7 +36,7 @@ const snapshot: GameSnapshot = {
 };
 
 const meta: CampaignMetaState = {
-  version: 4,
+  version: 3,
   introSeen: true,
   introReplays: 0,
   questStage: 'free-weekend',
