@@ -15,6 +15,7 @@ const storage = new NamespacedStorage();
 const arcStore = new GameStore(storage);
 let lastSerialized = localStorage.getItem(SAVE_KEY) ?? '';
 let baseAtLastOpen = lastSerialized;
+let returnToOlympiadAfterClose = false;
 
 function refreshStore(notify = true): void {
   const serialized = localStorage.getItem(SAVE_KEY) ?? '';
@@ -44,9 +45,32 @@ installWeekendArc({
 
 window.addEventListener('lpc-campaign-minigame-outcome', ((event: CustomEvent<MiniGameOutcome>) => {
   refreshStore(false);
+  const metaBefore = campaignMeta.snapshot();
+  const isOlympiadRound = metaBefore.questStage === 'friday-olympiad'
+    && metaBefore.weekendArc.olympiad.current === event.detail.id;
   handleWeekendArcMinigame(event.detail);
   lastSerialized = localStorage.getItem(SAVE_KEY) ?? '';
+  if (isOlympiadRound) {
+    returnToOlympiadAfterClose = true;
+    window.setTimeout(() => {
+      const mini = document.getElementById('minigame-modal');
+      const arc = document.getElementById('weekend-arc-modal');
+      if (mini && !mini.hidden && arc) arc.hidden = true;
+    }, 340);
+  }
 }) as EventListener);
+
+window.addEventListener('lpc-campaign-minigame-closed', () => {
+  const meta = campaignMeta.snapshot();
+  if (meta.questStage !== 'friday-olympiad') return;
+  if (meta.weekendArc.olympiad.current) {
+    campaignMeta.setOlympiadCurrent('');
+    returnToOlympiadAfterClose = true;
+  }
+  if (!returnToOlympiadAfterClose) return;
+  returnToOlympiadAfterClose = false;
+  window.setTimeout(() => document.getElementById('open-weekend-arc')?.click(), 80);
+});
 
 window.setInterval(() => refreshStore(true), 650);
 
