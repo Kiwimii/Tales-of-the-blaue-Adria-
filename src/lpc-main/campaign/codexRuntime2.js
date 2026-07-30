@@ -10,6 +10,7 @@ import { CHARACTER_VOICES } from './characterVoices';
 import { authorityManipulationScore, installAuthorityOverhaul } from './authorityOverhaul';
 import { campaignMeta } from './metaStore';
 import { ANECDOTES, COMPANION_ACTIONS, WEEKEND_RANKS, branchLabel } from './progression';
+import { buildWeekendArcCodexEntries } from './weekendArcCodex';
 import codexSource from './codexRuntime.js?raw';
 import './codex.css';
 
@@ -19,6 +20,14 @@ const correctedSource = codexSource
   .replace(
     "note('Verfeinerungspunkt', 'Charmant ist mechanisch schwächer angebunden.'));",
     "note('Verfeinerungspunkt', 'Charmant ist mechanisch schwächer angebunden.')));",
+  )
+  .replace(
+    "  ['world', '⌖', 'Welt & Orte', 'Regionen, Interaktionsorte, Karte und Bewegungsregeln.'],",
+    "  ['weekend', '☀', 'Wochenendbogen', 'Freitag-Olympiade, Nachtlärm, Räumungsquest, Faustkampf, Lieder und Secret Millionär.'],\n  ['world', '⌖', 'Welt & Orte', 'Regionen, Interaktionsorte, Karte und Bewegungsregeln.'],",
+  )
+  .replace(
+    '  addWorld(result, snapshot);',
+    '  result.push(...buildWeekendArcCodexEntries(snapshot, meta));\n  addWorld(result, snapshot);',
   );
 
 const dependencies = {
@@ -46,6 +55,7 @@ const dependencies = {
   COMPANION_ACTIONS,
   WEEKEND_RANKS,
   branchLabel,
+  buildWeekendArcCodexEntries,
 };
 
 const runCodex = new Function(
@@ -75,6 +85,7 @@ const runCodex = new Function(
     COMPANION_ACTIONS,
     WEEKEND_RANKS,
     branchLabel,
+    buildWeekendArcCodexEntries,
   } = dependencies;\n${correctedSource}`,
 );
 
