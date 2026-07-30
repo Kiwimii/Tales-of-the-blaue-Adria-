@@ -41,7 +41,7 @@ export interface RomanceState { interest: number; attempts: number; successes: n
 export interface CampaignMiniResult { attempts: number; wins: number; best: number; last: number; bestQuality: 'failed' | 'messy' | 'solid' | 'perfect'; }
 
 export interface CampaignMetaState {
-  version: 4;
+  version: 3;
   introSeen: boolean;
   introReplays: number;
   questStage: CampaignQuestStage;
@@ -77,7 +77,7 @@ const defaultMini = (): CampaignMiniResult => ({ attempts: 0, wins: 0, best: 0, 
 const defaultMastery = (): AttackMasteryState => ({ uses: 0, successes: 0, level: 1 });
 
 const DEFAULT_STATE: CampaignMetaState = {
-  version: 4,
+  version: 3,
   introSeen: false,
   introReplays: 0,
   questStage: 'arrival',
@@ -107,6 +107,7 @@ const DEFAULT_STATE: CampaignMetaState = {
 };
 
 type Listener = (state: CampaignMetaState) => void;
+type FridayOlympiadStateAfterparty = WeekendArcState['olympiad']['afterparty'];
 
 export class CampaignMetaStore {
   private state: CampaignMetaState = this.load();
@@ -207,68 +208,43 @@ export class CampaignMetaStore {
     this.state.lastEvent = event;
     this.emit();
   }
-  setOlympiadCurrent(id: OlympiadDisciplineId | ''): void {
-    this.state.weekendArc.olympiad.current = id;
-    this.emit();
-  }
+  setOlympiadCurrent(id: OlympiadDisciplineId | ''): void { this.state.weekendArc.olympiad.current = id; this.emit(); }
   recordOlympiadRound(id: OlympiadDisciplineId, success: boolean, score: number, quality: CampaignMiniResult['bestQuality']): void {
     const result = this.state.weekendArc.olympiad.disciplines[id];
     if (result.attempted) return;
-    result.attempted = true;
-    result.success = success;
-    result.score = score;
-    result.quality = quality;
-    result.points = olympiadPoints(success, quality);
+    result.attempted = true; result.success = success; result.score = score; result.quality = quality; result.points = olympiadPoints(success, quality);
     this.state.weekendArc.olympiad.points = Object.values(this.state.weekendArc.olympiad.disciplines).reduce((sum, entry) => sum + entry.points, 0);
     this.state.weekendArc.olympiad.current = '';
     this.state.lastEvent = `${id} ist als Olympiadendisziplin gewertet: ${result.points} Punkte.`;
     this.recalculateScore(); this.emit();
   }
   completeOlympiad(afterparty: FridayOlympiadStateAfterparty, nightNoise: number, event: string): void {
-    this.state.weekendArc.olympiad.completed = true;
-    this.state.weekendArc.olympiad.afterparty = afterparty;
-    this.state.weekendArc.nightNoise = clamp(nightNoise, 0, 100);
-    this.state.flags.fridayOlympiadComplete = true;
-    this.state.lastEvent = event;
+    this.state.weekendArc.olympiad.completed = true; this.state.weekendArc.olympiad.afterparty = afterparty;
+    this.state.weekendArc.nightNoise = clamp(nightNoise, 0, 100); this.state.flags.fridayOlympiadComplete = true; this.state.lastEvent = event;
     this.recalculateScore(); this.emit();
   }
   startSaturdayComplaint(): void {
     if (this.state.weekendArc.saturday.triggered || this.state.weekendArc.saturday.earlyEnding) return;
-    this.state.weekendArc.saturday.triggered = true;
-    this.state.weekendArc.saturday.step = 'complaint';
-    this.state.questStage = 'saturday-complaint';
+    this.state.weekendArc.saturday.triggered = true; this.state.weekendArc.saturday.step = 'complaint'; this.state.questStage = 'saturday-complaint';
     this.state.lastEvent = `Samstag, 08:00 Uhr: Gundula steht mit Klemmbrett am Zeltkreis. Nachtlärm ${this.state.weekendArc.nightNoise}/100.`;
     this.emit();
   }
-  updateWeekendArc(mutator: (state: WeekendArcState) => void, event?: string): void {
-    mutator(this.state.weekendArc);
-    if (event) this.state.lastEvent = event;
-    this.recalculateScore(); this.checkFinale(); this.emit();
-  }
+  updateWeekendArc(mutator: (state: WeekendArcState) => void, event?: string): void { mutator(this.state.weekendArc); if (event) this.state.lastEvent = event; this.recalculateScore(); this.checkFinale(); this.emit(); }
   winSaturdayBrawl(): void {
-    this.state.weekendArc.saturday.brawlWon = true;
-    this.state.weekendArc.saturday.earlyEnding = false;
-    this.state.weekendArc.saturday.step = 'won';
-    this.state.weekendArc.secretMillionaire.unlocked = true;
-    this.state.flags.saturdayStayWon = true;
-    this.state.questStage = 'secret-millionaire';
+    this.state.weekendArc.saturday.brawlWon = true; this.state.weekendArc.saturday.earlyEnding = false; this.state.weekendArc.saturday.step = 'won';
+    this.state.weekendArc.secretMillionaire.unlocked = true; this.state.flags.saturdayStayWon = true; this.state.questStage = 'secret-millionaire';
     this.state.lastEvent = 'Der Acht-Uhr-Faustkampf ist gewonnen. Gundula und Uli erlauben das Bleiben und behaupten, es selbst entschieden zu haben.';
     this.recalculateScore(); this.emit();
   }
   loseSaturdayBrawl(): void {
-    this.state.weekendArc.saturday.brawlWon = false;
-    this.state.weekendArc.saturday.earlyEnding = true;
-    this.state.weekendArc.saturday.step = 'evicted';
-    this.state.flags.earlyEvictionEnding = true;
-    this.state.questStage = 'early-eviction';
+    this.state.weekendArc.saturday.brawlWon = false; this.state.weekendArc.saturday.earlyEnding = true; this.state.weekendArc.saturday.step = 'evicted';
+    this.state.flags.earlyEvictionEnding = true; this.state.questStage = 'early-eviction';
     this.state.lastEvent = 'Vom Platz geflogen. Die Schranke schließt, bevor das Wochenende seine zweite Hälfte erreicht.';
     this.recalculateScore(); this.emit();
   }
   completeSecretMillionaire(winner: 'player' | 'rival'): void {
-    this.state.weekendArc.secretMillionaire.completed = true;
-    this.state.weekendArc.secretMillionaire.winner = winner;
-    this.state.flags.secretMillionaireComplete = true;
-    this.state.questStage = 'free-weekend';
+    this.state.weekendArc.secretMillionaire.completed = true; this.state.weekendArc.secretMillionaire.winner = winner;
+    this.state.flags.secretMillionaireComplete = true; this.state.questStage = 'free-weekend';
     this.state.lastEvent = winner === 'player' ? 'Secret Millionär gewonnen. Ein Hauptgewinn, keine Trostpreise und mehrere dauerhaft beleidigte Verdächtige.' : 'Secret Millionär beendet. Der Hauptgewinn geht an jemand anderen; Trostpreise wurden bereits aus Prinzip abgeschafft.';
     this.recalculateScore(); this.checkFinale(); this.emit();
   }
@@ -325,14 +301,11 @@ export class CampaignMetaStore {
       const raw = localStorage.getItem(META_KEY); if (!raw) return structuredClone(DEFAULT_STATE); const parsed = JSON.parse(raw) as Partial<CampaignMetaState>;
       const attackMastery: CampaignMetaState['attackMastery'] = {}; for (const id of [STARTER_ATTACK, ...(parsed.learnedAttacks ?? [])]) if (id in COMBAT_MOVES) attackMastery[id as CombatMoveId] = { ...defaultMastery(), ...(parsed.attackMastery?.[id as CombatMoveId] ?? {}) };
       const miniResults: Record<string, CampaignMiniResult> = {}; for (const [id, result] of Object.entries(parsed.miniResults ?? {})) miniResults[id] = { ...defaultMini(), ...result };
-      const arcDefault = defaultWeekendArcState();
-      const parsedArc = parsed.weekendArc;
+      const arcDefault = defaultWeekendArcState(); const parsedArc = parsed.weekendArc;
       const weekendArc: WeekendArcState = {
-        ...arcDefault,
-        ...(parsedArc ?? {}),
+        ...arcDefault, ...(parsedArc ?? {}),
         olympiad: {
-          ...arcDefault.olympiad,
-          ...(parsedArc?.olympiad ?? {}),
+          ...arcDefault.olympiad, ...(parsedArc?.olympiad ?? {}),
           disciplines: {
             flipCup: { ...arcDefault.olympiad.disciplines.flipCup, ...(parsedArc?.olympiad?.disciplines?.flipCup ?? {}) },
             beerPong: { ...arcDefault.olympiad.disciplines.beerPong, ...(parsedArc?.olympiad?.disciplines?.beerPong ?? {}) },
@@ -343,7 +316,7 @@ export class CampaignMetaStore {
         secretMillionaire: { ...arcDefault.secretMillionaire, ...(parsedArc?.secretMillionaire ?? {}) },
       };
       const state: CampaignMetaState = {
-        ...structuredClone(DEFAULT_STATE), ...parsed, version: 4,
+        ...structuredClone(DEFAULT_STATE), ...parsed, version: 3,
         unloading: { ...DEFAULT_STATE.unloading, ...(parsed.unloading ?? {}) },
         romance: { susi: { ...defaultRomance(), ...(parsed.romance?.susi ?? {}) }, jule: { ...defaultRomance(), ...(parsed.romance?.jule ?? {}) }, kira: { ...defaultRomance(), ...(parsed.romance?.kira ?? {}) } },
         learnedAttacks: [...new Set([STARTER_ATTACK, ...(parsed.learnedAttacks ?? [])])].filter((id): id is CombatMoveId => id in COMBAT_MOVES),
@@ -358,6 +331,5 @@ export class CampaignMetaStore {
   private emit(): void { this.recalculateScore(); localStorage.setItem(META_KEY, JSON.stringify(this.state)); const snapshot = this.snapshot(); this.listeners.forEach((listener) => listener(snapshot)); window.dispatchEvent(new CustomEvent('lpc-campaign-meta', { detail: snapshot })); }
 }
 
-type FridayOlympiadStateAfterparty = WeekendArcState['olympiad']['afterparty'];
 function clamp(value: number, min: number, max: number): number { return Math.max(min, Math.min(max, value)); }
 export const campaignMeta = new CampaignMetaStore();
