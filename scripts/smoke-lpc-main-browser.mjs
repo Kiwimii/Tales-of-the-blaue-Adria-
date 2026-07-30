@@ -75,13 +75,17 @@ try {
     const missing = Object.entries(readiness).filter(([, value]) => value !== true).map(([key]) => key);
     if (missing.length) throw new Error(`Campaign browser smoke state is incomplete: ${missing.join(', ')}`);
 
+    const codexState = await exerciseCodex(session);
+    const codexFailed = Object.entries(codexState).filter(([, value]) => value !== true).map(([key]) => key);
+    if (codexFailed.length) throw new Error(`Codex browser smoke state is incomplete: ${codexFailed.join(', ')}. State: ${JSON.stringify(codexState)}`);
+
     const minigameState = await exerciseMinigames(session);
     const failed = Object.entries(minigameState).filter(([, value]) => value !== true).map(([key]) => key);
     if (failed.length) throw new Error(`Minigame browser smoke state is incomplete: ${failed.join(', ')}. State: ${JSON.stringify(minigameState)}`);
 
     const runtimeErrors = stderr.split('\n').filter((line) => /uncaught|referenceerror|typeerror|syntaxerror/i.test(line));
     if (runtimeErrors.length) throw new Error(`Browser runtime exception detected:\n${runtimeErrors.join('\n')}`);
-    console.log('LPC campaign browser smoke test passed: world input, mobile controls, battles, hardened minigame input and CC0/fallback VFX rendered without runtime exceptions.');
+    console.log('LPC campaign browser smoke test passed: world input, searchable codex, mobile controls, battles, hardened minigame input and CC0/fallback VFX rendered without runtime exceptions.');
   } finally {
     session.close();
   }
@@ -89,6 +93,61 @@ try {
   browser.kill('SIGKILL');
   server.close();
   rmSync(profile, { recursive: true, force: true });
+}
+
+async function exerciseCodex(session) {
+  const opened = await evaluate(session, `(() => {
+    const button = document.querySelector('#open-codex');
+    if (!(button instanceof HTMLButtonElement)) return false;
+    button.click();
+    return true;
+  })()`);
+  if (!opened) return { button: false };
+
+  const visible = await waitForExpression(session, `(() => ({
+    modal: document.querySelector('#campaign-codex')?.hidden === false,
+    categories: document.querySelectorAll('[data-codex-category]').length === 10,
+    entries: document.querySelectorAll('[data-codex-entry]').length >= 4,
+    detail: document.querySelector('#codex-detail')?.textContent?.includes('Spielablauf') ?? false,
+    locked: document.body.classList.contains('campaign-modal-open')
+  }))()`, 9000);
+
+  const search = await evaluate(session, `(() => {
+    const input = document.querySelector('#codex-search');
+    if (!(input instanceof HTMLInputElement)) return false;
+    input.value = 'Beer-Pong-Zwangsduell';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    const first = document.querySelector('[data-codex-entry]');
+    if (!(first instanceof HTMLButtonElement)) return false;
+    first.click();
+    return {
+      result: document.querySelectorAll('[data-codex-entry]').length >= 1,
+      text: document.querySelector('#codex-detail')?.textContent?.includes('Beer-Pong-Zwangsduell') ?? false,
+      source: document.querySelector('#codex-detail')?.textContent?.includes('src/game/combatMoves.ts') ?? false
+    };
+  })()`);
+
+  const closed = await evaluate(session, `(() => {
+    const close = document.querySelector('#codex-close');
+    if (!(close instanceof HTMLButtonElement)) return false;
+    close.click();
+    return document.querySelector('#campaign-codex')?.hidden === true
+      && document.body.classList.contains('campaign-codex-open') === false
+      && document.body.classList.contains('campaign-modal-open') === false;
+  })()`);
+
+  return {
+    codexButton: opened === true,
+    codexModal: visible.modal === true,
+    tenCategories: visible.categories === true,
+    categoryEntries: visible.entries === true,
+    initialDetail: visible.detail === true,
+    worldInputLocked: visible.locked === true,
+    searchResult: search?.result === true,
+    searchDetail: search?.text === true,
+    sourcePathVisible: search?.source === true,
+    worldInputRestoredAfterCodex: closed === true,
+  };
 }
 
 async function exerciseMinigames(session) {
@@ -189,11 +248,13 @@ async function waitForCampaignState(session, timeoutMs) {
     battleStage: Boolean(document.querySelector('.cinematic-battle-stage')),
     canvas: Boolean(document.querySelector('canvas')),
     minigameDirector: Boolean(window.__lpcMinigameDebug),
-    vfxLayer: Boolean(document.querySelector('.minigame-vfx-canvas'))
+    vfxLayer: Boolean(document.querySelector('.minigame-vfx-canvas')),
+    codexButton: Boolean(document.querySelector('#open-codex')),
+    codexModal: Boolean(document.querySelector('#campaign-codex'))
   }))()`;
   while (Date.now() < deadline) {
     latest = await evaluate(session, expression);
-    if (Object.values(latest).length === 7 && Object.values(latest).every(Boolean)) return latest;
+    if (Object.values(latest).length === 9 && Object.values(latest).every(Boolean)) return latest;
     await delay(300);
   }
   throw new Error(`Campaign DOM was not ready before timeout. State: ${JSON.stringify(latest)}\n${stderr.slice(-5000)}`);
