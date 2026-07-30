@@ -1,0 +1,112 @@
+#open-weekend-arc { position: relative; }
+#open-weekend-arc b { display: none; min-width: 22px; padding: 3px 5px; border-radius: 7px; background: #d6533d; color: #fff; font-size: 8px; }
+#open-weekend-arc.urgent { border-color: rgba(242, 185, 69, .62); background: rgba(219, 151, 44, .14); color: #ffe29a; }
+#open-weekend-arc.urgent b { display: inline-block; }
+.weekend-arc-modal { z-index: 11900; padding: clamp(8px, 2vw, 22px); background: radial-gradient(circle at 20% 10%, rgba(230, 174, 66, .18), transparent 35%), rgba(4, 10, 9, .94); backdrop-filter: blur(10px); }
+.weekend-arc-modal[hidden] { display: none !important; }
+.weekend-arc-window { position: relative; width: min(1180px, 100%); height: min(900px, calc(100dvh - 30px)); margin: auto; overflow: auto; border: 1px solid rgba(234, 188, 76, .35); border-radius: 22px; background: #10241d; box-shadow: 0 30px 90px rgba(0,0,0,.6); }
+.weekend-arc-window > .modal-x { position: fixed; z-index: 4; margin: 14px 0 0 min(1115px, calc(100vw - 72px)); }
+.arc-head { padding: clamp(28px, 5vw, 58px); padding-bottom: 26px; border-bottom: 1px solid rgba(255,255,255,.08); background: linear-gradient(125deg, #183d31, #12251f 58%, #2b2118); }
+.arc-head span { color: #e9bd52; font: 900 11px/1 system-ui; letter-spacing: .15em; }
+.arc-head h2 { margin: 7px 0 10px; color: #fff0bd; font: 900 clamp(28px,5vw,54px)/1.02 "Arial Black", system-ui; }
+.arc-head p { max-width: 850px; margin: 0; color: #bfd1c8; font-size: 14px; line-height: 1.6; }
+.arc-main { padding: clamp(18px, 4vw, 42px); }
+.arc-stats { display: grid; grid-template-columns: repeat(auto-fit,minmax(150px,1fr)); gap: 9px; margin-bottom: 22px; }
+.arc-stats div { padding: 12px; border: 1px solid rgba(255,255,255,.08); border-radius: 13px; background: rgba(0,0,0,.22); }
+.arc-stats small { display: block; color: #84a092; font: 900 9px/1.2 system-ui; letter-spacing: .08em; text-transform: uppercase; }
+.arc-stats strong { display: block; margin-top: 5px; color: #f5e4ad; font-size: 14px; }
+.arc-section { margin: 24px 0; }
+.arc-section h3 { color: #e5bd57; font: 900 16px/1.2 "Arial Black", system-ui; }
+.arc-section p,.arc-hint { color: #b9ccc2; line-height: 1.6; }
+.arc-steps { padding-left: 25px; color: #c4d4cc; }
+.arc-steps li { margin: 9px 0; padding-left: 5px; line-height: 1.5; }
+.arc-steps li::marker { color: #e4b94d; font-weight: 900; }
+.arc-primary,.arc-options button,.brawl-actions button,.testimony button,.secret-candidate button { min-height: 48px; padding: 12px 15px; border: 1px solid rgba(255,255,255,.1); border-radius: 12px; background: rgba(255,255,255,.055); color: #f3e8c4; text-align: left; }
+.arc-primary { width: 100%; border-color: rgba(229,183,69,.38); background: linear-gradient(110deg,rgba(229,183,69,.19),rgba(53,112,88,.15)); font-weight: 900; text-align: center; }
+.arc-options { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 10px; }
+.arc-options button strong,.brawl-actions strong,.testimony strong,.secret-candidate strong { display:block; font-size: 13px; }
+.arc-options button small,.brawl-actions small,.testimony small,.secret-candidate small { display:block; margin-top:5px; color:#91aa9d; line-height:1.4; }
+button.danger,.arc-primary.danger { border-color: rgba(216,83,59,.4); background: rgba(154,49,34,.18); }
+button:disabled { opacity:.45; cursor:not-allowed; }
+.olympiad-list { display:grid; gap:9px; margin:18px 0 25px; }
+.olympiad-discipline { display:grid; grid-template-columns:48px 1fr auto; align-items:center; gap:14px; padding:15px; border:1px solid rgba(255,255,255,.08); border-radius:14px; background:rgba(0,0,0,.2); }
+.olympiad-discipline > span { display:grid; width:38px; height:38px; place-items:center; border-radius:50%; background:#193b30; color:#e8bf57; font-weight:900; }
+.olympiad-discipline h3 { margin:0; color:#f4e7bf; }
+.olympiad-discipline p { margin:4px 0 0; color:#8fa79b; font-size:12px; }
+.olympiad-discipline > strong { color:#dcb64e; font-size:11px; }
+.olympiad-discipline.complete { border-color:rgba(99,188,129,.27); }
+.olympiad-discipline.active { border-color:rgba(231,184,70,.5); box-shadow:0 0 0 3px rgba(231,184,70,.08); }
+.arc-scene { display:flex; align-items:center; gap:18px; padding:20px; margin-bottom:20px; border-radius:16px; background:linear-gradient(110deg,rgba(113,34,31,.23),rgba(0,0,0,.18)); }
+.scene-person { display:grid; flex:0 0 72px; height:88px; place-items:center; border-radius:20px 20px 11px 11px; background:#4b2227; color:#e6bd58; font:900 42px/1 serif; box-shadow:inset 0 -12px rgba(0,0,0,.2); }
+.arc-scene blockquote { margin:0; color:#eadfc0; font:800 16px/1.6 system-ui; }
+.testimony-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.testimony { padding:18px; border:1px solid rgba(255,255,255,.08); border-radius:15px; background:rgba(0,0,0,.2); }
+.testimony header { display:flex; justify-content:space-between; gap:10px; }
+.testimony header span { color:#d8ae47; font-size:9px; font-weight:900; }
+.testimony p { color:#c2d2ca; line-height:1.6; }
+.testimony.complete { border-color:rgba(91,177,122,.35); }
+.song-player { display:flex; align-items:center; gap:14px; margin-bottom:15px; padding:14px; border-radius:14px; background:rgba(0,0,0,.25); }
+.song-disc { display:grid; width:58px; height:58px; place-items:center; border-radius:50%; background:repeating-radial-gradient(circle,#20201e 0 5px,#0b0b0a 6px 8px); animation:arcSpin 5s linear infinite; }
+.song-disc i { width:14px; height:14px; border-radius:50%; background:#d6a83c; }
+.song-player strong { color:#f3df9e; }
+.song-player small { display:block; color:#8ea398; }
+.song-lyrics { max-height:480px; overflow:auto; padding:20px; border:1px solid rgba(255,255,255,.08); border-radius:14px; background:#07110e; color:#d8e0dc; white-space:pre-wrap; font:600 12px/1.7 ui-monospace,monospace; }
+.wake-meter { position:relative; height:28px; margin:12px 0 22px; overflow:hidden; border-radius:14px; background:#07120e; }
+.wake-meter i,.wake-meter span { position:absolute; inset:0 auto 0 0; }
+.wake-meter i { background:linear-gradient(90deg,#47775f,#d7b04d); }
+.wake-meter span { top:auto; height:5px; background:#65cf8b; }
+.debate-stage { display:grid; grid-template-columns:1fr 58px 1fr; align-items:center; gap:10px; margin:16px 0; }
+.debate-side { display:flex; justify-content:center; gap:10px; padding:18px; border-radius:14px; background:rgba(0,0,0,.2); }
+.debate-side b { padding:8px 10px; border-radius:10px; background:#244b3d; color:#e9deb9; }
+.debate-side.authority b { background:#582a2a; }
+.debate-versus { color:#e7b74b; text-align:center; font-weight:900; }
+.arc-log { margin-top:18px; padding:12px; border-radius:12px; background:rgba(0,0,0,.2); }
+.arc-log p { margin:6px 0; color:#a9beb3; font-size:11px; line-height:1.45; }
+.brawl-arena { display:grid; grid-template-columns:repeat(5,1fr); align-items:end; gap:8px; min-height:280px; padding:20px; border-radius:18px; background:linear-gradient(#223d35 0 58%,#5c5339 59% 100%); }
+.brawl-fighter { display:grid; gap:7px; text-align:center; }
+.brawl-fighter > div { display:flex; justify-content:space-between; color:#fff0c2; font-size:10px; }
+.brawl-fighter i { height:8px; overflow:hidden; border-radius:5px; background:#381c1c; }
+.brawl-fighter i b { display:block; height:100%; background:linear-gradient(90deg,#bd4739,#e8bc4f,#5ab279); }
+.brawl-fighter figure { display:grid; height:130px; margin:0; place-items:center; border-radius:38px 38px 16px 16px; background:#315f4e; color:#f4d981; font:900 50px/1 serif; box-shadow:inset 0 -25px rgba(0,0,0,.18); transition:.2s; }
+.brawl-fighter.gundula figure { background:#592b34; }
+.brawl-fighter.uli figure { background:#454232; }
+.brawl-fighter.down figure { transform:rotate(78deg) translateY(15px); filter:grayscale(1); opacity:.55; }
+.brawl-impact { align-self:center; color:#ffe5a0; font-size:11px; font-weight:900; text-align:center; }
+.timing-strip { position:relative; height:26px; margin:15px 0; overflow:hidden; border-radius:13px; background:linear-gradient(90deg,#662e2a,#d1a13d 40% 60%,#662e2a); }
+.timing-strip i { position:absolute; top:0; bottom:0; width:5px; background:white; box-shadow:0 0 8px white; animation:arcTiming 1.4s linear infinite alternate; }
+.timing-strip span { position:relative; display:block; padding-top:6px; color:#172119; font-size:9px; font-weight:900; text-align:center; }
+.brawl-actions { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+.secret-observations { display:grid; gap:7px; margin-bottom:16px; }
+.secret-observations p { margin:0; padding:12px; border-left:4px solid #d6a941; background:rgba(0,0,0,.2); color:#c7d7cf; }
+.secret-roster { display:grid; grid-template-columns:repeat(3,1fr); gap:9px; }
+.secret-candidate { position:relative; padding:13px; border:1px solid rgba(255,255,255,.08); border-radius:13px; background:rgba(0,0,0,.2); }
+.secret-candidate header span { display:block; color:#819c8e; font-size:8px; }
+.secret-candidate p { min-height:64px; color:#b8cbc1; font-size:11px; line-height:1.45; }
+.secret-candidate > div { display:flex; gap:6px; }
+.secret-candidate button { flex:1; min-height:38px; padding:8px; text-align:center; }
+.secret-candidate.eliminated { opacity:.58; }
+.secret-candidate > small { display:block; margin-top:8px; color:#e07867; font-weight:900; }
+.secret-result-list p { display:flex; justify-content:space-between; gap:12px; padding:12px; border-bottom:1px solid rgba(255,255,255,.07); color:#c8d8cf; }
+.secret-result-list span { color:#e2b94e; }
+.early-ending-actions { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:15px; }
+body.weekend-arc-open { overflow:hidden; }
+@keyframes arcSpin { to { transform:rotate(360deg); } }
+@keyframes arcTiming { from { left:0; } to { left:calc(100% - 5px); } }
+@media (max-width:800px) {
+  .weekend-arc-modal { padding:0; }
+  .weekend-arc-window { width:100%; height:100dvh; border:0; border-radius:0; }
+  .weekend-arc-window > .modal-x { position:fixed; top:max(8px,env(safe-area-inset-top)); right:8px; margin:0; }
+  .arc-head { padding:52px 16px 20px; }
+  .arc-main { padding:15px 12px calc(40px + env(safe-area-inset-bottom)); }
+  .testimony-grid,.brawl-actions,.secret-roster { grid-template-columns:1fr 1fr; }
+  .brawl-arena { grid-template-columns:1fr 1fr; min-height:0; }
+  .brawl-impact { grid-column:1/-1; grid-row:2; }
+}
+@media (max-width:500px) {
+  .testimony-grid,.secret-roster,.early-ending-actions { grid-template-columns:1fr; }
+  .brawl-actions { grid-template-columns:1fr 1fr; }
+  .brawl-fighter figure { height:95px; }
+  .arc-scene { align-items:flex-start; }
+  .scene-person { flex-basis:52px; height:68px; }
+}
+@media (prefers-reduced-motion:reduce) { .song-disc,.timing-strip i { animation-duration:12s; } }
