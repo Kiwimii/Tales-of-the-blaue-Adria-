@@ -36,7 +36,7 @@ const snapshot: GameSnapshot = {
 };
 
 const meta: CampaignMetaState = {
-  version: 3,
+  version: 4,
   introSeen: true,
   introReplays: 0,
   questStage: 'free-weekend',
@@ -92,7 +92,7 @@ describe('character-driven LPC dialogue', () => {
   });
 
   it('turns a relationship choice into social and system consequences', () => {
-    const choice = dialogueChoices('jule', snapshot, meta).find((entry) => entry.id === 'jule-help');
+    const choice = dialogueChoices('jule', snapshot, meta).find((entry) => entry.id === 'character:jule-help');
     expect(choice).toBeTruthy();
     const result = resolveDialogueAction('jule', choice!.action, snapshot, meta);
     expect(result.relationship).toBeGreaterThan(0);
