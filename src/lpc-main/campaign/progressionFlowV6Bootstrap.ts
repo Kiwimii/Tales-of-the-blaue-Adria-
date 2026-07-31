@@ -1,3 +1,5 @@
+export {};
+
 const query = new URLSearchParams(location.search);
 const genericSmoke = query.get('smoke') === '1' && query.get('progression') !== '1';
 if (!genericSmoke) void import('./progressionFlowV6Runtime');
