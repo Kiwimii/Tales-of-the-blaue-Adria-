@@ -4,6 +4,7 @@ import { INTRO_BEATS } from './narrative';
 import { CAMPAIGN_CHARACTERS, MINIGAME_INTERACTIONS, STORY_INTERACTIONS } from './content';
 import { createBattle, resolveBattleTurn } from './battleEngine';
 import { comboBonus, masteryAccuracy, masteryLevel, opponentPhase, weekendRank } from './progression';
+import { OPENING_LAYOUT } from './openingSequenceV5Model.js';
 
 const snapshot: GameSnapshot = {
   version: 3, mode: 'world',
@@ -15,17 +16,25 @@ const snapshot: GameSnapshot = {
 };
 
 describe('LPC campaign systems', () => {
-  it('contains a complete, paced black-humour intro', () => {
-    expect(INTRO_BEATS.length).toBeGreaterThanOrEqual(8);
-    expect(INTRO_BEATS.every((beat) => beat.lines.length >= 2 && beat.duration >= 6000)).toBe(true);
-    expect(INTRO_BEATS.some((beat) => beat.lines.join(' ').includes('Hecke'))).toBe(true);
+  it('contains one complete, paced black-humour space crawl', () => {
+    expect(INTRO_BEATS).toHaveLength(1);
+    const crawl = INTRO_BEATS[0];
+    const fullText = crawl.lines.join(' ');
+    expect(crawl.visual).toBe('space');
+    expect(crawl.lines.length).toBeGreaterThanOrEqual(6);
+    expect(crawl.duration).toBeGreaterThanOrEqual(30000);
+    expect(fullText.length).toBeGreaterThan(700);
+    expect(fullText).toContain('25 Euro');
+    expect(fullText).toContain('Gundula');
+    expect(fullText).toContain('Hecken');
+    expect(fullText).toContain('Kaution');
   });
   it('maps all central campaign characters and requested minigames', () => {
     const ids = new Set(CAMPAIGN_CHARACTERS.map((character) => character.id));
     for (const id of ['gundula', 'uli', 'andre', 'rene', 'lars', 'danny', 'manni', 'ronny', 'susi', 'jule', 'kira']) expect(ids.has(id)).toBe(true);
     const minigames = new Set(MINIGAME_INTERACTIONS.map((entry) => entry.id));
     for (const id of ['flipCup', 'beerPong', 'flunkyball', 'maslHole', 'ronnyBattle']) expect(minigames.has(id)).toBe(true);
-    expect(STORY_INTERACTIONS.find((entry) => entry.id === 'trunk')).toMatchObject({ x: 900, y: 1600 });
+    expect(STORY_INTERACTIONS.find((entry) => entry.id === 'trunk')).toMatchObject({ x: OPENING_LAYOUT.trunk.x, y: OPENING_LAYOUT.trunk.y });
   });
   it('resolves phased frustration turns with deterministic rolls', () => {
     const initial = createBattle('entry-authority');
