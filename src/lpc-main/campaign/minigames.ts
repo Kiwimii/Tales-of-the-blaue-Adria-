@@ -8,6 +8,7 @@ import {
   type MiniGameQuality,
 } from './minigamesV2';
 import { BeerPongRebuild } from './beerPongRebuild';
+import { FastMinigamesRebuild } from './fastMinigamesRebuild';
 import {
   applyMinigameRuntimeEffects,
   currentMinigameContext,
@@ -30,6 +31,7 @@ let activeDirector: MinigameDirector | undefined;
 
 export class MinigameDirector extends EnhancedMinigameDirector {
   private readonly beerPong: BeerPongRebuild;
+  private readonly fastGames: FastMinigamesRebuild;
 
   constructor(root: HTMLElement, onOutcome: (outcome: MiniGameOutcome) => void) {
     const deliverOutcome = (outcome: MiniGameOutcome): void => {
@@ -52,6 +54,8 @@ export class MinigameDirector extends EnhancedMinigameDirector {
     this.beerPong = new BeerPongRebuild(root, deliverOutcome, () => currentMinigameContext('beerPong'));
     beerPongStart.remove();
 
+    this.fastGames = new FastMinigamesRebuild(root, deliverOutcome, currentMinigameContext);
+
     activeDirector = this;
     installMinigameVisuals(root);
     root.querySelector<HTMLButtonElement>('[data-mini-close]')?.addEventListener('click', () => {
@@ -62,15 +66,24 @@ export class MinigameDirector extends EnhancedMinigameDirector {
 
   override start(id: MiniGameId): void {
     if (id === 'beerPong') {
+      this.fastGames.stop(false);
       super.stop(false);
       this.beerPong.start();
       return;
     }
+    if (id === 'hedgePee' || id === 'maslHole') {
+      this.beerPong.stop(false);
+      super.stop(false);
+      this.fastGames.start(id);
+      return;
+    }
+    this.fastGames.stop(false);
     this.beerPong.stop(false);
     super.start(id);
   }
 
   override stop(hide = true): void {
+    this.fastGames?.stop(false);
     this.beerPong?.stop(false);
     super.stop(hide);
   }
@@ -79,6 +92,18 @@ export class MinigameDirector extends EnhancedMinigameDirector {
   beerPongSkipCountdown(): void { this.beerPong.debugSkipCountdown(); }
   beerPongSetState(values: Record<string, unknown>): void { this.beerPong.debugSetState(values); }
   beerPongSnapshot(): Record<string, unknown> { return this.beerPong.debugSnapshot(); }
+
+  fastGameActive(): boolean { return this.fastGames.isActive(); }
+  fastGameSkipCountdown(): void { this.fastGames.debugSkipCountdown(); }
+  fastGameSetState(values: Record<string, unknown>): void { this.fastGames.debugSetState(values); }
+  fastGameAction(): void {
+    const snapshot = this.fastGames.debugSnapshot();
+    if (snapshot.phase === 'seal' && Number(snapshot.stableTime) >= 260) {
+      this.fastGames.debugSetState({ phase: 'timing', breath: .6, lockedSeal: Number(snapshot.seal) || 1 });
+    }
+    this.fastGames.debugAction();
+  }
+  fastGameSnapshot(): Record<string, unknown> { return this.fastGames.debugSnapshot(); }
 }
 
 let externalStartBridgeInstalled = false;
@@ -122,14 +147,17 @@ function exposeSmokeDiagnostics(director: MinigameDirector, root: HTMLElement): 
     close(): void { root.querySelector<HTMLButtonElement>('[data-mini-close]')?.click(); },
     skipCountdown(): void {
       if (director.beerPongActive()) director.beerPongSkipCountdown();
+      else if (director.fastGameActive()) director.fastGameSkipCountdown();
       else if (internal.runtime) internal.runtime.countdown = 0;
     },
     setState(values: Record<string, unknown>): void {
       if (director.beerPongActive()) director.beerPongSetState(values);
+      else if (director.fastGameActive()) director.fastGameSetState(values);
       else if (internal.runtime) Object.assign(internal.runtime.state, values);
     },
     action(): void {
       if (director.beerPongActive()) root.querySelector<HTMLButtonElement>('[data-mini-action]')?.click();
+      else if (director.fastGameActive()) director.fastGameAction();
       else internal.primaryAction();
     },
     holdAndRelease(pointerId = 91): void {
@@ -139,7 +167,9 @@ function exposeSmokeDiagnostics(director: MinigameDirector, root: HTMLElement): 
       window.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerId }));
     },
     snapshot(): Record<string, unknown> {
-      return director.beerPongActive() ? director.beerPongSnapshot() : minigameHardeningSnapshot(director);
+      if (director.beerPongActive()) return director.beerPongSnapshot();
+      if (director.fastGameActive()) return director.fastGameSnapshot();
+      return minigameHardeningSnapshot(director);
     },
   };
 }

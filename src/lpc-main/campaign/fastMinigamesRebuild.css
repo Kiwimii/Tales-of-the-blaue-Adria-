@@ -1,0 +1,71 @@
+.hedge-fast-rebuild-active .minigame-vfx-canvas {
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+.hedge-fast-rebuild-active .graphics-v3-scene-hedgePee {
+  background: linear-gradient(180deg, rgba(2,10,8,.03), rgba(2,8,6,.16));
+}
+
+.hedge-fast-rebuild-active .graphics-v3-patrol {
+  animation: none !important;
+  transition: left .06s linear;
+}
+
+.hedge-fast-rebuild-active .graphics-v3-patrol-gundula {
+  left: var(--hedge-gundula-x, 4%);
+  transform: scaleX(var(--hedge-gundula-dir, 1));
+}
+
+.hedge-fast-rebuild-active .graphics-v3-patrol-uli {
+  left: var(--hedge-uli-x, 78%);
+  transform: scaleX(var(--hedge-uli-dir, -1));
+}
+
+.hedge-fast-rebuild-active .graphics-v3-vision-cone {
+  opacity: .9;
+  animation: fastSightPulse .65s ease-in-out infinite alternate;
+  filter: drop-shadow(0 0 12px rgba(255,224,129,.3));
+}
+
+.hedge-fast-rebuild-active .graphics-v3-patrol-zone {
+  inset: 20px 0 0;
+}
+
+.hedge-fast-rebuild-active .graphics-v3-patrol > b {
+  top: -8px;
+  font-size: 8px;
+}
+
+.masl-fast-rebuild-active .graphics-v3-scene-maslHole .graphics-v3-field {
+  opacity: 0;
+}
+
+.masl-fast-rebuild-active .graphics-v3-scene-maslHole {
+  grid-template-columns: 105px minmax(180px, 1fr) 105px;
+  background: linear-gradient(180deg, rgba(2,10,8,.02), rgba(2,8,6,.13));
+}
+
+.masl-fast-rebuild-active .graphics-v3-cast-member {
+  opacity: .72;
+}
+
+.masl-fast-rebuild-active .minigame-vfx-canvas {
+  opacity: .08 !important;
+}
+
+@keyframes fastSightPulse {
+  from { opacity: .7; filter: drop-shadow(0 0 6px rgba(255,224,129,.18)); }
+  to { opacity: 1; filter: drop-shadow(0 0 16px rgba(255,224,129,.38)); }
+}
+
+@media (max-width: 620px) {
+  .hedge-fast-rebuild-active .graphics-v3-patrol > b { display: none; }
+  .hedge-fast-rebuild-active .graphics-v3-vision-cone { width: 138px; }
+  .masl-fast-rebuild-active .graphics-v3-scene-maslHole { grid-template-columns: 72px 1fr 72px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hedge-fast-rebuild-active .graphics-v3-vision-cone { animation: none !important; }
+  .hedge-fast-rebuild-active .graphics-v3-patrol { transition: none; }
+}
