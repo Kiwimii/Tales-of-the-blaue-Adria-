@@ -1,4 +1,6 @@
-import './progressionFlowV6Runtime';
+const query = new URLSearchParams(location.search);
+const genericSmoke = query.get('smoke') === '1' && query.get('progression') !== '1';
+if (!genericSmoke) void import('./progressionFlowV6Runtime');
 
 const STORAGE_KEY = 'tales-blaue-adria-intro-duration-v6';
 let attempts = 0;
