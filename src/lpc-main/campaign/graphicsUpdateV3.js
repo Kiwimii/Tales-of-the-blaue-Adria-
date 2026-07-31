@@ -53,6 +53,8 @@ function createCharacter(id, variant = 'support', reaction = 'idle') {
   const figure = document.createElement('div');
   figure.className = `graphics-v3-character graphics-v3-${variant} graphics-v3-reaction-${reaction}`;
   figure.dataset.character = id;
+  figure.dataset.reaction = reaction;
+  figure.dataset.variant = variant;
   figure.setAttribute('role', 'img');
   figure.setAttribute('aria-label', `${labelFor(id)} – ${roleFor(id)}`);
   figure.style.setProperty('--v3-shirt', color(visual.shirt, PLAYER_IDS.has(id) ? '#2f6f5a' : '#476c5b'));
@@ -87,8 +89,12 @@ function enhanceBrawl() {
     const fighter = arena.querySelector(selector);
     const slot = fighter?.querySelector('figure');
     if (!(slot instanceof HTMLElement)) continue;
-    slot.textContent = '';
-    slot.append(createCharacter(id, 'fighter', fighter?.classList.contains('down') ? 'down' : reaction));
+    const nextReaction = fighter?.classList.contains('down') ? 'down' : reaction;
+    const current = slot.querySelector(':scope > .graphics-v3-character');
+    if (!(current instanceof HTMLElement) || current.dataset.character !== id || current.dataset.reaction !== nextReaction) {
+      slot.textContent = '';
+      slot.append(createCharacter(id, 'fighter', nextReaction));
+    }
     fighter.dataset.character = id;
   }
 
@@ -223,7 +229,7 @@ function buildHedgePatrol(cast) {
     guard.style.setProperty('--patrol-delay', `${actor.delay}s`);
     guard.style.setProperty('--patrol-direction', String(actor.direction));
     guard.style.setProperty('--cone-length', `${actor.cone}px`);
-    guard.append(createCharacter(actor.id, 'patrol', 'inspect'));
+    guard.append(createCharacter(actor.id, 'guard', 'inspect'));
     const label = document.createElement('b');
     label.textContent = actor.id === 'gundula' ? 'GUNDULA · KLEMMBRETT-PATROUILLE' : 'ULI · SCHLÜSSELBUND-PATROUILLE';
     const cone = document.createElement('span');
@@ -278,7 +284,7 @@ function snapshot() {
     supportTeam: brawlSupportTeam(meta.activeTeam ?? []),
     brawlEnhanced: Boolean(document.querySelector('.graphics-v3-brawl')),
     minigame: document.querySelector('#minigame-modal')?.dataset.miniGame ?? '',
-    patrols: document.querySelectorAll('.graphics-v3-patrol').length,
+    patrols: document.querySelectorAll('.graphics-v3-patrol-zone > .graphics-v3-patrol').length,
   };
 }
 
@@ -299,8 +305,8 @@ function install() {
     snapshot,
     setActiveTeam,
     showBrawl(ids = ['masl', 'felix', 'danny', 'rene', 'susi']) {
-      setActiveTeam(ids);
       window.__lpcWeekendArcDebug?.showBrawl?.();
+      setActiveTeam(ids);
       schedule();
     },
     startMinigame(game = 'hedgePee', ids = ['danny', 'felix', 'rene', 'lars']) {
