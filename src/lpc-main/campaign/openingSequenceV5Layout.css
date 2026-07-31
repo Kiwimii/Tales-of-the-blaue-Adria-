@@ -1,0 +1,48 @@
+#campaign-creator.opening-v5-driver,
+#campaign-shop.opening-v5-market {
+  position: relative;
+  padding-top: clamp(108px, 13vh, 142px);
+}
+
+#campaign-creator > .opening-v5-flow-rail,
+#campaign-shop > .opening-v5-flow-rail {
+  position: absolute;
+  z-index: 20;
+  top: max(18px, env(safe-area-inset-top));
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(900px, calc(100% - 30px));
+  margin: 0;
+}
+
+body.opening-v5-arrival-active {
+  overflow: hidden;
+}
+
+.opening-v5-arrival[data-phase='ready'] .opening-v5-gate {
+  box-shadow: 0 0 0 5px rgba(242,200,79,.12), 0 0 34px rgba(242,200,79,.32);
+}
+
+.opening-v5-arrival[data-phase='ready'] .opening-v5-board {
+  animation: openingV5BoardPulse .8s ease-in-out infinite alternate;
+}
+
+@keyframes openingV5BoardPulse {
+  to { transform: rotate(-2deg) scale(1.08); filter: brightness(1.18); }
+}
+
+@media (max-width: 760px) {
+  #campaign-creator.opening-v5-driver,
+  #campaign-shop.opening-v5-market {
+    padding-top: 176px;
+  }
+
+  #campaign-creator > .opening-v5-flow-rail,
+  #campaign-shop > .opening-v5-flow-rail {
+    grid-template-columns: repeat(2, minmax(0,1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .opening-v5-arrival[data-phase='ready'] .opening-v5-board { animation: none; }
+}
