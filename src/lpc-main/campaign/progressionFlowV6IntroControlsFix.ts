@@ -1,3 +1,5 @@
+export {};
+
 const STORAGE_KEY = 'tales-blaue-adria-intro-duration-v6';
 
 const observer = new MutationObserver(mountIntroSpeedControls);
