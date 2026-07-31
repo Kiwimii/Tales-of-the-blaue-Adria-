@@ -21,9 +21,11 @@ import {
 import { installMinigameVisuals } from './minigameVisuals';
 import './battleProgressionV4';
 import './battleProgressionV4Effects.css';
-import './openingSequenceSmokeGuard';
-import './openingSequenceV5';
 import './openingSequenceV5Layout.css';
+
+const openingQuery = new URLSearchParams(location.search);
+const genericCampaignSmoke = openingQuery.get('smoke') === '1' && openingQuery.get('opening') !== '1';
+if (!genericCampaignSmoke) void import('./openingSequenceV5');
 
 installMinigameHardening();
 installMinigameCloseBridge();
