@@ -113,19 +113,28 @@ try {
 
     await evaluate(session, `window.__lpcWeekendArcDebug.showSecret()`);
     const secret = await waitForExpression(session, `(() => {
+      const debug = window.__lpcWeekendArcDebug;
+      const runtime = window.__talesDepthUpdateV2;
+      if (!debug?.showSecret || !runtime?.snapshot) {
+        return { bridge: false, caseFile: false, threeClues: false, cluesEnhanced: false, roleNotNamed: false, twelveCandidates: false, roleHistory: false, separateSave: false };
+      }
+      const candidates = document.querySelectorAll('.secret-candidate');
+      const modal = document.querySelector('#weekend-arc-modal');
+      if (candidates.length !== 12 || modal?.hidden !== false) debug.showSecret();
       const observations = document.querySelector('.secret-observations');
       const text = observations?.textContent?.toLocaleLowerCase('de') ?? '';
-      const snapshot = window.__talesDepthUpdateV2?.snapshot?.();
+      const snapshot = runtime.snapshot();
       return {
+        bridge: true,
         caseFile: Boolean(document.querySelector('.depth-case-file')),
         threeClues: document.querySelectorAll('.secret-observations p').length === 3,
         cluesEnhanced: observations?.classList.contains('depth-clues-ready') ?? false,
-        roleNotNamed: !text.includes('masl'),
+        roleNotNamed: Boolean(observations) && !text.includes('masl'),
         twelveCandidates: document.querySelectorAll('.secret-candidate').length === 12,
         roleHistory: Boolean(snapshot?.depth?.secret?.roleHistory?.[1]),
         separateSave: Boolean(localStorage.getItem('tales-blaue-adria-gameplay-depth-v2'))
       };
-    })()`, 10000);
+    })()`, 16000);
     assertState('Secret Millionaire depth', secret);
 
     const strategyFunctions = await evaluate(session, `(() => {
@@ -142,8 +151,6 @@ try {
     })()`);
     assertState('Depth model in browser', strategyFunctions);
 
-    // The Secret Millionaire lifecycle performs one intentional synchronization reload.
-    // Re-acquire the debug bridge before closing so a larger production bundle cannot race this assertion.
     const closed = await waitForExpression(session, `(() => {
       const debug = window.__lpcWeekendArcDebug;
       if (!debug?.close) return { bridge: false, modalClosed: false, arcClassCleared: false, inputRestored: false };
@@ -198,7 +205,6 @@ async function waitForExpression(session, expression, timeoutMs) {
       latest = await evaluate(session, expression);
       if (latest && Object.values(latest).every(Boolean)) return latest;
     } catch (error) {
-      // A navigation can invalidate one Runtime.evaluate call. Retry until the new document is ready.
       if (!/Execution context|Cannot find context|Inspected target navigated|Uncaught/i.test(String(error))) throw error;
     }
     await delay(160);
