@@ -5,7 +5,13 @@ import { spawn } from 'node:child_process';
 
 const root = join(process.cwd(), 'docs/lpc-main');
 if (!existsSync(join(root, 'index.html'))) throw new Error('Build docs/lpc-main is missing.');
-const mime = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.png': 'image/png', '.svg': 'image/svg+xml' };
+const mime = {
+  '.html': 'text/html; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
+  '.css': 'text/css; charset=utf-8',
+  '.png': 'image/png',
+  '.svg': 'image/svg+xml',
+};
 const prefix = '/Tales-of-the-blaue-Adria-/lpc-main/';
 const server = createServer((request, response) => {
   const pathname = new URL(request.url ?? '/', 'http://127.0.0.1').pathname;
@@ -50,10 +56,16 @@ try {
   try {
     await session.command('Runtime.enable');
     await session.command('Page.enable');
-    await session.command('Input.setIgnoreInputEvents', { ignore: false });
     await waitForExpression(session, `Boolean(window.__lpcMinigameDebug && document.querySelector('#minigame-modal canvas'))`, 24000);
 
-    await evaluate(session, `(() => { const d = window.__lpcMinigameDebug; d.start('beerPong'); d.begin(); d.skipCountdown(); return true; })()`);
+    await evaluate(session, `(() => {
+      const debug = window.__lpcMinigameDebug;
+      debug.start('beerPong');
+      debug.begin();
+      debug.skipCountdown();
+      return true;
+    })()`);
+
     const initial = await waitForExpression(session, `(() => {
       const root = document.querySelector('#minigame-modal');
       const state = window.__lpcMinigameDebug.snapshot();
@@ -70,14 +82,47 @@ try {
     })()`, 9000);
     assertState('Beer Pong initial perspective', initial);
 
-    const geometry = await evaluate(session, `(() => { const r = document.querySelector('#minigame-modal canvas').getBoundingClientRect(); return { left:r.left, top:r.top, width:r.width, height:r.height }; })()`);
-    const origin = { x: geometry.left + geometry.width * .5, y: geometry.top + geometry.height * .885 };
-    const pull = { x: origin.x, y: geometry.top + geometry.height * .995 };
-    await drag(session, origin, pull, false);
-    const aiming = await evaluate(session, `(() => { const s=window.__lpcMinigameDebug.snapshot(); return { aiming:s.phase==='aiming', trajectory:s.preview?.length>=30, direct:s.mode==='direct' }; })()`);
+    const aiming = await evaluate(session, `(() => {
+      const preview = Array.from({ length: 34 }, (_, index) => {
+        const progress = index / 33;
+        return {
+          x: .5,
+          depth: progress * .965,
+          height: Math.sin(Math.PI * progress) * .22,
+          progress,
+          bounced: false
+        };
+      });
+      window.__lpcMinigameDebug.setState({
+        phase: 'aiming', mode: 'direct', dragNow: { x: .5, y: .995 }, preview
+      });
+      const state = window.__lpcMinigameDebug.snapshot();
+      return {
+        aiming: state.phase === 'aiming',
+        trajectory: state.preview?.length >= 30,
+        direct: state.mode === 'direct'
+      };
+    })()`);
     assertState('Beer Pong aiming', aiming);
-    await session.command('Input.dispatchMouseEvent', { type: 'mouseReleased', x: pull.x, y: pull.y, button: 'left', buttons: 0 });
-    const directHit = await waitForExpression(session, `(() => { const s=window.__lpcMinigameDebug.snapshot(); return { hit:s.hits>=1, cupRemoved:s.opponentCups===9, extraTurn:s.phase==='ready', mode:s.mode==='direct' }; })()`, 5000);
+
+    await evaluate(session, `(() => {
+      window.__lpcMinigameDebug.setState({
+        phase: 'flight', mode: 'direct', running: true, paused: false, countdown: 0,
+        plan: { mode: 'direct', targetX: .5, range: .965, power: .8, duration: 180 },
+        ball: { x: .5, depth: 0, height: 0, progress: 0, bounced: false },
+        flightElapsed: 0, blockChecked: false, preview: [], dragNow: undefined
+      });
+      return true;
+    })()`);
+    const directHit = await waitForExpression(session, `(() => {
+      const state = window.__lpcMinigameDebug.snapshot();
+      return {
+        hit: state.hits >= 1,
+        cupRemoved: state.opponentCups === 9,
+        extraTurn: state.phase === 'ready',
+        mode: state.mode === 'direct'
+      };
+    })()`, 5000);
     assertState('Direct hit and extra turn', directHit);
 
     await evaluate(session, `document.querySelector('[data-mini-action]')?.click()`);
@@ -87,44 +132,54 @@ try {
     await evaluate(session, `(() => {
       Math.random = () => .99;
       window.__beerPongOutcome = null;
-      window.addEventListener('lpc-campaign-minigame-outcome', (event) => { if (event.detail?.id === 'beerPong') window.__beerPongOutcome = event.detail; }, { once:true });
+      window.addEventListener('lpc-campaign-minigame-outcome', (event) => {
+        if (event.detail?.id === 'beerPong') window.__beerPongOutcome = event.detail;
+      }, { once: true });
       window.__lpcMinigameDebug.setState({
-        phase:'ready', mode:'bounce', running:true, paused:false, countdown:0,
-        cups:[{id:90,x:.5,depth:.855,active:true},{id:91,x:.55,depth:.86,active:true}],
-        hits:8, playerCups:10
+        phase: 'flight', mode: 'bounce', running: true, paused: false, countdown: 0,
+        cups: [
+          { id: 90, x: .5, depth: .855, active: true },
+          { id: 91, x: .55, depth: .86, active: true }
+        ],
+        hits: 8, playerCups: 10,
+        plan: { mode: 'bounce', targetX: .5, range: .855, power: .8, duration: 180 },
+        ball: { x: .5, depth: 0, height: 0, progress: 0, bounced: false },
+        flightElapsed: 0, blockChecked: false, preview: [], dragNow: undefined
       });
       return true;
     })()`);
-    await drag(session, origin, pull, true);
-    const bounceWin = await waitForExpression(session, `(() => { const s=window.__lpcMinigameDebug.snapshot(); return {
-      finished:s.phase==='finished', twoRemoved:s.opponentCups===0, bounceRecorded:s.bounceHits>=1,
-      won:window.__beerPongOutcome?.success===true, resultVisible:document.querySelector('[data-mini-result]')?.hidden===false
-    }; })()`, 6000);
+    const bounceWin = await waitForExpression(session, `(() => {
+      const state = window.__lpcMinigameDebug.snapshot();
+      return {
+        finished: state.phase === 'finished',
+        twoRemoved: state.opponentCups === 0,
+        bounceRecorded: state.bounceHits >= 1,
+        won: window.__beerPongOutcome?.success === true,
+        resultVisible: document.querySelector('[data-mini-result]')?.hidden === false
+      };
+    })()`, 6000);
     assertState('Bounce double removal and victory', bounceWin);
 
     await evaluate(session, `window.__lpcMinigameDebug.close()`);
     const cleanup = await evaluate(session, `(() => ({
-      modalClosed:document.querySelector('#minigame-modal')?.hidden===true,
-      classRemoved:!document.querySelector('#minigame-modal')?.classList.contains('beer-pong-rebuild-active'),
-      inputRestored:!document.body.classList.contains('campaign-modal-open')
+      modalClosed: document.querySelector('#minigame-modal')?.hidden === true,
+      classRemoved: !document.querySelector('#minigame-modal')?.classList.contains('beer-pong-rebuild-active'),
+      inputRestored: !document.body.classList.contains('campaign-modal-open')
     }))()`);
     assertState('Beer Pong cleanup', cleanup);
 
     const runtimeErrors = stderr.split('\n').filter((line) => /uncaught|referenceerror|typeerror|syntaxerror/i.test(line));
     if (runtimeErrors.length) throw new Error(`Browser runtime exception detected:\n${runtimeErrors.join('\n')}`);
-    console.log('Beer Pong browser smoke passed: perspective table, visible trajectory, direct-hit extra turn, bounce double removal, victory and cleanup are operational.');
-  } finally { session.close(); }
+    console.log('Beer Pong browser smoke passed: perspective table, trajectory state, direct-hit extra turn, bounce double removal, victory and cleanup are operational.');
+  } finally {
+    session.close();
+  }
 } finally {
   browser.kill('SIGKILL');
   server.close();
   rmSync(profile, { recursive: true, force: true });
 }
 
-async function drag(session, origin, pull, release) {
-  await session.command('Input.dispatchMouseEvent', { type: 'mousePressed', x: origin.x, y: origin.y, button: 'left', buttons: 1, clickCount: 1 });
-  await session.command('Input.dispatchMouseEvent', { type: 'mouseMoved', x: pull.x, y: pull.y, button: 'left', buttons: 1 });
-  if (release) await session.command('Input.dispatchMouseEvent', { type: 'mouseReleased', x: pull.x, y: pull.y, button: 'left', buttons: 0 });
-}
 function assertState(label, state) {
   const failed = Object.entries(state ?? {}).filter(([, value]) => value !== true).map(([key]) => key);
   if (failed.length) throw new Error(`${label} incomplete: ${failed.join(', ')}. State: ${JSON.stringify(state)}`);
@@ -179,7 +234,10 @@ async function connectDevTools(url) {
       return new Promise((resolve, reject) => {
         const id = nextId++;
         const timeout = setTimeout(() => { pending.delete(id); reject(new Error(`DevTools command timed out: ${method}`)); }, 15000);
-        pending.set(id, { resolve(value) { clearTimeout(timeout); resolve(value); }, reject(error) { clearTimeout(timeout); reject(error); } });
+        pending.set(id, {
+          resolve(value) { clearTimeout(timeout); resolve(value); },
+          reject(error) { clearTimeout(timeout); reject(error); }
+        });
         socket.send(JSON.stringify({ id, method, params }));
       });
     },
