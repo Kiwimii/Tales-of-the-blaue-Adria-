@@ -3,7 +3,7 @@ import {
   buildSecretClues,
   chooseNextMillionaire,
   computeDirectorState,
-} from '../docs/lpc-main/depth-update-v2.js';
+} from '../src/lpc-main/campaign/depthUpdateV2.js';
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
