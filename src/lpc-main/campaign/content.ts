@@ -8,6 +8,7 @@ import {
 } from '../../game/aerialCampgroundPlan';
 import { applySprint89CampPlan } from '../../game/sprint89CampPlan';
 import { installAuthorityOverhaul } from './authorityOverhaul';
+import { OPENING_LAYOUT } from './openingSequenceV5Model.js';
 
 installAuthorityOverhaul();
 applySprint89CampPlan();
@@ -42,7 +43,11 @@ const supplemental: CharacterVisual[] = [
   },
 ];
 
-export const CAMPAIGN_PLAYER_VISUAL: CharacterVisual = { ...PLAYER_VISUAL, x: ARRIVAL_STORY_PLACEMENTS.trunk.x, y: ARRIVAL_STORY_PLACEMENTS.trunk.y };
+export const CAMPAIGN_PLAYER_VISUAL: CharacterVisual = {
+  ...PLAYER_VISUAL,
+  x: OPENING_LAYOUT.playerExit.x,
+  y: OPENING_LAYOUT.playerExit.y,
+};
 
 export const CAMPAIGN_CHARACTERS: CharacterVisual[] = [...CHARACTER_VISUALS, ...supplemental].map((visual) => {
   const position = NPC_PLACEMENTS[visual.id] ?? { x: visual.x, y: visual.y };
@@ -52,7 +57,7 @@ export const CAMPAIGN_CHARACTERS: CharacterVisual[] = [...CHARACTER_VISUALS, ...
 export const CAMPAIGN_CHARACTER_BY_ID = Object.fromEntries(CAMPAIGN_CHARACTERS.map((visual) => [visual.id, visual])) as Record<string, CharacterVisual>;
 
 export const STORY_INTERACTIONS: CampaignInteraction[] = [
-  point('trunk', 'Kofferraum öffnen', 'story', ARRIVAL_STORY_PLACEMENTS.trunk, 105),
+  point('trunk', 'Kofferraum des Ankunftsautos öffnen', 'story', OPENING_LAYOUT.trunk, 112),
   point('reservationBoard', 'Reservierung am Schwarzen Brett', 'story', ARRIVAL_STORY_PLACEMENTS.reservationBoard, 100),
   point('gundula', 'Gundula und Uli auf ihre Seite ziehen', 'story', ARRIVAL_STORY_PLACEMENTS.gundula, 115),
   point('taucherplatz', 'Wagen am Taucherplatz', 'story', ARRIVAL_STORY_PLACEMENTS.taucherplatz, 120, true),

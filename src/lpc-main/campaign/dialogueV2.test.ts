@@ -23,10 +23,10 @@ const snapshot: GameSnapshot = {
   relationships: { rene: 14, jule: 18, kira: 6, gundula: 8, gregor: 10 },
   quests: {},
   activeQuest: 'entry',
-  flags: {},
+  flags: { firstBeerOpened: true },
   encounter: null,
   chronicle: [],
-  worldPosition: { x: 900, y: 1600 },
+  worldPosition: { x: 900, y: 900 },
   currentInterior: null,
   activityResults: {},
   clockLabel: '15:00',
@@ -49,7 +49,7 @@ const meta: CampaignMetaState = {
   relationshipBonus: {},
   romance: {
     susi: { interest: 0, attempts: 0, successes: 0, boundaryStrikes: 0, lastLine: '' },
-    jule: { interest: 8, attempts: 1, successes: 1, boundaryStrikes: 0, lastLine: '' },
+    jule: { interest: 0, attempts: 0, successes: 0, boundaryStrikes: 0, lastLine: '' },
     kira: { interest: 0, attempts: 0, successes: 0, boundaryStrikes: 0, lastLine: '' },
   },
   conversationCounts: {},
@@ -64,7 +64,7 @@ const meta: CampaignMetaState = {
   suspicion: 0,
   reliefCount: 0,
   weekendArc: defaultWeekendArcState(),
-  weekendScore: 42,
+  weekendScore: 55,
   weekendRank: 'tolerated',
   lastEvent: '',
 };
@@ -94,7 +94,7 @@ describe('character-driven LPC dialogue', () => {
   it('turns a relationship choice into social and system consequences', () => {
     const choice = dialogueChoices('jule', snapshot, meta).find((entry) => entry.id === 'character:jule-help');
     expect(choice).toBeTruthy();
-    const result = resolveDialogueAction('jule', choice!.action, snapshot, meta);
+    const result = resolveDialogueAction('jule', choice!.action, snapshot, meta, () => 0);
     expect(result.relationship).toBeGreaterThan(0);
     expect(result.flags?.['partner-jule-flunky']).toBe(true);
   });
