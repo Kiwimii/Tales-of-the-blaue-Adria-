@@ -43,14 +43,16 @@ try {
 
     const intro = await waitForExpression(session, `(() => {
       const bridge = window.__lpcOpeningV5;
-      const text = document.querySelector('#intro-lines')?.textContent || '';
+      const modelText = bridge?.crawl().join(' ') || '';
+      const rendered = document.querySelector('.opening-v5-crawl-track')?.textContent || '';
       return {
         bridge: Boolean(bridge),
         version: bridge?.version === 'star-crawl-arrival-v5',
         crawl: Boolean(document.querySelector('.opening-v5-intro .opening-v5-crawl-track')),
         stars: document.querySelectorAll('.opening-v5-stars').length === 3,
-        story: text.includes('25 Euro') && text.includes('Gundula') && text.includes('Kaution'),
-        oneBeat: document.querySelectorAll('#intro-progress button').length === 1,
+        story: modelText.includes('25 Euro') && modelText.includes('Gundula') && modelText.includes('Kaution'),
+        renderedTitle: rendered.includes('Tales of the Blaue Adria'),
+        singleFlow: document.querySelector('#intro-back')?.disabled === true && (document.querySelector('#intro-next')?.textContent?.includes('Supermarkt') ?? false),
         layout: bridge?.layout().report.valid === true,
       };
     })()`, 24000);
