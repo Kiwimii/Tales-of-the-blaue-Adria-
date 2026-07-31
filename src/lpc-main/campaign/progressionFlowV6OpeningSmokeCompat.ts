@@ -1,3 +1,5 @@
+export {};
+
 const query = new URLSearchParams(location.search);
 if (query.get('opening') === '1') {
   const timer = window.setInterval(() => {
