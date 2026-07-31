@@ -17,6 +17,10 @@ if (genericSmoke) {
     internal.state.flags['all-core-minigames-unlocked'] = true;
     try {
       gatedStart.call(this, id);
+      if (id === 'beerPong') {
+        const controller = (this as unknown as Record<string, any>).beerPong;
+        if (controller?.state) controller.state.playerCups = 10;
+      }
     } finally {
       internal.state.questStage = previousStage;
       internal.state.firstBeerOpened = previousBeer;
