@@ -1,0 +1,137 @@
+.league-impact-layer::before,
+.league-impact-layer::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.league-cinematic-stage.animate-player[data-attack="logic-cards"] .league-impact-layer::before {
+  width: 86px;
+  height: 36px;
+  background: repeating-linear-gradient(90deg,#f5e9bd 0 18px,transparent 18px 27px);
+  animation: leaguePersistentProjectile .52s ease-out both;
+}
+.league-cinematic-stage.animate-player[data-attack="counter-slash"] .league-impact-layer::before {
+  width: 112px;
+  height: 5px;
+  border-radius: 5px;
+  background: #fff0c2;
+  box-shadow: 0 0 15px #edc45d;
+  animation: leaguePersistentSlash .48s ease-out both;
+}
+.league-cinematic-stage.animate-player[data-attack="chair-guard"] .league-impact-layer::before {
+  width: 54px;
+  height: 62px;
+  border: 6px solid #7b5636;
+  border-top-width: 14px;
+  animation: leaguePersistentGuard .52s ease-out both;
+}
+.league-cinematic-stage.animate-player[data-attack="beer-arc"] .league-impact-layer::before,
+.league-cinematic-stage.animate-player[data-attack="pong-arc"] .league-impact-layer::before {
+  width: 90px;
+  height: 56px;
+  border-top: 4px dashed #f1cf70;
+  border-radius: 50%;
+  animation: leaguePersistentArc .55s ease-out both;
+}
+.league-cinematic-stage.animate-player[data-attack="pong-arc"] .league-impact-layer::after {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #f5f0d9;
+  box-shadow: 0 0 8px rgba(255,255,255,.8);
+  animation: leaguePersistentBall .55s ease-out both;
+}
+.league-cinematic-stage.animate-player[data-attack="team-wave"] .league-impact-layer::before {
+  width: 124px;
+  height: 58px;
+  background: radial-gradient(circle,#edc45d 0 5px,transparent 6px) 0 0/24px 24px;
+  animation: leaguePersistentPulse .58s ease-out both;
+}
+.league-cinematic-stage.animate-player[data-attack="shockwave"] .league-impact-layer::before {
+  width: 30px;
+  height: 30px;
+  border: 6px solid #edc45d;
+  border-radius: 50%;
+  animation: leaguePersistentShockwave .58s ease-out both;
+}
+.league-cinematic-stage.animate-player[data-attack="highfive"] .league-impact-layer::before {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  background: radial-gradient(circle,#fff4be 0 18%,#edc45d 20% 36%,transparent 38%);
+  animation: leaguePersistentBurst .5s ease-out both;
+}
+.league-cinematic-stage.animate-player[data-attack="shirt-flash"] .league-impact-layer::before {
+  width: 105px;
+  height: 90px;
+  background: repeating-conic-gradient(from 0deg,rgba(237,196,93,.75) 0 8deg,transparent 9deg 20deg);
+  animation: leaguePersistentBurst .55s ease-out both;
+}
+.league-cinematic-stage.animate-player[data-attack="agree"] .league-impact-layer::before {
+  content: "JA.\A TROTZDEM.";
+  white-space: pre;
+  width: auto;
+  height: auto;
+  color: #fff0c2;
+  background: rgba(7,19,15,.82);
+  border: 1px solid rgba(237,196,93,.45);
+  border-radius: 8px;
+  padding: 7px 10px;
+  font: 900 10px/1.15 system-ui;
+  text-align: center;
+  animation: leaguePersistentText .55s ease-out both;
+}
+
+@keyframes leaguePersistentProjectile {
+  from { opacity: 0; transform: translate(-125px,-50%) rotate(-9deg); }
+  55% { opacity: 1; }
+  to { opacity: 0; transform: translate(40px,-50%) rotate(8deg); }
+}
+@keyframes leaguePersistentSlash {
+  from { opacity: 0; transform: translate(-50%,-50%) rotate(-18deg) scaleX(.1); }
+  45% { opacity: 1; }
+  to { opacity: 0; transform: translate(-50%,-50%) rotate(-18deg) scaleX(1.25); }
+}
+@keyframes leaguePersistentGuard {
+  from { opacity: 0; transform: translate(-50%,-20%) rotate(28deg); }
+  55% { opacity: 1; transform: translate(-50%,-50%) rotate(-7deg); }
+  to { opacity: 0; transform: translate(-50%,-50%) rotate(-7deg); }
+}
+@keyframes leaguePersistentArc {
+  from { opacity: 0; transform: translate(-120px,18px) rotate(-22deg); }
+  50% { opacity: 1; }
+  to { opacity: 0; transform: translate(26px,-42px) rotate(5deg); }
+}
+@keyframes leaguePersistentBall {
+  from { opacity: 0; transform: translate(-112px,22px); }
+  45% { opacity: 1; transform: translate(-44px,-38px); }
+  to { opacity: 0; transform: translate(32px,8px); }
+}
+@keyframes leaguePersistentPulse {
+  from { opacity: .1; transform: translate(-50%,-50%) scale(.25); }
+  55% { opacity: 1; }
+  to { opacity: 0; transform: translate(-50%,-50%) scale(1.3); }
+}
+@keyframes leaguePersistentShockwave {
+  from { opacity: 1; transform: translate(-50%,-50%) scale(.25); }
+  to { opacity: 0; transform: translate(-50%,-50%) scale(4.6); }
+}
+@keyframes leaguePersistentBurst {
+  from { opacity: 0; transform: translate(-50%,-50%) scale(.3) rotate(-15deg); }
+  45% { opacity: 1; }
+  to { opacity: 0; transform: translate(-50%,-50%) scale(1.8) rotate(12deg); }
+}
+@keyframes leaguePersistentText {
+  from { opacity: 0; transform: translate(-50%,10px) scale(.75); }
+  45% { opacity: 1; transform: translate(-50%,-50%) scale(1.08); }
+  to { opacity: 0; transform: translate(-50%,-70px) scale(.92); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .league-impact-layer::before,
+  .league-impact-layer::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; }
+}
