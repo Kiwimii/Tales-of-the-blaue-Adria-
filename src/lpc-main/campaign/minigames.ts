@@ -22,6 +22,7 @@ import { installMinigameVisuals } from './minigameVisuals';
 import './battleProgressionV4';
 import './battleProgressionV4Effects.css';
 import './openingSequenceV5';
+import './openingSequenceV5Hardening';
 
 installMinigameHardening();
 installMinigameCloseBridge();
