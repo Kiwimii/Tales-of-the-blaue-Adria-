@@ -1,5 +1,6 @@
 export {};
 import './progressionFlowV6.css';
+import './progressionFlowV6IntroControlsFix';
 
 const query = new URLSearchParams(location.search);
 const genericSmoke = query.get('smoke') === '1' && query.get('progression') !== '1';
