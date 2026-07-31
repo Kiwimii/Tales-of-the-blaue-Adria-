@@ -21,6 +21,7 @@ import {
 import { installMinigameVisuals } from './minigameVisuals';
 import './battleProgressionV4';
 import './battleProgressionV4Effects.css';
+import './openingSequenceV5.css';
 import './openingSequenceV5Layout.css';
 
 const openingQuery = new URLSearchParams(location.search);
