@@ -40,7 +40,17 @@ export class MinigameDirector extends EnhancedMinigameDirector {
     };
 
     super(root, deliverOutcome, currentMinigameContext);
+
+    // The enhanced base director owns its own detached start button and only mounts it when a game opens.
+    // Beer Pong needs a separate button reference during construction, so mount a temporary button,
+    // let the rebuilt controller capture it, and detach it again until Beer Pong renders its briefing.
+    const beerPongStart = document.createElement('button');
+    beerPongStart.type = 'button';
+    beerPongStart.className = 'primary mini-start beer-pong-start';
+    beerPongStart.textContent = 'SPIEL STARTEN';
+    root.querySelector('[data-mini-briefing]')?.append(beerPongStart);
     this.beerPong = new BeerPongRebuild(root, deliverOutcome, () => currentMinigameContext('beerPong'));
+    beerPongStart.remove();
 
     activeDirector = this;
     installMinigameVisuals(root);
