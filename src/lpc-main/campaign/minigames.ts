@@ -19,6 +19,7 @@ import {
   minigameHardeningSnapshot,
 } from './minigameHardening';
 import { installMinigameVisuals } from './minigameVisuals';
+import './battleProgressionV4';
 
 installMinigameHardening();
 installMinigameCloseBridge();
