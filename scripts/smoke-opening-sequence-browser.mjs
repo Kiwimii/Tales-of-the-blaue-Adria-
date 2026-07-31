@@ -75,7 +75,7 @@ try {
 
     await evaluate(session, `document.querySelector('#shop-recommended').click()`);
     const cart = await waitForExpression(session, `(() => ({
-      count:Number(document.querySelector('.opening-v5-cart-count')?.textContent?.match(/\d+/)?.[0]||0)>=6,
+      count:Number(document.querySelector('.opening-v5-cart-count')?.dataset.count||0)>=6,
       selected:document.querySelectorAll('.shop-item.selected').length>=5,
       enabled:document.querySelector('#shop-finish')?.disabled===false,
       route:document.querySelector('#shop-finish')?.textContent?.includes('Parkplatz')??false
