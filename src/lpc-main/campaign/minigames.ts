@@ -23,6 +23,7 @@ import './battleProgressionV4';
 import './battleProgressionV4Effects.css';
 import './openingSequenceV5.css';
 import './openingSequenceV5Layout.css';
+import './openingSequenceV5CartSync';
 
 const openingQuery = new URLSearchParams(location.search);
 const genericCampaignSmoke = openingQuery.get('smoke') === '1' && openingQuery.get('opening') !== '1';
