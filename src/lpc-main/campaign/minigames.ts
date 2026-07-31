@@ -7,6 +7,7 @@ import {
   type MiniGameOutcome,
   type MiniGameQuality,
 } from './minigamesV2';
+import { BeerPongRebuild } from './beerPongRebuild';
 import {
   applyMinigameRuntimeEffects,
   currentMinigameContext,
@@ -28,17 +29,28 @@ export type { MiniGameContext, MiniGameId, MiniGameOutcome, MiniGameQuality };
 let activeDirector: MinigameDirector | undefined;
 
 export class MinigameDirector extends EnhancedMinigameDirector {
+  private readonly beerPong: BeerPongRebuild;
+
   constructor(root: HTMLElement, onOutcome: (outcome: MiniGameOutcome) => void) {
-    super(
-      root,
-      (outcome) => {
-        stageMinigameOutcome(outcome);
-        applyMinigameRuntimeEffects(outcome);
-        onOutcome(outcome);
-        window.dispatchEvent(new CustomEvent<MiniGameOutcome>('lpc-campaign-minigame-outcome', { detail: structuredClone(outcome) }));
-      },
-      currentMinigameContext,
-    );
+    const deliverOutcome = (outcome: MiniGameOutcome): void => {
+      stageMinigameOutcome(outcome);
+      applyMinigameRuntimeEffects(outcome);
+      onOutcome(outcome);
+      window.dispatchEvent(new CustomEvent<MiniGameOutcome>('lpc-campaign-minigame-outcome', { detail: structuredClone(outcome) }));
+    };
+
+    super(root, deliverOutcome, currentMinigameContext);
+
+    // The enhanced base director owns its own detached start button and only mounts it when a game opens.
+    // Beer Pong needs a separate button reference during construction, so mount a temporary button,
+    // let the rebuilt controller capture it, and detach it again until Beer Pong renders its briefing.
+    const beerPongStart = document.createElement('button');
+    beerPongStart.type = 'button';
+    beerPongStart.className = 'primary mini-start beer-pong-start';
+    beerPongStart.textContent = 'SPIEL STARTEN';
+    root.querySelector('[data-mini-briefing]')?.append(beerPongStart);
+    this.beerPong = new BeerPongRebuild(root, deliverOutcome, () => currentMinigameContext('beerPong'));
+    beerPongStart.remove();
 
     activeDirector = this;
     installMinigameVisuals(root);
@@ -47,6 +59,26 @@ export class MinigameDirector extends EnhancedMinigameDirector {
     });
     exposeSmokeDiagnostics(this, root);
   }
+
+  override start(id: MiniGameId): void {
+    if (id === 'beerPong') {
+      super.stop(false);
+      this.beerPong.start();
+      return;
+    }
+    this.beerPong.stop(false);
+    super.start(id);
+  }
+
+  override stop(hide = true): void {
+    this.beerPong?.stop(false);
+    super.stop(hide);
+  }
+
+  beerPongActive(): boolean { return this.beerPong.isActive(); }
+  beerPongSkipCountdown(): void { this.beerPong.debugSkipCountdown(); }
+  beerPongSetState(values: Record<string, unknown>): void { this.beerPong.debugSetState(values); }
+  beerPongSnapshot(): Record<string, unknown> { return this.beerPong.debugSnapshot(); }
 }
 
 let externalStartBridgeInstalled = false;
@@ -88,15 +120,26 @@ function exposeSmokeDiagnostics(director: MinigameDirector, root: HTMLElement): 
     start(id: MiniGameId): void { director.start(id); },
     begin(): void { root.querySelector<HTMLButtonElement>('.mini-start')?.click(); },
     close(): void { root.querySelector<HTMLButtonElement>('[data-mini-close]')?.click(); },
-    skipCountdown(): void { if (internal.runtime) internal.runtime.countdown = 0; },
-    setState(values: Record<string, unknown>): void { if (internal.runtime) Object.assign(internal.runtime.state, values); },
-    action(): void { internal.primaryAction(); },
+    skipCountdown(): void {
+      if (director.beerPongActive()) director.beerPongSkipCountdown();
+      else if (internal.runtime) internal.runtime.countdown = 0;
+    },
+    setState(values: Record<string, unknown>): void {
+      if (director.beerPongActive()) director.beerPongSetState(values);
+      else if (internal.runtime) Object.assign(internal.runtime.state, values);
+    },
+    action(): void {
+      if (director.beerPongActive()) root.querySelector<HTMLButtonElement>('[data-mini-action]')?.click();
+      else internal.primaryAction();
+    },
     holdAndRelease(pointerId = 91): void {
       const button = root.querySelector<HTMLButtonElement>('[data-mini-action]');
       if (!button) return;
       button.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerId }));
       window.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerId }));
     },
-    snapshot(): Record<string, unknown> { return minigameHardeningSnapshot(director); },
+    snapshot(): Record<string, unknown> {
+      return director.beerPongActive() ? director.beerPongSnapshot() : minigameHardeningSnapshot(director);
+    },
   };
 }
