@@ -142,13 +142,20 @@ try {
     })()`);
     assertState('Depth model in browser', strategyFunctions);
 
-    const closed = await evaluate(session, `(() => {
-      window.__lpcWeekendArcDebug.close();
-      return document.querySelector('#weekend-arc-modal')?.hidden === true
-        && !document.body.classList.contains('weekend-arc-open')
-        && !document.body.classList.contains('campaign-modal-open');
-    })()`);
-    if (!closed) throw new Error('Weekend arc did not restore world input after depth smoke test.');
+    // The Secret Millionaire lifecycle performs one intentional synchronization reload.
+    // Re-acquire the debug bridge before closing so a larger production bundle cannot race this assertion.
+    const closed = await waitForExpression(session, `(() => {
+      const debug = window.__lpcWeekendArcDebug;
+      if (!debug?.close) return { bridge: false, modalClosed: false, arcClassCleared: false, inputRestored: false };
+      debug.close();
+      return {
+        bridge: true,
+        modalClosed: document.querySelector('#weekend-arc-modal')?.hidden === true,
+        arcClassCleared: !document.body.classList.contains('weekend-arc-open'),
+        inputRestored: !document.body.classList.contains('campaign-modal-open')
+      };
+    })()`, 9000);
+    assertState('Weekend arc cleanup', closed);
 
     const runtimeErrors = stderr.split('\n').filter((line) => /uncaught|referenceerror|typeerror|syntaxerror/i.test(line));
     if (runtimeErrors.length) throw new Error(`Browser runtime exception detected:\n${runtimeErrors.join('\n')}`);
@@ -187,8 +194,13 @@ async function waitForExpression(session, expression, timeoutMs) {
   const deadline = Date.now() + timeoutMs;
   let latest;
   while (Date.now() < deadline) {
-    latest = await evaluate(session, expression);
-    if (latest && Object.values(latest).every(Boolean)) return latest;
+    try {
+      latest = await evaluate(session, expression);
+      if (latest && Object.values(latest).every(Boolean)) return latest;
+    } catch (error) {
+      // A navigation can invalidate one Runtime.evaluate call. Retry until the new document is ready.
+      if (!/Execution context|Cannot find context|Inspected target navigated|Uncaught/i.test(String(error))) throw error;
+    }
     await delay(160);
   }
   throw new Error(`Browser expression did not become true. State: ${JSON.stringify(latest)}`);
@@ -196,7 +208,11 @@ async function waitForExpression(session, expression, timeoutMs) {
 
 async function evaluate(session, expression) {
   const response = await session.command('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: true });
-  if (response?.result?.exceptionDetails) throw new Error(`Runtime.evaluate failed: ${response.result.exceptionDetails.text}`);
+  if (response?.result?.exceptionDetails) {
+    const details = response.result.exceptionDetails;
+    const description = details.exception?.description ?? details.text ?? 'Unknown browser exception';
+    throw new Error(`Runtime.evaluate failed: ${description}`);
+  }
   return response?.result?.result?.value;
 }
 
