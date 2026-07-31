@@ -11,7 +11,7 @@ const timer = window.setInterval(() => {
   attempts += 1;
   const space = document.querySelector('.opening-v5-space');
   if (!(space instanceof HTMLElement)) {
-    if (attempts > 400) window.clearInterval(timer);
+    if (attempts > 2400) window.clearInterval(timer);
     return;
   }
   const controls = space.querySelector('.opening-v5-intro-controls');
