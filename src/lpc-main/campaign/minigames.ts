@@ -21,6 +21,7 @@ import {
 import { installMinigameVisuals } from './minigameVisuals';
 import './battleProgressionV4';
 import './battleProgressionV4Effects.css';
+import './openingSequenceV5';
 
 installMinigameHardening();
 installMinigameCloseBridge();
@@ -154,7 +155,7 @@ function exposeSmokeDiagnostics(director: MinigameDirector, root: HTMLElement): 
     },
     setState(values: Record<string, unknown>): void {
       if (director.beerPongActive()) director.beerPongSetState(values);
-      else if (director.fastGameActive()) director.fastGameSetState(values);
+      else if (director.fastGameActive()) director.fastGamesSetState?.(values);
       else if (internal.runtime) Object.assign(internal.runtime.state, values);
     },
     action(): void {
