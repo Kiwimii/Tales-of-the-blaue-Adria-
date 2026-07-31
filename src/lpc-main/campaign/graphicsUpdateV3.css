@@ -1,0 +1,170 @@
+:root.graphics-update-v3-active {
+  --v3-gold: #edc45d;
+  --v3-cream: #fff0c2;
+  --v3-night: #07130f;
+}
+
+.graphics-v3-character {
+  position: relative;
+  display: block;
+  width: 56px;
+  height: 86px;
+  transform-origin: 50% 100%;
+  filter: drop-shadow(0 6px 5px rgba(0,0,0,.35));
+  image-rendering: pixelated;
+}
+.graphics-v3-character span,
+.graphics-v3-character i,
+.graphics-v3-character b,
+.graphics-v3-character em { position: absolute; display: block; box-sizing: border-box; }
+.graphics-v3-shadow { left: 9px; bottom: 0; width: 40px; height: 9px; border-radius: 50%; background: rgba(0,0,0,.34); }
+.graphics-v3-legs { left: 16px; bottom: 7px; width: 29px; height: 29px; }
+.graphics-v3-legs i { bottom: 0; width: 10px; height: 29px; border-radius: 3px 3px 2px 2px; background: var(--v3-trousers); box-shadow: inset 0 -6px rgba(0,0,0,.22); }
+.graphics-v3-legs i:first-child { left: 0; transform: rotate(2deg); }
+.graphics-v3-legs i:last-child { right: 0; transform: rotate(-2deg); }
+.graphics-v3-body { left: 10px; bottom: 30px; width: 39px; height: 32px; border-radius: 11px 11px 6px 6px; background: linear-gradient(90deg,var(--v3-shirt-shade),var(--v3-shirt) 26% 74%,var(--v3-shirt-shade)); box-shadow: inset 0 -7px rgba(0,0,0,.16); }
+.graphics-v3-body > b { left: 15px; top: 8px; width: 9px; height: 9px; border: 2px solid var(--v3-accent); border-radius: 2px; opacity: .8; }
+.graphics-v3-arm { top: 4px; width: 9px; height: 29px; border-radius: 5px; background: var(--v3-shirt-shade); transform-origin: 50% 4px; }
+.graphics-v3-arm.left { left: -7px; transform: rotate(9deg); }
+.graphics-v3-arm.right { right: -7px; transform: rotate(-9deg); }
+.graphics-v3-head { left: 15px; top: 3px; width: 30px; height: 31px; border: 2px solid rgba(30,20,16,.28); border-radius: 44% 44% 40% 40%; background: #d8a879; box-shadow: inset 0 -5px rgba(119,68,42,.14); }
+.graphics-v3-hair { left: -2px; top: -5px; width: 30px; height: 12px; border-radius: 10px 10px 4px 4px; background: var(--v3-hair); box-shadow: 5px 5px 0 -2px var(--v3-hair); }
+.graphics-v3-eye { top: 14px; width: 3px; height: 3px; border-radius: 50%; background: #18211c; }
+.graphics-v3-eye.left { left: 7px; }
+.graphics-v3-eye.right { right: 7px; }
+.graphics-v3-head em { left: 11px; bottom: 5px; width: 7px; height: 2px; border-radius: 3px; background: rgba(92,46,39,.65); }
+.graphics-v3-accessory { right: 2px; top: 31px; width: 9px; height: 9px; border: 2px solid var(--v3-accent); border-radius: 2px; transform: rotate(12deg); opacity: .9; }
+
+.graphics-v3-fighter { width: 72px; height: 112px; margin: auto; transform: scale(1.12); }
+.graphics-v3-fighter .graphics-v3-head { transform: scale(1.08); transform-origin: 50% 100%; }
+.graphics-v3-support { width: 46px; height: 72px; }
+.graphics-v3-mini { width: 43px; height: 68px; transform: scale(.88); }
+.graphics-v3-patrol { width: 56px; height: 84px; }
+.graphics-v3-reaction-cheer { animation: graphicsV3Cheer .7s ease-in-out infinite alternate; }
+.graphics-v3-reaction-cheer .graphics-v3-arm.left { transform: rotate(145deg); }
+.graphics-v3-reaction-cheer .graphics-v3-arm.right { transform: rotate(-145deg); }
+.graphics-v3-reaction-panic { animation: graphicsV3Panic .22s linear infinite alternate; }
+.graphics-v3-reaction-panic .graphics-v3-arm.left { transform: rotate(58deg); }
+.graphics-v3-reaction-panic .graphics-v3-arm.right { transform: rotate(-58deg); }
+.graphics-v3-reaction-hit { animation: graphicsV3Hit .35s ease-out; }
+.graphics-v3-reaction-guard .graphics-v3-arm.left { transform: rotate(70deg); }
+.graphics-v3-reaction-guard .graphics-v3-arm.right { transform: rotate(-70deg); }
+.graphics-v3-reaction-run .graphics-v3-legs i:first-child { animation: graphicsV3RunLeg .3s linear infinite alternate; }
+.graphics-v3-reaction-run .graphics-v3-legs i:last-child { animation: graphicsV3RunLeg .3s linear infinite alternate-reverse; }
+.graphics-v3-reaction-inspect .graphics-v3-head { animation: graphicsV3Inspect 1.1s ease-in-out infinite alternate; }
+.graphics-v3-reaction-down { transform: rotate(82deg) translate(10px,8px); filter: grayscale(1) drop-shadow(0 3px 3px rgba(0,0,0,.25)); opacity: .65; }
+
+.brawl-arena.graphics-v3-brawl { position: relative; isolation: isolate; overflow: hidden; min-height: 350px; padding-top: 92px; background: linear-gradient(#203b34 0 43%,#4e6249 44% 57%,#655a3d 58% 100%); }
+.graphics-v3-brawl-atmosphere { position: absolute; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+.graphics-v3-gate { position: absolute; left: 50%; top: 14px; width: 74%; height: 64px; transform: translateX(-50%); border: 5px solid #45504a; border-bottom: 0; background: linear-gradient(180deg,#182924,#263a31); box-shadow: inset 0 0 0 4px rgba(255,255,255,.04),0 10px 20px rgba(0,0,0,.25); }
+.graphics-v3-gate > i { top: 19px; width: 44%; height: 7px; background: repeating-linear-gradient(90deg,#e6dfc0 0 24px,#bd3f35 24px 48px); box-shadow: 0 4px rgba(0,0,0,.22); }
+.graphics-v3-gate > i:first-child { left: -2%; transform: rotate(3deg); }
+.graphics-v3-gate > i:nth-child(2) { right: -2%; transform: rotate(-3deg); }
+.graphics-v3-gate > b { left: 50%; top: 37px; transform: translateX(-50%); color: #d8c88c; font: 900 9px/1 system-ui; letter-spacing: .2em; }
+.graphics-v3-crowd { position: absolute; left: 2%; right: 2%; top: 55px; height: 80px; display: flex; justify-content: space-around; align-items: flex-end; opacity: .6; }
+.graphics-v3-crowd span { position: relative; width: 24px; height: calc(35px + var(--crowd-index) * 1.2px); border-radius: 10px 10px 3px 3px; background: #17261f; animation: graphicsV3Crowd calc(1.3s + var(--crowd-index) * .06s) ease-in-out infinite alternate; }
+.graphics-v3-crowd span::before { content:""; position:absolute; left:4px; top:-13px; width:16px; height:16px; border-radius:50%; background:#1b2e26; }
+.graphics-v3-ground-dust { position: absolute; left: 7%; right: 7%; bottom: 3px; height: 30px; background: radial-gradient(ellipse at center,rgba(218,190,111,.2),transparent 70%); }
+.graphics-v3-brawl .brawl-fighter { position: relative; z-index: 2; }
+.graphics-v3-brawl .brawl-fighter figure { height: 170px; overflow: visible; border: 1px solid rgba(255,255,255,.1); background: linear-gradient(180deg,rgba(11,34,27,.22),rgba(0,0,0,.15)); box-shadow: inset 0 -24px rgba(0,0,0,.12),0 12px 18px rgba(0,0,0,.2); }
+.graphics-v3-brawl .brawl-fighter.gundula figure { background: linear-gradient(180deg,rgba(116,42,55,.38),rgba(39,17,22,.22)); }
+.graphics-v3-brawl .brawl-fighter.uli figure { background: linear-gradient(180deg,rgba(95,85,50,.34),rgba(34,31,20,.24)); }
+.graphics-v3-brawl .brawl-impact { position: relative; z-index: 3; align-self: center; padding: 12px 8px; border: 1px solid rgba(237,196,93,.35); border-radius: 12px; background: rgba(7,19,15,.78); box-shadow: 0 0 26px rgba(237,196,93,.12); }
+.graphics-v3-support-row { margin: 10px 0 22px; padding: 13px; border: 1px solid rgba(237,196,93,.25); border-radius: 14px; background: linear-gradient(110deg,rgba(17,44,35,.94),rgba(8,24,19,.94)); }
+.graphics-v3-support-row[hidden] { display: none !important; }
+.graphics-v3-support-row > header { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 10px; color: var(--v3-cream); }
+.graphics-v3-support-row > header span { color: var(--v3-gold); font: 900 9px/1 system-ui; letter-spacing: .14em; }
+.graphics-v3-support-row > header strong { font-size: 11px; }
+.graphics-v3-support-row > div { display: grid; grid-template-columns: repeat(auto-fit,minmax(115px,1fr)); gap: 7px; }
+.graphics-v3-support-member { display: flex; align-items: center; gap: 6px; min-height: 76px; padding: 7px; border-radius: 10px; background: rgba(255,255,255,.045); animation: graphicsV3Support calc(1.4s + var(--support-index) * .08s) ease-in-out infinite alternate; }
+.graphics-v3-support-member p { margin: 0; min-width: 0; }
+.graphics-v3-support-member p strong,.graphics-v3-support-member p small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.graphics-v3-support-member p strong { color: #f5e5b1; font-size: 11px; }
+.graphics-v3-support-member p small { margin-top: 3px; color: #91aa9d; font-size: 8px; }
+
+.minigame-stage.graphics-v3-minigame-stage { position: relative; isolation: isolate; overflow: hidden; border-radius: 16px; }
+.graphics-v3-minigame-layer { position: absolute; inset: 0; z-index: 4; pointer-events: none; overflow: hidden; }
+.graphics-v3-scene { position: absolute; inset: 0; display: grid; grid-template-columns: minmax(95px,1fr) minmax(160px,2fr) minmax(95px,1fr); align-items: end; padding: 28px 14px 10px; }
+.graphics-v3-scene-badge { position: absolute; top: 9px; left: 12px; display: flex; gap: 7px; align-items: baseline; padding: 5px 8px; border: 1px solid rgba(237,196,93,.24); border-radius: 8px; background: rgba(5,17,13,.72); backdrop-filter: blur(3px); }
+.graphics-v3-scene-badge span { color: var(--v3-gold); font: 900 7px/1 system-ui; letter-spacing: .11em; }
+.graphics-v3-scene-badge strong { color: #d8e5de; font-size: 8px; }
+.graphics-v3-minigame-cast { display: flex; align-items: flex-end; justify-content: center; gap: 0; min-height: 95px; }
+.graphics-v3-minigame-cast.left { flex-direction: row-reverse; }
+.graphics-v3-cast-member { position: relative; margin: 0 -6px; transform: translateY(calc(var(--cast-index) * 1.2px)); animation: graphicsV3Cast calc(1.2s + var(--cast-index) * .08s) ease-in-out infinite alternate; }
+.graphics-v3-cast-member > span { position: absolute; left: 50%; bottom: -4px; transform: translateX(-50%); max-width: 55px; overflow: hidden; color: #fff0c2; font: 900 7px/1 system-ui; text-overflow: ellipsis; text-shadow: 0 1px 3px #000; white-space: nowrap; }
+.graphics-v3-field { align-self: stretch; position: relative; display: grid; place-items: center; }
+.graphics-v3-table { position: relative; width: min(330px,80%); height: 74px; margin-bottom: 34px; border: 5px solid #3a2417; border-radius: 7px; background: linear-gradient(#876139,#5e3b22); box-shadow: 0 12px 0 #25170f,0 18px 20px rgba(0,0,0,.4); }
+.graphics-v3-table.flip i { top: -14px; width: 18px; height: 22px; border: 2px solid #f1d8ad; border-top: 0; border-radius: 0 0 4px 4px; background: rgba(184,48,42,.86); }
+.graphics-v3-table.flip i:nth-child(1) { left: 13%; }.graphics-v3-table.flip i:nth-child(2) { left: 34%; }.graphics-v3-table.flip i:nth-child(3) { right: 34%; }.graphics-v3-table.flip i:nth-child(4) { right: 13%; }
+.graphics-v3-table.flip b { left: 50%; top: -23px; width: 20px; height: 25px; transform: translateX(-50%) rotate(13deg); border: 2px solid #f1d8ad; border-top: 0; background:#b82f29; animation: graphicsV3Cup 1s ease-in-out infinite; }
+.graphics-v3-table.pong { display: flex; align-items: center; justify-content: space-between; padding: 0 16px; }
+.graphics-v3-table.pong .rack { position: static; color: #e44d41; font: 900 14px/1.05 ui-monospace,monospace; text-align:center; text-shadow:0 1px #6e1717; }
+.graphics-v3-table.pong .ball { left: 48%; top: -18px; width: 11px; height: 11px; border-radius:50%; background:#f3e6c5; box-shadow:0 0 6px rgba(255,255,255,.8); animation: graphicsV3Ball 1.6s ease-in-out infinite; }
+.graphics-v3-flunky-lane { position: relative; width: min(410px,92%); height: 145px; margin-bottom: 4px; border-radius: 50%; background: radial-gradient(ellipse,#a79458 0 43%,#46764c 44% 100%); box-shadow: inset 0 0 0 4px rgba(255,255,255,.08); }
+.graphics-v3-flunky-lane .line { left: 10%; right: 10%; top: 50%; height: 3px; border-top: 3px dashed rgba(255,255,255,.55); }
+.graphics-v3-flunky-lane .bottle { left: 50%; top: 44%; width: 12px; height: 31px; transform: translate(-50%,-50%); border-radius: 4px 4px 2px 2px; background:#284d31; box-shadow: inset 3px 0 rgba(255,255,255,.15); }
+.graphics-v3-flunky-lane .throw-trail { left: 16%; top: 37%; width: 36%; height: 38px; border-top: 3px dashed rgba(255,236,174,.68); border-radius:50%; transform:rotate(-9deg); animation:graphicsV3Throw 1.7s ease-in-out infinite; }
+.graphics-v3-hole { position:relative; width:190px; height:130px; margin-bottom:20px; border-radius:50%; background:radial-gradient(ellipse,#060b09 0 28%,#5e4a31 30% 43%,#2e5a3d 44% 100%); box-shadow:0 15px 22px rgba(0,0,0,.42); }
+.graphics-v3-hole i { left:50%; top:50%; width:70px; height:35px; transform:translate(-50%,-50%); border-radius:50%; background:#020403; }
+.graphics-v3-hole b { left:50%; top:50%; transform:translate(-50%,-50%); color:#dfbd67; font:900 9px/1.1 system-ui; text-align:center; }
+.graphics-v3-hole span { left:50%; top:18%; width:7px; height:72px; background:linear-gradient(rgba(220,230,217,.8),transparent); animation:graphicsV3Smoke 2.2s ease-out infinite; }
+
+.minigame-stage[data-graphics-game="hedgePee"] .minigame-vfx-canvas { opacity: .16; }
+.graphics-v3-scene-hedgePee { display:block; padding:0; background:linear-gradient(180deg,rgba(2,10,8,.08),rgba(2,8,6,.28)); }
+.graphics-v3-patrol-zone { position:absolute; inset:25px 0 0; overflow:hidden; }
+.graphics-v3-hedge-wall { position:absolute; left:0; right:0; bottom:0; height:42%; background:linear-gradient(#25583b,#143723); box-shadow:inset 0 12px rgba(102,149,84,.22); }
+.graphics-v3-hedge-wall i { position:absolute; width:30%; height:70%; bottom:45%; border-radius:50%; background:#2d6842; filter:drop-shadow(0 5px #173923); }
+.graphics-v3-hedge-wall i:nth-child(1){left:-4%}.graphics-v3-hedge-wall i:nth-child(2){left:25%}.graphics-v3-hedge-wall i:nth-child(3){right:25%}.graphics-v3-hedge-wall i:nth-child(4){right:-4%}
+.graphics-v3-hide-team { position:absolute; left:13%; right:13%; bottom:12%; display:flex; justify-content:space-around; align-items:flex-end; opacity:.76; }
+.graphics-v3-hider { transform:translateY(calc(var(--hide-index) * 2px)) scale(.78); }
+.graphics-v3-patrol { position:absolute; z-index:5; width:96px; height:105px; animation:graphicsV3Patrol var(--patrol-duration) linear var(--patrol-delay) infinite alternate; }
+.graphics-v3-patrol.lane-upper { top:18%; }.graphics-v3-patrol.lane-lower { top:48%; }
+.graphics-v3-patrol > .graphics-v3-character { z-index:3; }
+.graphics-v3-patrol > b { position:absolute; left:50%; top:-5px; transform:translateX(-50%); width:150px; color:#ffe6aa; font:900 7px/1 system-ui; text-align:center; text-shadow:0 1px 4px #000; }
+.graphics-v3-vision-cone { left:55px; top:35px; z-index:1; width:var(--cone-length); height:105px; transform-origin:0 50%; clip-path:polygon(0 45%,100% 0,100% 100%,0 55%); background:linear-gradient(90deg,rgba(255,224,129,.32),rgba(255,224,129,.04)); filter:drop-shadow(0 0 8px rgba(255,224,129,.16)); animation:graphicsV3Cone 1.1s ease-in-out infinite alternate; }
+.graphics-v3-patrol-uli .graphics-v3-vision-cone { background:linear-gradient(90deg,rgba(255,197,99,.28),rgba(255,197,99,.03)); }
+
+html[data-graphics-v3-outcome="success"] .graphics-v3-minigame-layer { animation:graphicsV3Success .65s ease-out; }
+html[data-graphics-v3-outcome="fail"] .graphics-v3-minigame-layer { animation:graphicsV3Fail .45s linear; }
+
+@keyframes graphicsV3Cheer { from{transform:translateY(0) rotate(-1deg)} to{transform:translateY(-6px) rotate(1deg)} }
+@keyframes graphicsV3Panic { from{transform:translateX(-2px)} to{transform:translateX(2px)} }
+@keyframes graphicsV3Hit { 0%{transform:translateX(0) rotate(0)} 45%{transform:translateX(-9px) rotate(-8deg)} 100%{transform:translateX(0) rotate(0)} }
+@keyframes graphicsV3RunLeg { from{transform:rotate(-19deg)} to{transform:rotate(19deg)} }
+@keyframes graphicsV3Inspect { from{transform:rotate(-7deg)} to{transform:rotate(7deg)} }
+@keyframes graphicsV3Crowd { from{transform:translateY(1px)} to{transform:translateY(-5px)} }
+@keyframes graphicsV3Support { from{transform:translateY(1px)} to{transform:translateY(-2px)} }
+@keyframes graphicsV3Cast { from{transform:translateY(calc(var(--cast-index) * 1.2px))} to{transform:translateY(calc(-4px + var(--cast-index) * 1.2px))} }
+@keyframes graphicsV3Cup { 0%,45%{transform:translateX(-50%) rotate(13deg)} 60%{transform:translateX(-50%) translateY(-20px) rotate(125deg)} 100%{transform:translateX(-50%) rotate(360deg)} }
+@keyframes graphicsV3Ball { 0%{transform:translate(-120px,38px)} 50%{transform:translate(0,-34px)} 100%{transform:translate(120px,38px)} }
+@keyframes graphicsV3Throw { 0%,20%{opacity:0;transform:rotate(-9deg) scaleX(.2)} 60%{opacity:1;transform:rotate(-9deg) scaleX(1)} 100%{opacity:0;transform:rotate(-9deg) scaleX(1.15)} }
+@keyframes graphicsV3Smoke { from{opacity:.8;transform:translate(-50%,15px) scale(.6)} to{opacity:0;transform:translate(-50%,-25px) scale(1.8)} }
+@keyframes graphicsV3Patrol { from{left:4%;transform:scaleX(1)} 48%{transform:scaleX(1)} 52%{transform:scaleX(-1)} to{left:82%;transform:scaleX(-1)} }
+@keyframes graphicsV3Cone { from{opacity:.58;transform:rotate(-5deg)} to{opacity:1;transform:rotate(5deg)} }
+@keyframes graphicsV3Success { 0%{filter:brightness(1)} 40%{filter:brightness(1.55) saturate(1.25)} 100%{filter:brightness(1)} }
+@keyframes graphicsV3Fail { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
+
+@media (max-width:800px) {
+  .brawl-arena.graphics-v3-brawl { padding-top:82px; }
+  .graphics-v3-brawl .brawl-fighter figure { height:140px; }
+  .graphics-v3-support-row > header { display:block; }
+  .graphics-v3-support-row > header strong { display:block; margin-top:5px; }
+  .graphics-v3-scene { grid-template-columns:80px 1fr 80px; padding-inline:4px; }
+  .graphics-v3-minigame-cast { gap:0; }
+  .graphics-v3-cast-member { margin:0 -10px; }
+  .graphics-v3-table { width:90%; }
+}
+@media (max-width:520px) {
+  .graphics-v3-fighter { transform:scale(.88); }
+  .graphics-v3-brawl .brawl-fighter figure { height:115px; }
+  .graphics-v3-support-row > div { grid-template-columns:repeat(2,1fr); }
+  .graphics-v3-support-member { min-height:66px; }
+  .graphics-v3-scene-badge strong { display:none; }
+  .graphics-v3-scene { grid-template-columns:65px 1fr 65px; }
+  .graphics-v3-cast-member:nth-child(n+3) { display:none; }
+  .graphics-v3-patrol > b { width:115px; font-size:6px; }
+  .graphics-v3-vision-cone { width:150px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .graphics-v3-character,.graphics-v3-crowd span,.graphics-v3-support-member,.graphics-v3-cast-member,.graphics-v3-patrol,.graphics-v3-vision-cone,.graphics-v3-table.flip b,.graphics-v3-table.pong .ball,.graphics-v3-flunky-lane .throw-trail,.graphics-v3-hole span { animation-duration:12s !important; animation-iteration-count:1 !important; }
+}
