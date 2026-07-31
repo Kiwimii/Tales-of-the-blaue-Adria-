@@ -1,107 +1,22 @@
+import { OPENING_CRAWL_LINES } from './openingSequenceV5Model.js';
+
 export interface IntroBeat {
   id: string;
   kicker: string;
   title: string;
   lines: string[];
-  visual: 'road' | 'car' | 'shop' | 'gate' | 'clipboard' | 'camp' | 'night' | 'sunday';
+  visual: 'space' | 'road' | 'car' | 'shop' | 'gate' | 'clipboard' | 'camp' | 'night' | 'sunday';
   duration: number;
 }
 
 export const INTRO_BEATS: IntroBeat[] = [
   {
-    id: 'peace',
-    kicker: 'FREITAG · 07:03 UHR',
-    title: 'Noch ist alles friedlich',
-    visual: 'road',
-    duration: 6500,
-    lines: [
-      'Die Blaue Adria liegt still da. Ein See, ein Campingplatz und mehrere Menschen, die glauben, sie hätten hier Hausrecht.',
-      'Die Vögel zwitschern. Die Schranke ist geschlossen. Beides wird im Laufe des Tages aggressiver.',
-    ],
-  },
-  {
-    id: 'crew',
-    kicker: 'NEUN FREUNDE · EIN AUTO · KEIN ERWACHSENER',
-    title: 'Eine Reisegruppe nähert sich',
-    visual: 'car',
-    duration: 7000,
-    lines: [
-      'Neun Freunde fahren los. Jeder hat zugesagt, etwas Wichtiges mitzubringen.',
-      'Das Ergebnis sind vier Ladekabel, sieben halbvolle Deos und genau eine Person, die an Klopapier gedacht hat.',
-      'Niemand hat einen Hammer. Zwei haben denselben Bluetooth-Lautsprecher dabei.',
-    ],
-  },
-  {
-    id: 'budget',
-    kicker: '25 EURO STARTKAPITAL',
-    title: 'Ökonomische Verantwortung',
-    visual: 'shop',
-    duration: 7000,
-    lines: [
-      'Vor der Abfahrt bleibt ein Supermarktbesuch. Das Budget: 25 Euro.',
-      'Damit müssen Nahrung, Flüssigkeit, Hygiene und spätere Ausreden finanziert werden.',
-      'Die Entscheidung zwischen Wasser und Batida ist technisch eine Charaktererstellung mit Kassenbon.',
-    ],
-  },
-  {
-    id: 'authority',
-    kicker: 'AM HAUPTTOR',
-    title: 'Zwei Endgegner im Frühdienst',
-    visual: 'gate',
-    duration: 7600,
-    lines: [
-      'Gundula bewacht die Anmeldung. Ihr Klemmbrett enthält Regeln, die teilweise älter sind als die Bäume.',
-      'Neben ihr steht Uli. Glatze, Schlüsselbund, Tanktop. Ein Mann, der Abstände nicht schätzt, sondern persönlich nimmt.',
-      'Gemeinsam bilden sie eine Verwaltungseinheit, gegen die selbst Formulare nervös werden.',
-    ],
-  },
-  {
-    id: 'reservation',
-    kicker: 'DIE RESERVIERUNG EXISTIERT',
-    title: 'Vermutlich',
-    visual: 'clipboard',
-    duration: 7000,
-    lines: [
-      'Die Gruppe hat reserviert. Der Name steht irgendwo auf einer Liste.',
-      'Leider wurde die Liste von Menschen sortiert, die alphabetische Reihenfolge als unverbindliche Empfehlung betrachten.',
-      'Wer hineinwill, muss lesen, reden oder die Gegenseite zuerst vollständig frustrieren.',
-    ],
-  },
-  {
-    id: 'camp',
-    kicker: 'HINTER DER SCHRANKE',
-    title: 'Das Wochenende beginnt',
-    visual: 'camp',
-    duration: 7600,
-    lines: [
-      'Am Taucherplatz warten Zelte, Kabel, Getränke und ein Stromkasten, der sichtbar schon bessere Jahre abgelehnt hat.',
-      'Auf dem restlichen Platz verteilen sich Freunde, Rivalen, Flirtchancen und mehrere Orte, an denen man offiziell nicht urinieren darf.',
-      'Die Regeln sind klar. Die Gruppe ist es nicht.',
-    ],
-  },
-  {
-    id: 'night',
-    kicker: 'SPÄTER AM ABEND',
-    title: 'Zustände werden zu Persönlichkeiten',
-    visual: 'night',
-    duration: 7600,
-    lines: [
-      'Alkohol macht mutiger und ungenauer. Müdigkeit macht ehrlicher und sozial unbrauchbar.',
-      'Beziehungen entstehen durch Gespräche, Geschenke und gemeinsam überstandene Fehlentscheidungen.',
-      'Manche Attacken lernt man im Kampf. Andere, indem man René lange genug zuhört, ohne aufs Handy zu sehen.',
-    ],
-  },
-  {
-    id: 'sunday',
-    kicker: 'ZIEL: SONNTAG',
-    title: 'Mit Restwürde abreisen',
-    visual: 'sunday',
-    duration: 8200,
-    lines: [
-      'Bis Sonntag soll die Gruppe vollständig sein, der Platz noch stehen und wenigstens eine Erinnerung rechtlich nicht verwertbar bleiben.',
-      'Vielleicht entsteht Freundschaft. Vielleicht Romantik. Vielleicht nur ein sehr präziser Lageplan der Hecke.',
-      'Tales of the Blaue Adria beginnt dort, wo vernünftige Wochenendplanung ihre Zuständigkeit beendet.',
-    ],
+    id: 'star-crawl',
+    kicker: 'EPISODE 0 · DIE VORBEREITUNG SCHLÄGT ZURÜCK',
+    title: 'Tales of the Blaue Adria',
+    visual: 'space',
+    duration: 42000,
+    lines: [...OPENING_CRAWL_LINES],
   },
 ];
 
