@@ -18,7 +18,7 @@ const server = createServer((request, response) => {
 });
 await new Promise((resolve) => server.listen(4180, '127.0.0.1', resolve));
 
-const pageUrl = 'http://127.0.0.1:4180/Tales-of-the-blaue-Adria-/lpc-main/?smoke=1';
+const pageUrl = 'http://127.0.0.1:4180/Tales-of-the-blaue-Adria-/lpc-main/?opening=1';
 const debuggingPort = 9331;
 const profile = `/tmp/lpc-opening-smoke-${process.pid}`;
 rmSync(profile, { recursive: true, force: true });
