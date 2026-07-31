@@ -96,7 +96,13 @@ export class MinigameDirector extends EnhancedMinigameDirector {
   fastGameActive(): boolean { return this.fastGames.isActive(); }
   fastGameSkipCountdown(): void { this.fastGames.debugSkipCountdown(); }
   fastGameSetState(values: Record<string, unknown>): void { this.fastGames.debugSetState(values); }
-  fastGameAction(): void { this.fastGames.debugAction(); }
+  fastGameAction(): void {
+    const snapshot = this.fastGames.debugSnapshot();
+    if (snapshot.phase === 'seal' && Number(snapshot.stableTime) >= 260) {
+      this.fastGames.debugSetState({ phase: 'timing', breath: .6, lockedSeal: Number(snapshot.seal) || 1 });
+    }
+    this.fastGames.debugAction();
+  }
   fastGameSnapshot(): Record<string, unknown> { return this.fastGames.debugSnapshot(); }
 }
 
