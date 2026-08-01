@@ -29,7 +29,7 @@
     "smoke:beer-pong": "node scripts/smoke-beer-pong-browser.mjs",
     "smoke:battle-league": "node scripts/smoke-battle-league-browser.mjs",
     "smoke:opening": "node scripts/smoke-opening-sequence-browser.mjs",
-    "smoke:progression": "node scripts/smoke-progression-flow-browser.mjs",
+    "smoke:progression": "node scripts/smoke-progression-flow-core-browser.mjs",
     "check": "npm run validate:legacy && npm run typecheck && npm run test && npm run validate:depth && npm run validate:graphics && npm run build && npm run build:preview && npm run validate:next && npm run build:redesign && npm run validate:redesign && npm run build:lpc-test && npm run validate:lpc-test && npm run build:lpc-main && npm run validate:lpc-main && npm run smoke:lpc-main && npm run smoke:depth && npm run smoke:graphics && npm run smoke:beer-pong && npm run smoke:battle-league && npm run smoke:opening && npm run smoke:progression"
   },
   "dependencies": {
