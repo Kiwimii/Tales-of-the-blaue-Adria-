@@ -1,11 +1,8 @@
 export {};
 import './progressionFlowV6.css';
 import './progressionFlowV6IntroControlsFix';
-
-const query = new URLSearchParams(location.search);
-const genericSmoke = query.get('smoke') === '1' && query.get('progression') !== '1';
-if (!genericSmoke) await import('./progressionFlowV6Runtime');
-await import('./app');
+import './progressionFlowV6Runtime';
+import './app';
 
 const STORAGE_KEY = 'tales-blaue-adria-intro-duration-v6';
 let attempts = 0;
