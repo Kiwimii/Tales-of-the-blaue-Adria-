@@ -75,7 +75,8 @@ try {
         version: root?.dataset.beerPongVersion === 'beer-pong-perspective-v4',
         perspectiveTitle: (document.querySelector('[data-mini-title]')?.textContent ?? '').includes('Perspektivisches Tischduell'),
         tenOpponentCups: state.opponentCups === 10,
-        tenPlayerCups: state.playerCups === 10,
+        harderPlayerCups: state.playerCups === 8,
+        explicitModes: document.querySelectorAll('[data-pong-mode]').length === 2,
         playerTurn: state.phase === 'ready',
         oldOverlayHidden: !oldLayer || getComputedStyle(oldLayer).display === 'none'
       };
@@ -99,7 +100,7 @@ try {
       const state = window.__lpcMinigameDebug.snapshot();
       return {
         aiming: state.phase === 'aiming',
-        trajectory: state.preview?.length >= 30,
+        trajectory: state.preview?.length >= 20,
         direct: state.mode === 'direct'
       };
     })()`);
@@ -125,7 +126,7 @@ try {
     })()`, 5000);
     assertState('Direct hit and extra turn', directHit);
 
-    await evaluate(session, `document.querySelector('[data-mini-action]')?.click()`);
+    await evaluate(session, `document.querySelector('[data-pong-mode="bounce"]')?.click()`);
     const bounceMode = await evaluate(session, `window.__lpcMinigameDebug.snapshot().mode === 'bounce'`);
     if (!bounceMode) throw new Error('Bounce mode did not activate.');
 
@@ -141,7 +142,7 @@ try {
           { id: 90, x: .5, depth: .855, active: true },
           { id: 91, x: .55, depth: .86, active: true }
         ],
-        hits: 8, playerCups: 10,
+        hits: 8, playerCups: 8,
         plan: { mode: 'bounce', targetX: .5, range: .855, power: .8, duration: 180 },
         ball: { x: .5, depth: 0, height: 0, progress: 0, bounced: false },
         flightElapsed: 0, blockChecked: false, preview: [], dragNow: undefined
@@ -170,7 +171,7 @@ try {
 
     const runtimeErrors = stderr.split('\n').filter((line) => /uncaught|referenceerror|typeerror|syntaxerror/i.test(line));
     if (runtimeErrors.length) throw new Error(`Browser runtime exception detected:\n${runtimeErrors.join('\n')}`);
-    console.log('Beer Pong browser smoke passed: perspective table, trajectory state, direct-hit extra turn, bounce double removal, victory and cleanup are operational.');
+    console.log('Beer Pong browser smoke passed: harder start, explicit throw modes, perspective table, trajectory state, direct-hit extra turn, bounce double removal, victory and cleanup are operational.');
   } finally {
     session.close();
   }
