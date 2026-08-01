@@ -44,7 +44,7 @@ if (query.get('smoke') === '1') {
     activeTeam: [],
     miniResults: progressionSmoke ? {} : {
       flipCup: { attempts: 1, wins: 1, best: 100, last: 100, bestQuality: 'solid' },
-      beerPong: { attempts: 1, wins: 1, best: 100, last: 100, bestQuality: 'solid' },
+      beerPong: { attempts: 1, wins: 0, best: 20, last: 20, bestQuality: 'failed' },
       flunkyball: { attempts: 1, wins: 1, best: 100, last: 100, bestQuality: 'solid' },
     },
     flags: progressionSmoke ? {} : { 'all-core-minigames-unlocked': true },
