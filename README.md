@@ -8,6 +8,10 @@ Ein schwarzhumoriges, storygetriebenes Camping-RPG für Smartphone und Desktop. 
 
 **Neue Next-Alpha:** [Sprint 89 starten](https://kiwimii.github.io/Tales-of-the-blaue-Adria-/next/?v=89)
 
+**Separater 3D-Third-Person-Build:** [3D V1 starten](https://kiwimii.github.io/Tales-of-the-blaue-Adria-/third-person/)
+
+**Technischer Stand:** [Code-Audit vom 23. August 2026](docs/CODE-AUDIT-2026-08-23.md)
+
 Inhaltlicher Stand: **Sprint 28 · v1.8.0 · Build v29**
 
 Die Alpha ist von Freitagmorgen bis zum Sonntagsfinale spielbar. Spielstände, Export/Import, mobile Steuerung und Offline-Nutzung werden unterstützt.
@@ -21,6 +25,8 @@ Die Zielarchitektur enthält die **Gameplay-Sprints 29–89** und wird parallel 
 | `docs/` | umfangreiche, veröffentlichte Alpha | Referenz für Funktionsumfang und GitHub-Pages-Release |
 | `src/` | spielbare React-/Phaser-/TypeScript-Next-Alpha | einzige Zielarchitektur für die weitere Entwicklung |
 | `docs/next/` | gebauter Next-Preview | separater GitHub-Pages-Release der Zielarchitektur |
+| `src/third-person/` | spielbarer Three.js-/TypeScript-Vertical-Slice | eigenständiger 3D-Third-Person-Build mit getrenntem Spielstand |
+| `docs/third-person/` | gebauter 3D-Release | separater GitHub-Pages-Link; ersetzt keinen 2D-Build |
 
 `docs/` ist feature-frozen. Neue Spielinhalte entstehen ausschließlich in der TypeScript-Zielarchitektur unter `src/`.
 
@@ -84,6 +90,7 @@ Voraussetzung: Node.js 24 oder neuer.
 ```bash
 npm ci
 npm run dev
+npm run dev:third-person
 ```
 
 ## Qualitätsprüfung
@@ -99,5 +106,6 @@ Der Befehl prüft:
 - TypeScript-Typen
 - Store-, Welt-, Navigation-, Quest-, Interaktions-, Platzierungs-, Zeltkreis-, Versorgungsketten-, Grafik-, Mobil-, Gesprächs-, Kampf-, Team- und Minispieltests
 - Produktionsbuild und Next-Preview
+- separaten 3D-Third-Person-Build, Questfolge, Kollisionen und Release-Marker
 
 Die Sprint-Historie liegt in [SPRINTS.md](docs/SPRINTS.md), [SPRINTS-21-28.md](docs/SPRINTS-21-28.md), [SPRINTS-29-33.md](docs/SPRINTS-29-33.md), [SPRINTS-34-43.md](docs/SPRINTS-34-43.md), [SPRINTS-44.md](docs/SPRINTS-44.md), [SPRINTS-45.md](docs/SPRINTS-45.md), [SPRINTS-46-55.md](docs/SPRINTS-46-55.md), [SPRINT-56.md](docs/SPRINT-56.md), [SPRINT-57.md](docs/SPRINT-57.md), [SPRINTS-58-72.md](docs/SPRINTS-58-72.md), [SPRINT-73.md](docs/SPRINT-73.md), [SPRINT-74.md](docs/SPRINT-74.md), [SPRINT-75.md](docs/SPRINT-75.md), [SPRINT-76.md](docs/SPRINT-76.md), [SPRINT-77.md](docs/SPRINT-77.md), [SPRINT-78.md](docs/SPRINT-78.md), [SPRINT-79.md](docs/SPRINT-79.md), [SPRINT-80.md](docs/SPRINT-80.md), [SPRINT-81.md](docs/SPRINT-81.md), [SPRINT-82.md](docs/SPRINT-82.md), [SPRINT-83.md](docs/SPRINT-83.md), [SPRINT-84.md](docs/SPRINT-84.md), [SPRINT-85.md](docs/SPRINT-85.md), [SPRINT-86.md](docs/SPRINT-86.md), [SPRINT-87.md](docs/SPRINT-87.md), [SPRINT-88.md](docs/SPRINT-88.md) und [SPRINT-89.md](docs/SPRINT-89.md).

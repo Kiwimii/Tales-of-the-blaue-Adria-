@@ -81,6 +81,7 @@ function synchronizeDepthLifecycle() {
   const fingerprint = `${secret.millionaireId}:${secret.rivalScore}:${depth.secret?.difficulty ?? 'standard'}`;
   if (sessionStorage.getItem(SECRET_SYNC_KEY) === fingerprint) return;
   sessionStorage.setItem(SECRET_SYNC_KEY, fingerprint);
+  if (new URLSearchParams(location.search).get('noDepthReload') === '1') return;
   window.setTimeout(() => location.reload(), 40);
 }
 
