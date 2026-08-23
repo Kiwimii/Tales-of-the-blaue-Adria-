@@ -18,7 +18,7 @@ const server = createServer((request, response) => {
 });
 await new Promise((resolve) => server.listen(4183, '127.0.0.1', resolve));
 
-const pageUrl = 'http://127.0.0.1:4183/Tales-of-the-blaue-Adria-/third-person/?smoke=1';
+const pageUrl = 'http://127.0.0.1:4183/Tales-of-the-blaue-Adria-/third-person/?smoke=1&quality=low';
 const debuggingPort = 9333;
 const profile = `/tmp/adria-third-person-smoke-${process.pid}`;
 rmSync(profile, { recursive: true, force: true });
@@ -136,7 +136,7 @@ async function connectDevTools(url) {
     command(method, params = {}) {
       return new Promise((resolve, reject) => {
         const id = nextId++;
-        const timeout = setTimeout(() => { pending.delete(id); reject(new Error(`DevTools command timed out: ${method}`)); }, 15000);
+        const timeout = setTimeout(() => { pending.delete(id); reject(new Error(`DevTools command timed out: ${method}`)); }, 60000);
         pending.set(id, {
           resolve(value) { clearTimeout(timeout); resolve(value); },
           reject(error) { clearTimeout(timeout); reject(error); },

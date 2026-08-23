@@ -600,6 +600,8 @@ function dampAngle(current: number, target: number, lambda: number, delta: numbe
 }
 
 function selectQuality(): GraphicsQuality {
+  const requested = new URLSearchParams(window.location.search).get('quality');
+  if (requested === 'low' || requested === 'high') return requested;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const coarse = matchMedia('(pointer: coarse)').matches;
   const memory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? 8;
