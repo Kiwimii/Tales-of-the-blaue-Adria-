@@ -137,8 +137,11 @@ try {
     })()`, 16000);
     assertState('Secret Millionaire depth', secret);
 
-    const strategyFunctions = await evaluate(session, `(() => {
+    const strategyFunctions = await waitForExpression(session, `(() => {
       const runtime = window.__talesDepthUpdateV2;
+      if (!runtime?.buildSecretClues || !runtime?.chooseNextMillionaire) {
+        return { deterministicRole: false, exclusions: false, threeExpertClues: false, noRoleSpoiler: false };
+      }
       const clues = runtime.buildSecretClues({ millionaireId: 'masl', round: 2, seed: 77, difficulty: 'expert' });
       const a = runtime.chooseNextMillionaire({ seed: 77, round: 3, eliminated: ['rene', 'lars'], previous: 'masl' });
       const b = runtime.chooseNextMillionaire({ seed: 77, round: 3, eliminated: ['rene', 'lars'], previous: 'masl' });
@@ -148,7 +151,7 @@ try {
         threeExpertClues: clues.length === 3,
         noRoleSpoiler: !clues.join(' ').toLocaleLowerCase('de').includes('masl')
       };
-    })()`);
+    })()`, 16000);
     assertState('Depth model in browser', strategyFunctions);
 
     const closed = await waitForExpression(session, `(() => {

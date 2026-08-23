@@ -79,6 +79,7 @@ PR #54 ist noch offen, obwohl eine spätere Eröffnungssequenz über PR #55 bere
 - Kollision, Kamera, Steuerung, Questfortschritt und Speicherung durch Unit- und Browser-Smokes abgesichert,
 - Absturz der 3D-Kamerakollision an beschrifteten Sprites durch gesetzte Raycaster-Kamera und Sprite-Filter behoben,
 - zufallsabhängigen Jule-Dialogtest durch explizite Zufallsquelle deterministisch gemacht,
+- Depth-Browser-Smoke gegen den vorgesehenen Secret-Millionaire-Neuladevorgang synchronisiert,
 - 3D-Artifact und WebGL-Smoke in die verpflichtende CI aufgenommen.
 
 ## 3D-V1-Grenze
