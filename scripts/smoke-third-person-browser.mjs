@@ -27,7 +27,8 @@ let browser;
 for (const candidate of candidates) {
   browser = spawn(candidate, [
     '--headless=new', '--no-sandbox', '--disable-gpu', '--enable-unsafe-swiftshader', '--disable-dev-shm-usage',
-    '--disable-background-networking', '--disable-component-update', '--disable-extensions', '--disable-sync',
+    '--disable-background-networking', '--disable-background-timer-throttling', '--disable-renderer-backgrounding',
+    '--disable-backgrounding-occluded-windows', '--disable-component-update', '--disable-extensions', '--disable-sync',
     '--disable-features=MediaRouter,Translate,OptimizationGuideModelDownloading,OptimizationHints,PushMessaging,Notifications,BackgroundSync,PeriodicBackgroundSync',
     '--no-first-run', '--no-default-browser-check', '--mute-audio', '--window-size=1440,900',
     `--remote-debugging-port=${debuggingPort}`, `--user-data-dir=${profile}`, pageUrl,
@@ -51,6 +52,9 @@ try {
   try {
     await session.command('Runtime.enable');
     await session.command('Page.enable');
+    await session.command('Page.bringToFront');
+    await waitFor(session, `Boolean(window.__talesThirdPerson?.step)`, 24000, Boolean);
+    await evaluate(session, `window.__talesThirdPerson.step(2)`);
     const initial = await waitFor(session, `(() => window.__talesThirdPerson?.snapshot?.())()`, 24000, (state) => (
       state?.objective === 'trunk' && state.npcCount >= 16 && state.interactionCount >= 19 && state.renderCalls > 0 && state.triangles > 0 && !state.contextLost
     ));
@@ -77,7 +81,7 @@ try {
     await evaluate(session, `window.__talesThirdPerson.teleportPlan(800,1500)`);
     const before = await evaluate(session, `window.__talesThirdPerson.snapshot().player`);
     await evaluate(session, `window.dispatchEvent(new KeyboardEvent('keydown',{code:'KeyW'}))`);
-    await delay(420);
+    await evaluate(session, `window.__talesThirdPerson.step(30)`);
     await evaluate(session, `window.dispatchEvent(new KeyboardEvent('keyup',{code:'KeyW'}))`);
     const after = await evaluate(session, `window.__talesThirdPerson.snapshot().player`);
     assert(Math.hypot(after.x - before.x, after.z - before.z) > 0.3, 'Keyboard movement did not move the 3D player.');

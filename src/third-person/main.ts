@@ -210,6 +210,22 @@ class ThirdPersonGame {
     this.persist();
   }
 
+  debugStep(frameCount = 1): void {
+    const frames = Math.max(1, Math.min(120, Math.floor(frameCount)));
+    for (let index = 0; index < frames; index += 1) {
+      const delta = 1 / 60;
+      if (this.started && !this.modalOpen) {
+        this.updateCameraInput();
+        this.updateMovement(delta);
+        this.updateGameTime(delta);
+        this.updateNearby();
+      }
+      this.updateCamera(delta);
+      this.world.update(performance.now() / 1000, delta);
+      this.renderer.render(this.scene, this.camera);
+    }
+  }
+
   interact(): void {
     if (!this.started || this.modalOpen || !this.nearby) return;
     if (this.nearby.type === 'npc') this.handleNpc(this.nearby.id);
@@ -616,6 +632,7 @@ try {
       teleportPlan: (x: number, y: number) => game?.debugTeleportToPlan(x, y),
       action: () => game?.interact(),
       persist: () => game?.debugPersist(),
+      step: (frameCount?: number) => game?.debugStep(frameCount),
     };
   }
 } catch (error) {
