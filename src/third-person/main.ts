@@ -323,8 +323,10 @@ class ThirdPersonGame {
     const desiredDistance = ray.length();
     ray.normalize();
     this.raycaster.set(target, ray);
+    this.raycaster.camera = this.camera;
     this.raycaster.far = desiredDistance;
-    const hits = this.raycaster.intersectObjects(this.world.cameraBlockers, true);
+    const hits = this.raycaster.intersectObjects(this.world.cameraBlockers, true)
+      .filter((hit) => !(hit.object instanceof THREE.Sprite));
     if (hits[0] && hits[0].distance < desiredDistance) desired.copy(target).addScaledVector(ray, Math.max(0.9, hits[0].distance - 0.32));
     this.camera.position.x = THREE.MathUtils.damp(this.camera.position.x, desired.x, 11, delta);
     this.camera.position.y = THREE.MathUtils.damp(this.camera.position.y, desired.y, 11, delta);
