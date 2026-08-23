@@ -150,7 +150,12 @@ async function connectDevTools(url) {
 
 async function evaluate(session, expression) {
   const response = await session.command('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: true });
-  if (response?.result?.exceptionDetails) throw new Error(`Runtime.evaluate failed: ${response.result.exceptionDetails.text}`);
+  if (response?.result?.exceptionDetails) {
+    const details = response.result.exceptionDetails;
+    const description = details.exception?.description ?? details.text ?? 'Unknown browser exception';
+    const frames = details.stackTrace?.callFrames?.map((frame) => `${frame.functionName || '<anonymous>'} (${frame.url}:${frame.lineNumber + 1}:${frame.columnNumber + 1})`).join('\n') ?? '';
+    throw new Error(`Runtime.evaluate failed: ${description}${frames ? `\n${frames}` : ''}\n${stderr.slice(-4000)}`);
+  }
   return response?.result?.result?.value;
 }
 
