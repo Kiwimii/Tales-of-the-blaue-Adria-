@@ -81,6 +81,7 @@ export const THIRD_PERSON_INTERACTIONS: ThirdPersonInteraction[] = [
   point('campfire', 'Feuerstelle und Team', 'landmark', LANDMARK_PLACEMENTS.campfire, 120, true),
   point('noticeBoard', 'Schwarzes Brett', 'landmark', LANDMARK_PLACEMENTS['notice-board'], 100),
   point('flipCup', 'Flip Cup am Zeltkreis', 'minigame', { x: 630, y: 1200 }, 115, true),
+  point('romme', 'Rommé am Zeltkreis', 'minigame', { x: 760, y: 1170 }, 115, true),
   point('beerPong', 'Beer Pong auf der Festwiese', 'minigame', { x: 1690, y: 700 }, 120, true),
   point('flunkyball', 'Flunkyball am Strand', 'minigame', { x: 2070, y: 860 }, 135, true),
   point('maslHole', 'Masls „Komm ans Loch“', 'minigame', NPC_PLACEMENTS.masl, 120, true),
